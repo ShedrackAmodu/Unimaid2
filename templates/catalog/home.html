@@ -1,0 +1,948 @@
+{% extends 'base.html' %}
+
+{% block title %}Library Catalog - Browse Collections{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item active" aria-current="page">Home</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <!-- Catalog Hero Section -->
+        <div class="position-relative overflow-hidden rounded-4" style="height: 400px;">
+            <div class="position-absolute w-100 h-100 d-flex align-items-center" 
+                 style="background: linear-gradient(90deg, rgba(10, 36, 114, 0.85) 0%, rgba(10, 36, 114, 0.7) 100%), 
+                        url('images/librarybooks.jfif') center/cover;">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h1 class="display-3 fw-bold text-white mb-4">Library Catalog</h1>
+                            <p class="lead text-white mb-4">
+                                Explore our collection of {{ total_books|default:"50,000+" }} books, 
+                                journals, and academic resources
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Stats -->
+<div class="row g-4 mb-5 animate__animated animate__fadeInUp">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4">
+            <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
+            <div class="stat-label">Total Books</div>
+            <i class="bi bi-book fs-1 text-primary mt-3"></i>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4">
+            <div class="stat-number mb-2">{{ available_books|default:"45,000+" }}</div>
+            <div class="stat-label">Available Now</div>
+            <i class="bi bi-check-circle fs-1 text-success mt-3"></i>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4">
+            <div class="stat-number mb-2">{{ genres_count|default:"150+" }}</div>
+            <div class="stat-label">Genres</div>
+            <i class="bi bi-tags fs-1 text-warning mt-3"></i>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4">
+            <div class="stat-number mb-2">{{ authors_count|default:"20,000+" }}</div>
+            <div class="stat-label">Authors</div>
+            <i class="bi bi-person-badge fs-1 text-info mt-3"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Books Section -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="display-5 fw-bold">Featured Books</h2>
+        <a href="/catalog/books/" class="btn btn-outline-primary">
+            View All Books <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for book in featured_books|slice:":6" %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card book-card h-100 border-0 shadow-hover">
+                <div class="row g-0 h-100">
+                    <div class="col-md-4">
+                        <div class="position-relative h-100">
+                            <img src="images/librarybooks.jfif" class="img-fluid rounded-start h-100" 
+                                 alt="{{ book.title }}" style="object-fit: cover;">
+                            {% if book.is_available %}
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-success">
+                                Available
+                            </span>
+                            {% else %}
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-warning">
+                                Checked Out
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title fw-bold mb-2">{{ book.title|truncatechars:50 }}</h5>
+                                <p class="card-text text-muted small mb-2">
+                                    <i class="bi bi-person me-1"></i>
+                                    {% for author in book.authors.all|slice:":2" %}
+                                    {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                                <p class="card-text text-muted small mb-3">
+                                    <i class="bi bi-building me-1"></i>{{ book.publisher.name|truncatechars:30 }}
+                                </p>
+                                <div class="mb-3">
+                                    <span class="badge bg-light text-dark">{{ book.genre.name }}</span>
+                                    {% if book.publication_date.year >= 2023 %}
+                                    <span class="badge bg-info">New</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>{{ book.publication_date.year }}
+                                </small>
+                                <div>
+                                    <a href="/catalog/books/{{ book.id }}/" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                    {% if user.is_authenticated and book.is_available %}
+                                    <a href="/circulation/reserve/{{ book.id }}/" class="btn btn-sm btn-outline-primary ms-1">
+                                        Reserve
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <img src="images/ramat_ai2.png" alt="No Books" class="img-fluid mb-4" style="max-height: 150px;">
+            <h4 class="text-muted mb-3">No Featured Books Available</h4>
+            <p class="text-muted mb-4">Our collection is being updated. Please check back soon.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Quick Search Section -->
+<section class="mb-5">
+    <div class="card border-0 shadow-lg">
+        <div class="card-body p-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h3 class="fw-bold mb-3">Find Your Next Read</h3>
+                    <p class="text-muted mb-4">
+                        Search through our extensive collection by title, author, ISBN, or keyword
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                    <form action="/catalog/books/" method="get" class="search-form">
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="q" class="form-control border-primary" 
+                                   placeholder="Search catalog..." aria-label="Search catalog">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="text-muted me-3">Quick filters:</span>
+                        <a href="/catalog/books/?genre=science" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-bezier2 me-1"></i>Science
+                        </a>
+                        <a href="/catalog/books/?genre=literature" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pen me-1"></i>Literature
+                        </a>
+                        <a href="/catalog/books/?genre=history" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-clock-history me-1"></i>History
+                        </a>
+                        <a href="/catalog/books/?genre=technology" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-laptop me-1"></i>Technology
+                        </a>
+                        <a href="/catalog/books/?available=yes" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-check-circle me-1"></i>Available Now
+                        </a>
+                        <a href="/catalog/books/?sort=newest" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-stars me-1"></i>New Arrivals
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Browse by Category -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="display-5 fw-bold">Browse by Category</h2>
+        <a href="/catalog/genres/" class="btn btn-outline-primary">
+            All Categories <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for genre in popular_genres|slice:":6" %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card category-card border-0 shadow-hover overflow-hidden">
+                <div class="row g-0 h-100">
+                    <div class="col-md-4 d-none d-md-block">
+                        <div class="h-100 position-relative">
+                            <img src="images/librarybooks.jfif" class="img-fluid h-100" 
+                                 alt="{{ genre.name }}" style="object-fit: cover; filter: brightness(0.8);">
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <span class="badge bg-primary fs-6">{{ genre.books.count|default:"0" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3">{{ genre.name }}</h5>
+                            <p class="text-muted small mb-4">
+                                {{ genre.description|truncatechars:100|default:"Explore our collection in this category" }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ genre.books.count|default:"0" }} books</small>
+                                <a href="/catalog/genres/{{ genre.id }}/" class="btn btn-sm btn-outline-primary">
+                                    Browse <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card category-card border-0 shadow-hover">
+                        <div class="card-body p-4 text-center">
+                            <i class="bi bi-bezier2 fs-1 text-primary mb-3"></i>
+                            <h5 class="fw-bold mb-2">Science & Technology</h5>
+                            <p class="text-muted small mb-3">Physics, Chemistry, Engineering, Computing</p>
+                            <a href="/catalog/books/?genre=science" class="btn btn-sm btn-outline-primary">
+                                Explore 12,000+ Books
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card category-card border-0 shadow-hover">
+                        <div class="card-body p-4 text-center">
+                            <i class="bi bi-pen fs-1 text-primary mb-3"></i>
+                            <h5 class="fw-bold mb-2">Arts & Humanities</h5>
+                            <p class="text-muted small mb-3">Literature, Philosophy, History, Fine Arts</p>
+                            <a href="/catalog/books/?genre=arts" class="btn btn-sm btn-outline-primary">
+                                Explore 8,500+ Books
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card category-card border-0 shadow-hover">
+                        <div class="card-body p-4 text-center">
+                            <i class="bi bi-people fs-1 text-primary mb-3"></i>
+                            <h5 class="fw-bold mb-2">Social Sciences</h5>
+                            <p class="text-muted small mb-3">Economics, Sociology, Psychology, Politics</p>
+                            <a href="/catalog/books/?genre=social_science" class="btn btn-sm btn-outline-primary">
+                                Explore 6,800+ Books
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- New Arrivals -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="display-5 fw-bold">New Arrivals</h2>
+        <a href="/catalog/books/?sort=newest" class="btn btn-outline-primary">
+            View All New Books <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for book in recent_books|slice:":4" %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card new-book-card border-0 shadow-hover">
+                <div class="position-relative">
+                    <img src="images/librarybooks.jfif" class="card-img-top" alt="{{ book.title }}" 
+                         style="height: 200px; object-fit: cover;">
+                    <span class="position-absolute top-0 end-0 m-2 badge bg-danger">New</span>
+                </div>
+                <div class="card-body p-3">
+                    <h6 class="fw-bold mb-2">{{ book.title|truncatechars:40 }}</h6>
+                    <p class="text-muted small mb-3">
+                        {% for author in book.authors.all|slice:":1" %}
+                        {{ author.name }}
+                        {% endfor %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ book.publication_date.year }}</small>
+                        <a href="/catalog/books/{{ book.id }}/" class="btn btn-sm btn-outline-primary">
+                            Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-4">
+            <div class="d-inline-block p-4 rounded-circle bg-light mb-4">
+                <i class="bi bi-book text-primary fs-1"></i>
+            </div>
+            <h4 class="text-muted mb-3">No New Arrivals</h4>
+            <p class="text-muted">New books will appear here as they are added to our collection.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Featured Authors -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="display-5 fw-bold">Featured Authors</h2>
+        <a href="/catalog/authors/" class="btn btn-outline-primary">
+            View All Authors <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for author in featured_authors|slice:":4" %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card author-card border-0 shadow-hover text-center p-4">
+                <div class="author-avatar mb-3 mx-auto">
+                    <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <span class="text-white fs-3">{{ author.name|first|upper }}</span>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2">{{ author.name }}</h5>
+                <p class="text-muted small mb-3">
+                    {{ author.bio|truncatechars:80|default:"Prolific author in our collection" }}
+                </p>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">{{ author.books.count }} books</span>
+                </div>
+                <a href="/catalog/authors/{{ author.id }}/" class="btn btn-sm btn-outline-primary">
+                    View Works
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card author-card border-0 shadow-hover text-center p-4">
+                <div class="author-avatar mb-3 mx-auto">
+                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill text-white fs-3"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2">Chinua Achebe</h5>
+                <p class="text-muted small mb-3">Nigerian novelist, poet, professor</p>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">25+ books</span>
+                </div>
+                <a href="/catalog/books/?author=achebe" class="btn btn-sm btn-outline-primary">
+                    View Works
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card author-card border-0 shadow-hover text-center p-4">
+                <div class="author-avatar mb-3 mx-auto">
+                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill text-white fs-3"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2">Wole Soyinka</h5>
+                <p class="text-muted small mb-3">Nigerian playwright, poet, essayist</p>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">20+ books</span>
+                </div>
+                <a href="/catalog/books/?author=soyinka" class="btn btn-sm btn-outline-primary">
+                    View Works
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card author-card border-0 shadow-hover text-center p-4">
+                <div class="author-avatar mb-3 mx-auto">
+                    <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill text-white fs-3"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2">Chimamanda Adichie</h5>
+                <p class="text-muted small mb-3">Nigerian writer of novels, short stories</p>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">15+ books</span>
+                </div>
+                <a href="/catalog/books/?author=adichie" class="btn btn-sm btn-outline-primary">
+                    View Works
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card author-card border-0 shadow-hover text-center p-4">
+                <div class="author-avatar mb-3 mx-auto">
+                    <div class="rounded-circle bg-info d-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-fill text-white fs-3"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2">Stephen Hawking</h5>
+                <p class="text-muted small mb-3">English theoretical physicist</p>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">10+ books</span>
+                </div>
+                <a href="/catalog/books/?author=hawking" class="btn btn-sm btn-outline-primary">
+                    View Works
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="mb-5">
+    <div class="card bg-gradient border-0 shadow-lg overflow-hidden">
+        <div class="row g-0">
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="images/students_reading.png" alt="Student Reading" 
+                     class="img-fluid h-100" style="object-fit: cover;">
+            </div>
+            <div class="col-lg-6">
+                <div class="card-body p-5">
+                    <h2 class="fw-bold mb-4">Need Help Finding Resources?</h2>
+                    <p class="text-muted mb-4">
+                        Our librarians are here to help you find the perfect resources for your research 
+                        and academic needs. Get personalized recommendations and research assistance.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-person-check text-primary mt-1 me-3 fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Expert Guidance</h6>
+                                    <p class="text-muted small mb-0">Subject-specialist librarians</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-search text-primary mt-1 me-3 fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Research Assistance</h6>
+                                    <p class="text-muted small mb-0">Help with complex searches</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/accounts/staff_directory/" class="btn btn-primary me-3">
+                            <i class="bi bi-people me-2"></i>Meet Our Librarians
+                        </a>
+                        <a href="/accounts/contact/" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope me-2"></i>Contact for Help
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Links -->
+<section>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-book-half fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Browse All Books</h5>
+                    <p class="text-muted small mb-4">
+                        Explore our complete collection of books across all genres and subjects.
+                    </p>
+                    <a href="/catalog/books/" class="btn btn-primary w-100">
+                        View Book Catalog
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-person-badge fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Find Authors</h5>
+                    <p class="text-muted small mb-4">
+                        Discover works by your favorite authors or explore new literary voices.
+                    </p>
+                    <a href="/catalog/authors/" class="btn btn-primary w-100">
+                        Browse Authors
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-tags fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Explore Genres</h5>
+                    <p class="text-muted small mb-4">
+                        Browse books by genre and discover new areas of interest.
+                    </p>
+                    <a href="/catalog/genres/" class="btn btn-primary w-100">
+                        View All Genres
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Catalog-specific styles */
+    .search-form .input-group {
+        box-shadow: 0 4px 15px rgba(0, 31, 63, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .search-form .form-control {
+        border: 2px solid var(--accent-blue);
+        border-right: none;
+        padding: 0.9rem 1.2rem;
+    }
+    
+    .search-form .btn {
+        border-left: none;
+        padding: 0.9rem 1.5rem;
+    }
+    
+    .book-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15) !important;
+    }
+    
+    .book-card .card-img-top {
+        transition: transform 0.5s ease;
+    }
+    
+    .book-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .category-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-blue);
+    }
+    
+    .category-card:hover {
+        transform: translateX(5px);
+        border-left-color: var(--accent-blue);
+    }
+    
+    .new-book-card {
+        transition: all 0.3s ease;
+    }
+    
+    .new-book-card:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+    
+    .author-card {
+        transition: all 0.3s ease;
+    }
+    
+    .author-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .author-avatar .avatar-placeholder {
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .author-card:hover .avatar-placeholder {
+        transform: scale(1.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Quick filter buttons */
+    .btn-outline-primary:hover {
+        background: var(--gradient-2);
+        border-color: transparent;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    /* Stats enhancement */
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--gradient-2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .book-card .col-md-4 {
+            height: 200px;
+        }
+        
+        .category-card .col-md-4 {
+            height: 150px;
+        }
+        
+        .search-form .input-group {
+            flex-direction: column;
+        }
+        
+        .search-form .form-control {
+            border-right: 2px solid var(--accent-blue);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .search-form .btn {
+            border-left: 2px solid var(--accent-blue);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            width: 100%;
+        }
+    }
+    
+    /* Animation classes */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    
+    .animate-on-scroll.animated {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize counters animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const originalText = stat.textContent;
+            if (originalText.includes('+')) {
+                const number = parseInt(originalText.replace('+', ''));
+                let current = 0;
+                const increment = number / 20;
+                
+                const updateCounter = () => {
+                    if (current < number) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString() + '+';
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = originalText;
+                    }
+                };
+                
+                // Start when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Book card hover effects
+        const bookCards = document.querySelectorAll('.book-card');
+        bookCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const image = card.querySelector('img');
+                if (image) {
+                    image.style.transform = 'scale(1.05)';
+                }
+                
+                const availabilityBadge = card.querySelector('.badge');
+                if (availabilityBadge && availabilityBadge.classList.contains('bg-success')) {
+                    availabilityBadge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const image = card.querySelector('img');
+                if (image) {
+                    image.style.transform = 'scale(1)';
+                }
+                
+                const availabilityBadge = card.querySelector('.badge');
+                if (availabilityBadge) {
+                    availabilityBadge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Category card animations
+        const categoryCards = document.querySelectorAll('.category-card');
+        categoryCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.2) rotate(5deg)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1) rotate(0)';
+                }
+            });
+        });
+        
+        // Author card animations
+        const authorCards = document.querySelectorAll('.author-card');
+        authorCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const avatar = card.querySelector('.avatar-placeholder');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.1) rotate(5deg)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const avatar = card.querySelector('.avatar-placeholder');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1) rotate(0)';
+                }
+            });
+        });
+        
+        // Quick search functionality
+        const searchForm = document.querySelector('.search-form');
+        const searchInput = searchForm.querySelector('input[name="q"]');
+        
+        searchInput.addEventListener('focus', () => {
+            searchForm.classList.add('focused');
+        });
+        
+        searchInput.addEventListener('blur', () => {
+            searchForm.classList.remove('focused');
+        });
+        
+        // Auto-suggest for search
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 2) {
+                // In a real implementation, fetch suggestions from API
+                console.log('Searching for:', query);
+                
+                // Simulate suggestions
+                if (query.toLowerCase().includes('sci')) {
+                    showSearchSuggestions(['Science', 'Scientific Methods', 'Computer Science']);
+                }
+            }
+        });
+        
+        function showSearchSuggestions(suggestions) {
+            // Remove existing suggestions
+            const existingSuggestions = document.querySelector('.search-suggestions');
+            if (existingSuggestions) {
+                existingSuggestions.remove();
+            }
+            
+            if (suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'search-suggestions card border-0 shadow-lg position-absolute w-100 mt-1';
+                suggestionsDiv.style.zIndex = '1000';
+                
+                let html = '<div class="card-body p-2">';
+                suggestions.forEach(suggestion => {
+                    html += `
+                        <a href="/catalog/books/?q=${encodeURIComponent(suggestion)}" 
+                           class="d-block p-2 text-decoration-none text-dark hover-bg">
+                            <i class="bi bi-search me-2"></i>${suggestion}
+                        </a>
+                    `;
+                });
+                html += '</div>';
+                
+                suggestionsDiv.innerHTML = html;
+                searchForm.parentElement.appendChild(suggestionsDiv);
+                
+                // Add hover effect to suggestions
+                suggestionsDiv.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('mouseenter', () => {
+                        link.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+                    });
+                    link.addEventListener('mouseleave', () => {
+                        link.style.backgroundColor = 'transparent';
+                    });
+                });
+                
+                // Remove suggestions when clicking outside
+                document.addEventListener('click', function removeSuggestions(e) {
+                    if (!searchForm.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                        suggestionsDiv.remove();
+                        document.removeEventListener('click', removeSuggestions);
+                    }
+                });
+            }
+        }
+        
+        // Filter buttons animation
+        const filterButtons = document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-info');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-2px)';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Scroll animations
+        const animateElements = document.querySelectorAll('.animate-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        animateElements.forEach(el => observer.observe(el));
+        
+        // Quick stats animation on scroll
+        const statsSection = document.querySelector('.row.g-4.mb-5');
+        if (statsSection) {
+            const statObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('stats-animated');
+                        statObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            statObserver.observe(statsSection);
+        }
+        
+        // Load more books functionality (simulated)
+        const loadMoreBtn = document.createElement('button');
+        loadMoreBtn.className = 'btn btn-outline-primary w-100 mt-4';
+        loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Load More Books';
+        loadMoreBtn.style.display = 'none';
+        
+        const featuredBooksSection = document.querySelector('.mb-5');
+        if (featuredBooksSection) {
+            featuredBooksSection.appendChild(loadMoreBtn);
+            
+            // Show button if there are more books
+            setTimeout(() => {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.classList.add('animate__animated', 'animate__fadeIn');
+            }, 1000);
+            
+            loadMoreBtn.addEventListener('click', function() {
+                loadMoreBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
+                loadMoreBtn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // In real implementation, this would load more books from server
+                    console.log('Loading more books...');
+                    
+                    // Reset button
+                    loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Load More Books';
+                    loadMoreBtn.disabled = false;
+                    
+                    // Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-3';
+                    alert.innerHTML = `
+                        More books loaded successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    loadMoreBtn.parentElement.insertBefore(alert, loadMoreBtn);
+                    
+                    // Auto-remove alert after 3 seconds
+                    setTimeout(() => {
+                        alert.classList.remove('show');
+                        setTimeout(() => alert.remove(), 300);
+                    }, 3000);
+                }, 1500);
+            });
+        }
+    });
+</script>
+{% endblock %}

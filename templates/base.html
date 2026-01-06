@@ -65,7 +65,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
+            overflow-x: auto;
             position: relative;
         }
 
@@ -192,6 +192,9 @@
             margin-top: 10px !important;
             animation: fadeInDown 0.3s ease;
             border: 1px solid rgba(0, 0, 0, 0.1);
+            position: absolute;
+            z-index: 1050;
+            min-width: 200px;
         }
 
         @keyframes fadeInDown {
@@ -287,7 +290,8 @@
             flex: 1;
             padding: 3rem 0;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .main-content::before {
@@ -437,7 +441,7 @@
             background: var(--light-text);
             color: var(--dark-text);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .card::before {
@@ -617,6 +621,10 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            body {
+                overflow-x: auto;
+            }
+
             .navbar-brand {
                 font-size: 1.5rem;
             }
@@ -626,22 +634,46 @@
                 height: 35px;
                 margin-right: 8px;
             }
-            
+
             .hero-section {
                 padding: 3rem 0 !important;
             }
-            
+
+            .main-content {
+                overflow-x: auto;
+            }
+
             .footer {
                 text-align: center;
             }
-            
+
             .footer h5::after {
                 left: 50%;
                 transform: translateX(-50%);
             }
-            
+
             .social-links {
                 justify-content: center;
+            }
+
+            /* Ensure dropdowns don't overflow on mobile */
+            .dropdown-menu {
+                position: static;
+                float: none;
+                width: auto;
+                margin-top: 0;
+                background-color: transparent;
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .dropdown-menu.show {
+                display: block;
+            }
+
+            .dropdown-item {
+                padding: 0.5rem 1rem;
             }
         }
 

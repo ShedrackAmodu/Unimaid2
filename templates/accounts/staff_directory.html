@@ -1,0 +1,1091 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Directory - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Home
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Staff Directory</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-people fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Library Staff Directory</h1>
+                <p class="lead text-muted">Meet our dedicated team of library professionals</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Staff Directory Page Content -->
+<div class="staff-directory-page">
+    <div class="container-fluid">
+        <!-- Search and Filter Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-4 mb-3 mb-lg-0">
+                                <h5 class="fw-bold mb-0">
+                                    <i class="bi bi-search me-2"></i>Find Staff Member
+                                </h5>
+                                <p class="text-muted small mb-0">Search by name, department, or specialty</p>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" 
+                                                   class="form-control border-0" 
+                                                   id="staffSearch"
+                                                   placeholder="Search staff members..."
+                                                   aria-label="Search staff directory">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0">
+                                                <i class="bi bi-filter"></i>
+                                            </span>
+                                            <select class="form-select border-0" id="departmentFilter">
+                                                <option value="">All Departments</option>
+                                                <option value="circulation">Circulation</option>
+                                                <option value="reference">Reference & Research</option>
+                                                <option value="technical">Technical Services</option>
+                                                <option value="digital">Digital Library</option>
+                                                <option value="administration">Administration</option>
+                                                <option value="special-collections">Special Collections</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organizational Overview -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-diagram-3 me-2"></i>Organizational Structure
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Head Librarian -->
+                            <div class="col-md-4">
+                                <div class="org-card leadership" data-dept="administration">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="card-body p-4 text-center">
+                                            <div class="mb-3">
+                                                <div class="profile-image mx-auto" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid var(--gold-accent);">
+                                                    <img src="{% static 'images/librarian.jpg' %}" 
+                                                         alt="Head Librarian" 
+                                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                                </div>
+                                            </div>
+                                            <h5 class="fw-bold mb-1">Dr. Abubakar Sadiq</h5>
+                                            <p class="text-primary mb-2">Head Librarian</p>
+                                            <p class="small text-muted mb-3">
+                                                Overall administration and strategic direction of the library.
+                                            </p>
+                                            <div class="contact-info">
+                                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                                    <i class="bi bi-envelope me-2 small text-primary"></i>
+                                                    <small>asadiq@unimaid.edu.ng</small>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <i class="bi bi-telephone me-2 small text-primary"></i>
+                                                    <small>Ext. 101</small>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <button class="btn btn-sm btn-outline-primary view-profile" data-id="1">
+                                                    <i class="bi bi-person me-1"></i> View Profile
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department Heads -->
+                            <div class="col-md-8">
+                                <div class="row g-4">
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="org-card" data-dept="circulation">
+                                            <div class="card h-100 border-0 shadow-hover">
+                                                <div class="card-body p-3 text-center">
+                                                    <div class="mb-2">
+                                                        <div class="dept-icon mx-auto" style="width: 60px; height: 60px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-book text-white fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1">Circulation Services</h6>
+                                                    <p class="small text-muted mb-2">Borrowing, returns, and loan management</p>
+                                                    <div class="staff-count">
+                                                        <span class="badge bg-primary">8 Staff</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Head: Ms. Fatima Bello</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="org-card" data-dept="reference">
+                                            <div class="card h-100 border-0 shadow-hover">
+                                                <div class="card-body p-3 text-center">
+                                                    <div class="mb-2">
+                                                        <div class="dept-icon mx-auto" style="width: 60px; height: 60px; background: linear-gradient(135deg, #198754, #20c997); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-question-circle text-white fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1">Reference & Research</h6>
+                                                    <p class="small text-muted mb-2">Research assistance and information services</p>
+                                                    <div class="staff-count">
+                                                        <span class="badge bg-success">6 Staff</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Head: Dr. Ibrahim Musa</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="org-card" data-dept="technical">
+                                            <div class="card h-100 border-0 shadow-hover">
+                                                <div class="card-body p-3 text-center">
+                                                    <div class="mb-2">
+                                                        <div class="dept-icon mx-auto" style="width: 60px; height: 60px; background: linear-gradient(135deg, #fd7e14, #ffc107); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-gear text-white fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1">Technical Services</h6>
+                                                    <p class="small text-muted mb-2">Cataloging, acquisitions, and systems</p>
+                                                    <div class="staff-count">
+                                                        <span class="badge bg-warning">5 Staff</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Head: Engr. Chinedu Okoro</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="org-card" data-dept="digital">
+                                            <div class="card h-100 border-0 shadow-hover">
+                                                <div class="card-body p-3 text-center">
+                                                    <div class="mb-2">
+                                                        <div class="dept-icon mx-auto" style="width: 60px; height: 60px; background: linear-gradient(135deg, #0dcaf0, #6f42c1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-laptop text-white fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1">Digital Library</h6>
+                                                    <p class="small text-muted mb-2">E-resources and repository management</p>
+                                                    <div class="staff-count">
+                                                        <span class="badge bg-info">4 Staff</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Head: Ms. Aisha Mohammed</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 col-md-4">
+                                        <div class="org-card" data-dept="special-collections">
+                                            <div class="card h-100 border-0 shadow-hover">
+                                                <div class="card-body p-3 text-center">
+                                                    <div class="mb-2">
+                                                        <div class="dept-icon mx-auto" style="width: 60px; height: 60px; background: linear-gradient(135deg, #6f42c1, #d63384); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-archive text-white fs-4"></i>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="fw-bold mb-1">Special Collections</h6>
+                                                    <p class="small text-muted mb-2">Rare books and archival materials</p>
+                                                    <div class="staff-count">
+                                                        <span class="badge bg-purple">3 Staff</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Head: Dr. Samuel Johnson</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Directory Grid -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people-fill me-2"></i>All Staff Members
+                        </h5>
+                        <div class="d-flex align-items-center">
+                            <span class="text-muted me-3">{{ staff_members|length }} staff members</span>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-sort-down me-1"></i> Sort By
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" data-sort="name">Name (A-Z)</a></li>
+                                    <li><a class="dropdown-item" href="#" data-sort="department">Department</a></li>
+                                    <li><a class="dropdown-item" href="#" data-sort="position">Position</a></li>
+                                    <li><a class="dropdown-item" href="#" data-sort="seniority">Seniority</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4" id="staffGrid">
+                            {% for staff in staff_members %}
+                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="staff-card" data-dept="{{ staff.department|lower|slugify }}" data-name="{{ staff.first_name }} {{ staff.last_name }}">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="card-body p-4 text-center">
+                                            <!-- Profile Image -->
+                                            <div class="mb-3">
+                                                <div class="profile-image mx-auto" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--light-blue);">
+                                                    {% if staff.profile_picture %}
+                                                    <img src="{{ staff.profile_picture.url }}" 
+                                                         alt="{{ staff.first_name }} {{ staff.last_name }}" 
+                                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                                    {% else %}
+                                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" 
+                                                         style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                                                        <span class="display-5 text-white fw-bold">
+                                                            {{ staff.first_name|first|upper }}{{ staff.last_name|first|upper }}
+                                                        </span>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Staff Info -->
+                                            <h5 class="fw-bold mb-1">{{ staff.first_name }} {{ staff.last_name }}</h5>
+                                            <p class="text-primary mb-2">{{ staff.position|default:"Library Staff" }}</p>
+                                            
+                                            <div class="department mb-3">
+                                                <span class="badge 
+                                                    {% if staff.department == 'Circulation' %}bg-primary
+                                                    {% elif staff.department == 'Reference' %}bg-success
+                                                    {% elif staff.department == 'Technical' %}bg-warning
+                                                    {% elif staff.department == 'Digital' %}bg-info
+                                                    {% elif staff.department == 'Special Collections' %}bg-purple
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ staff.department|default:"Library" }}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Contact Info -->
+                                            <div class="contact-info mb-3">
+                                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                                    <i class="bi bi-envelope me-2 small text-primary"></i>
+                                                    <small>{{ staff.email|default:"Not provided" }}</small>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <i class="bi bi-telephone me-2 small text-primary"></i>
+                                                    <small>{{ staff.phone|default:"Ext. N/A" }}</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Specialization -->
+                                            {% if staff.specialization %}
+                                            <div class="specialization mb-3">
+                                                <h6 class="small fw-bold mb-2">Specialization</h6>
+                                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                    {% for spec in staff.specialization_list %}
+                                                    <span class="badge bg-light text-dark small">{{ spec }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Office Hours -->
+                                            {% if staff.office_hours %}
+                                            <div class="office-hours mb-3">
+                                                <h6 class="small fw-bold mb-2">
+                                                    <i class="bi bi-clock me-1"></i>Office Hours
+                                                </h6>
+                                                <p class="small text-muted mb-0">{{ staff.office_hours }}</p>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Actions -->
+                                            <div class="mt-4">
+                                                <button class="btn btn-sm btn-outline-primary view-profile" data-id="{{ staff.id }}">
+                                                    <i class="bi bi-person me-1"></i> Full Profile
+                                                </button>
+                                                <a href="mailto:{{ staff.email }}" class="btn btn-sm btn-outline-success ms-2">
+                                                    <i class="bi bi-envelope me-1"></i> Email
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-people display-1 text-muted mb-3"></i>
+                                    <h4 class="text-muted mb-3">No Staff Members Found</h4>
+                                    <p class="text-muted mb-4">Try adjusting your search or filter criteria.</p>
+                                    <button class="btn btn-primary" onclick="resetFilters()">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Reset Filters
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if staff_members.has_other_pages %}
+                        <div class="mt-5">
+                            <nav aria-label="Staff directory pagination">
+                                <ul class="pagination justify-content-center">
+                                    {% if staff_members.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ staff_members.previous_page_number }}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for i in staff_members.paginator.page_range %}
+                                        {% if staff_members.number == i %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ i }}</span>
+                                        </li>
+                                        {% elif i > staff_members.number|add:'-3' and i < staff_members.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                        </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if staff_members.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ staff_members.next_page_number }}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-telephone me-2"></i>Contact Points
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="contact-point p-3 border rounded">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <div style="width: 50px; height: 50px; background: var(--primary-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-telephone text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Circulation Desk</h6>
+                                            <p class="small text-muted mb-2">For borrowing, returns, and loan inquiries</p>
+                                            <div class="contact-details">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="bi bi-telephone me-2 small"></i>
+                                                    <small>+234 80166 253 232</small>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-envelope me-2 small"></i>
+                                                    <small>circulation@unimaid.edu.ng</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="contact-point p-3 border rounded">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <div style="width: 50px; height: 50px; background: var(--success); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-question-circle text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Research Help Desk</h6>
+                                            <p class="small text-muted mb-2">For research assistance and database support</p>
+                                            <div class="contact-details">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="bi bi-telephone me-2 small"></i>
+                                                    <small>Ext. 234</small>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-envelope me-2 small"></i>
+                                                    <small>reference@unimaid.edu.ng</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="contact-point p-3 border rounded">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <div style="width: 50px; height: 50px; background: var(--warning); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-wrench text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Technical Support</h6>
+                                            <p class="small text-muted mb-2">For website, login, and technical issues</p>
+                                            <div class="contact-details">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="bi bi-telephone me-2 small"></i>
+                                                    <small>Ext. 456</small>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-envelope me-2 small"></i>
+                                                    <small>support@unimaid.edu.ng</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="contact-point p-3 border rounded">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <div style="width: 50px; height: 50px; background: var(--info); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-laptop text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Digital Library</h6>
+                                            <p class="small text-muted mb-2">For e-resources and repository inquiries</p>
+                                            <div class="contact-details">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="bi bi-telephone me-2 small"></i>
+                                                    <small>Ext. 567</small>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-envelope me-2 small"></i>
+                                                    <small>digital@unimaid.edu.ng</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Quick Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-clock me-2"></i>Staff Availability
+                            </h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Monday - Friday</th>
+                                    <td>8:00 AM - 6:00 PM</td>
+                                </tr>
+                                <tr>
+                                    <th>Weekend Support</th>
+                                    <td>Limited staff available</td>
+                                </tr>
+                                <tr>
+                                    <th>Emergency Contact</th>
+                                    <td>Ext. 999</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-pin-map me-2"></i>Office Locations
+                            </h6>
+                            <ul class="small list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Administration:</strong> 2nd Floor, Room 201
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Circulation:</strong> Ground Floor, Main Desk
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Reference:</strong> 1st Floor, Room 105-110
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Technical:</strong> 3rd Floor, Room 301
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-lightbulb fs-4 me-3"></i>
+                                    <div class="small">
+                                        <strong>Need to meet a staff member?</strong>
+                                        <p class="mb-0">Please schedule appointments in advance via email.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Staff Profile Modal -->
+<div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title" id="profileModalTitle">Staff Profile</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="profile-content">
+                    <!-- Profile will be loaded here dynamically -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading staff profile...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Staff Directory Specific Styles */
+    .staff-directory-page {
+        padding-bottom: 4rem;
+    }
+    
+    /* Search and Filter */
+    .input-group .form-control, .input-group .form-select {
+        background-color: var(--light-text);
+        box-shadow: none;
+    }
+    
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25);
+        border-radius: 8px;
+    }
+    
+    /* Org Card Styles */
+    .org-card .card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+    
+    .org-card.leadership .card {
+        border-top: 4px solid var(--gold-accent);
+    }
+    
+    .org-card:hover .card {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .dept-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .org-card:hover .dept-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    /* Staff Card Styles */
+    .staff-card .card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .staff-card:hover .card {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .staff-card:hover .profile-image {
+        border-color: var(--accent-blue);
+        transform: scale(1.05);
+    }
+    
+    .profile-image {
+        transition: all 0.3s ease;
+    }
+    
+    /* Department Badges */
+    .bg-purple {
+        background-color: #6f42c1 !important;
+    }
+    
+    /* Specialization Tags */
+    .specialization .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Contact Points */
+    .contact-point {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .contact-point:hover {
+        border-color: var(--accent-blue) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Modal Styles */
+    #staffProfileModal .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    /* Pagination Styles */
+    .pagination .page-link {
+        border: none;
+        color: var(--primary-blue);
+        margin: 0 3px;
+        border-radius: 8px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: var(--gradient-2);
+        color: white;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: var(--light-blue);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .org-card.leadership {
+            margin-bottom: 2rem;
+        }
+        
+        .staff-card .profile-image {
+            width: 100px !important;
+            height: 100px !important;
+        }
+        
+        .contact-point {
+            margin-bottom: 1rem;
+        }
+        
+        #staffSearch, #departmentFilter {
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Animation for search results */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .staff-card {
+        animation: fadeInUp 0.3s ease forwards;
+        animation-delay: calc(var(--card-index) * 0.05s);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sample staff data (in real app, this would come from Django context)
+        const staffData = [
+            {
+                id: 1,
+                name: "Dr. Abubakar Sadiq",
+                position: "Head Librarian",
+                department: "Administration",
+                email: "asadiq@unimaid.edu.ng",
+                phone: "Ext. 101",
+                specialization: ["Library Management", "Strategic Planning", "Academic Libraries"],
+                office_hours: "Mon-Fri: 9:00 AM - 5:00 PM",
+                bio: "With over 20 years of experience in library management, Dr. Sadiq leads the strategic direction of Ramat Library.",
+                qualifications: "PhD in Library Science, MLS, PMP"
+            },
+            {
+                id: 2,
+                name: "Ms. Fatima Bello",
+                position: "Circulation Head",
+                department: "Circulation",
+                email: "fbello@unimaid.edu.ng",
+                phone: "Ext. 102",
+                specialization: ["Loan Management", "Customer Service", "Library Systems"],
+                office_hours: "Mon-Fri: 8:00 AM - 4:00 PM",
+                bio: "Manages all circulation operations with 15 years of experience in academic libraries.",
+                qualifications: "MLS, BA English"
+            },
+            {
+                id: 3,
+                name: "Dr. Ibrahim Musa",
+                position: "Reference Librarian",
+                department: "Reference",
+                email: "imusac@unimaid.edu.ng",
+                phone: "Ext. 103",
+                specialization: ["Research Assistance", "Database Management", "Information Literacy"],
+                office_hours: "Mon-Thu: 10:00 AM - 6:00 PM",
+                bio: "Specializes in research support and information literacy instruction.",
+                qualifications: "PhD Information Science, MLS"
+            }
+            // Add more staff data as needed
+        ];
+        
+        // Initialize card indices for animation
+        document.querySelectorAll('.staff-card').forEach((card, index) => {
+            card.style.setProperty('--card-index', index);
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('staffSearch');
+        const departmentFilter = document.getElementById('departmentFilter');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', filterStaff);
+        }
+        
+        if (departmentFilter) {
+            departmentFilter.addEventListener('change', filterStaff);
+        }
+        
+        // Sort functionality
+        document.querySelectorAll('[data-sort]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sortBy = this.dataset.sort;
+                sortStaff(sortBy);
+            });
+        });
+        
+        // View profile buttons
+        document.querySelectorAll('.view-profile').forEach(button => {
+            button.addEventListener('click', function() {
+                const staffId = this.dataset.id;
+                showStaffProfile(staffId);
+            });
+        });
+        
+        // Filter staff function
+        function filterStaff() {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const department = departmentFilter ? departmentFilter.value : '';
+            
+            document.querySelectorAll('.staff-card').forEach(card => {
+                const name = card.dataset.name.toLowerCase();
+                const dept = card.dataset.dept;
+                
+                const nameMatch = name.includes(searchTerm);
+                const deptMatch = !department || dept === department;
+                
+                if (nameMatch && deptMatch) {
+                    card.style.display = 'block';
+                    // Trigger animation
+                    card.style.animation = 'fadeInUp 0.3s ease forwards';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Update count
+            const visibleCards = document.querySelectorAll('.staff-card[style*="block"]').length;
+            const countElement = document.querySelector('.text-muted.me-3');
+            if (countElement) {
+                countElement.textContent = `${visibleCards} staff members`;
+            }
+            
+            // Show no results message
+            const staffGrid = document.getElementById('staffGrid');
+            const noResults = staffGrid.querySelector('.no-results');
+            
+            if (visibleCards === 0) {
+                if (!noResults) {
+                    const noResultsDiv = document.createElement('div');
+                    noResultsDiv.className = 'col-12 no-results';
+                    noResultsDiv.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="bi bi-search display-1 text-muted mb-3"></i>
+                            <h4 class="text-muted mb-3">No Staff Members Found</h4>
+                            <p class="text-muted mb-4">Try adjusting your search or filter criteria.</p>
+                            <button class="btn btn-primary" onclick="resetFilters()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset Filters
+                            </button>
+                        </div>
+                    `;
+                    staffGrid.appendChild(noResultsDiv);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        }
+        
+        // Sort staff function
+        function sortStaff(sortBy) {
+            const staffGrid = document.getElementById('staffGrid');
+            const cards = Array.from(staffGrid.querySelectorAll('.staff-card'));
+            
+            cards.sort((a, b) => {
+                switch(sortBy) {
+                    case 'name':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'department':
+                        return a.dataset.dept.localeCompare(b.dataset.dept);
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Reorder cards
+            cards.forEach(card => {
+                staffGrid.appendChild(card);
+            });
+            
+            // Update animation delays
+            cards.forEach((card, index) => {
+                card.style.setProperty('--card-index', index);
+            });
+        }
+        
+        // Show staff profile
+        function showStaffProfile(staffId) {
+            const staff = staffData.find(s => s.id == staffId) || staffData[0];
+            const modal = new bootstrap.Modal(document.getElementById('staffProfileModal'));
+            
+            // Load profile content
+            const profileContent = document.querySelector('.profile-content');
+            profileContent.innerHTML = `
+                <div class="row g-0">
+                    <!-- Left Column: Profile Info -->
+                    <div class="col-lg-5 p-4" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                        <div class="text-center text-white">
+                            <div class="mb-4">
+                                <div class="profile-image-modal mx-auto" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 5px solid rgba(255, 255, 255, 0.3);">
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255, 255, 255, 0.1);">
+                                        <span class="display-2 fw-bold">
+                                            ${staff.name.split(' ').map(n => n[0]).join('')}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-2">${staff.name}</h3>
+                            <h5 class="mb-4 opacity-75">${staff.position}</h5>
+                            
+                            <div class="department-badge mb-4">
+                                <span class="badge bg-white text-dark px-3 py-2 fs-6">${staff.department}</span>
+                            </div>
+                            
+                            <div class="contact-details">
+                                <div class="d-flex align-items-center justify-content-center mb-3">
+                                    <i class="bi bi-envelope me-3 fs-5"></i>
+                                    <span>${staff.email}</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center mb-3">
+                                    <i class="bi bi-telephone me-3 fs-5"></i>
+                                    <span>${staff.phone}</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-clock me-3 fs-5"></i>
+                                    <span>${staff.office_hours}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Detailed Info -->
+                    <div class="col-lg-7 p-4">
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-person-badge me-2"></i>About
+                            </h5>
+                            <p class="text-muted">${staff.bio}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-mortarboard me-2"></i>Qualifications
+                            </h5>
+                            <p class="text-muted">${staff.qualifications}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-stars me-2"></i>Specializations
+                            </h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${staff.specialization.map(spec => `
+                                    <span class="badge bg-primary px-3 py-2">${spec}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a href="mailto:${staff.email}" class="btn btn-primary w-100">
+                                        <i class="bi bi-envelope me-2"></i>Send Email
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-outline-primary w-100" onclick="scheduleMeeting(${staff.id})">
+                                        <i class="bi bi-calendar-plus me-2"></i>Schedule Meeting
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Update modal title
+            document.getElementById('profileModalTitle').textContent = `${staff.name}'s Profile`;
+            
+            // Show modal
+            modal.show();
+        }
+        
+        // Reset filters function
+        window.resetFilters = function() {
+            if (searchInput) searchInput.value = '';
+            if (departmentFilter) departmentFilter.value = '';
+            filterStaff();
+        };
+        
+        // Schedule meeting function
+        window.scheduleMeeting = function(staffId) {
+            const staff = staffData.find(s => s.id == staffId);
+            if (staff) {
+                const subject = encodeURIComponent(`Meeting Request with ${staff.name}`);
+                const body = encodeURIComponent(`Dear ${staff.name},\n\nI would like to schedule a meeting with you regarding:\n\n[Please provide details here]\n\nBest regards,\n\n[Your Name]`);
+                window.location.href = `mailto:${staff.email}?subject=${subject}&body=${body}`;
+            }
+        };
+        
+        // Department card click handlers
+        document.querySelectorAll('.org-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const dept = this.dataset.dept;
+                if (departmentFilter) {
+                    departmentFilter.value = dept;
+                    filterStaff();
+                    
+                    // Scroll to staff grid
+                    document.getElementById('staffGrid').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Print directory function
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-outline-secondary btn-sm position-fixed d-none d-md-block';
+        printButton.innerHTML = '<i class="bi bi-printer"></i>';
+        printButton.style.cssText = 'bottom: 20px; right: 20px; z-index: 100;';
+        printButton.onclick = () => {
+            // Hide search and filter section when printing
+            const searchSection = document.querySelector('.card.shadow-lg');
+            if (searchSection) searchSection.style.display = 'none';
+            
+            window.print();
+            
+            // Restore search section
+            if (searchSection) searchSection.style.display = 'block';
+        };
+        document.body.appendChild(printButton);
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,925 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Home
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Login</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-box-arrow-in-right fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Welcome Back</h1>
+                <p class="lead text-muted">Sign in to access your library account</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Login Page Content -->
+<div class="login-page">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg">
+                    <div class="row g-0">
+                        <!-- Left Column: Login Form -->
+                        <div class="col-lg-6">
+                            <div class="card-body p-5">
+                                <div class="mb-4">
+                                    <h3 class="fw-bold mb-2">Sign In</h3>
+                                    <p class="text-muted">Enter your credentials to continue</p>
+                                </div>
+                                
+                                <!-- Login Form -->
+                                <form method="post" id="loginForm" novalidate>
+                                    {% csrf_token %}
+                                    
+                                    <!-- Username/Email Field -->
+                                    <div class="mb-4">
+                                        <label for="username" class="form-label">Username or Email *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0">
+                                                <i class="bi bi-person"></i>
+                                            </span>
+                                            <input type="text" 
+                                                   class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                                   id="username" 
+                                                   name="username" 
+                                                   value="{{ form.username.value|default:'' }}"
+                                                   placeholder="Enter username or email"
+                                                   required
+                                                   autofocus>
+                                            {% if form.username.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.username.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-text">
+                                            Use your username or university email
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Password Field -->
+                                    <div class="mb-4">
+                                        <label for="password" class="form-label">Password *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0">
+                                                <i class="bi bi-lock"></i>
+                                            </span>
+                                            <input type="password" 
+                                                   class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                                   id="password" 
+                                                   name="password" 
+                                                   placeholder="Enter your password"
+                                                   required>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            {% if form.password.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ form.password.errors.0 }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                                <label class="form-check-label" for="rememberMe">
+                                                    Remember me
+                                                </label>
+                                            </div>
+                                            <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none small">
+                                                Forgot password?
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Error Messages -->
+                                    {% if form.non_field_errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <div>{{ form.non_field_errors.0 }}</div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- CAPTCHA (Optional) -->
+                                    <div class="mb-4" id="captchaSection" style="display: none;">
+                                        <label class="form-label">Security Check</label>
+                                        <div class="captcha-container p-3 border rounded">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="captcha-display me-3 p-2 border rounded bg-light">
+                                                    <span id="captchaText" class="fw-bold">A1B2C3</span>
+                                                </div>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="refreshCaptcha()">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-0">
+                                                    <i class="bi bi-shield-check"></i>
+                                                </span>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="captchaInput" 
+                                                       placeholder="Enter the code above"
+                                                       maxlength="6">
+                                            </div>
+                                            <div class="form-text">
+                                                Type the characters shown in the image
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Submit Button -->
+                                    <div class="d-grid mb-4">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Social Login (Optional) -->
+                                    <div class="mb-4">
+                                        <div class="position-relative text-center">
+                                            <hr>
+                                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                                                Or continue with
+                                            </span>
+                                        </div>
+                                        <div class="row g-2 mt-3">
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-outline-dark w-100" onclick="socialLogin('google')">
+                                                    <i class="bi bi-google me-2"></i>Google
+                                                </button>
+                                            </div>
+                                            <div class="col-6">
+                                                <button type="button" class="btn btn-outline-primary w-100" onclick="socialLogin('microsoft')">
+                                                    <i class="bi bi-microsoft me-2"></i>Microsoft
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Registration Link -->
+                                    <div class="text-center">
+                                        <p class="text-muted mb-0">
+                                            Don't have an account?
+                                            <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-bold">
+                                                Register here
+                                            </a>
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Features & Info -->
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="login-features h-100 p-5" 
+                                 style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                                <div class="text-white">
+                                    <h3 class="fw-bold mb-4">Library Access Features</h3>
+                                    
+                                    <div class="features-list">
+                                        <div class="feature-item mb-4">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-book fs-4 me-3"></i>
+                                                <div>
+                                                    <h5 class="fw-bold mb-2">Personal Dashboard</h5>
+                                                    <p class="opacity-75 mb-0">
+                                                        Track your loans, reservations, and reading history
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-item mb-4">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-search fs-4 me-3"></i>
+                                                <div>
+                                                    <h5 class="fw-bold mb-2">Advanced Search</h5>
+                                                    <p class="opacity-75 mb-0">
+                                                        Find books, journals, and digital resources quickly
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-item mb-4">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-bell fs-4 me-3"></i>
+                                                <div>
+                                                    <h5 class="fw-bold mb-2">Smart Notifications</h5>
+                                                    <p class="opacity-75 mb-0">
+                                                        Get alerts for due dates, reservations, and new arrivals
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-item mb-4">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-download fs-4 me-3"></i>
+                                                <div>
+                                                    <h5 class="fw-bold mb-2">Digital Downloads</h5>
+                                                    <p class="opacity-75 mb-0">
+                                                        Access e-books and research papers 24/7
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="feature-item">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-people fs-4 me-3"></i>
+                                                <div>
+                                                    <h5 class="fw-bold mb-2">Community Features</h5>
+                                                    <p class="opacity-75 mb-0">
+                                                        Join reading groups and library events
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Security Notice -->
+                                    <div class="mt-5 pt-4 border-top border-white border-opacity-25">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-shield-check fs-4 me-3"></i>
+                                            <div>
+                                                <h5 class="fw-bold mb-2">Secure Login</h5>
+                                                <p class="opacity-75 mb-0 small">
+                                                    Your account is protected with industry-standard security measures.
+                                                    Never share your login credentials.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Quick Stats -->
+                                    <div class="mt-4">
+                                        <div class="row g-3 text-center">
+                                            <div class="col-4">
+                                                <div class="stat-number">50K+</div>
+                                                <div class="stat-label opacity-75">Books</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-number">10K+</div>
+                                                <div class="stat-label opacity-75">E-Resources</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="stat-number">5K+</div>
+                                                <div class="stat-label opacity-75">Members</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Login Options -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-phone me-2"></i>Mobile Access
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Access your library account on the go with our mobile-friendly interface.
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-qr-code me-1"></i>Scan QR Code
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="showMobileInstructions()">
+                                        <i class="bi bi-info-circle me-1"></i>Instructions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-question-circle me-2"></i>Need Help?
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Having trouble logging in? We're here to help.
+                                </p>
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'accounts:password_reset' %}" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-key me-1"></i>Reset Password
+                                    </a>
+                                    <a href="{% url 'accounts:contact' %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-envelope me-1"></i>Contact Support
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Instructions Modal -->
+<div class="modal fade" id="mobileInstructionsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Mobile Access Instructions</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="qr-code mb-3">
+                        <!-- Placeholder for QR code -->
+                        <div style="width: 200px; height: 200px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <div class="text-center">
+                                <i class="bi bi-qr-code fs-1 text-muted mb-2 d-block"></i>
+                                <small class="text-muted">Scan to login on mobile</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h6 class="fw-bold mb-3">How to Access on Mobile:</h6>
+                    <ol class="small text-muted">
+                        <li class="mb-2">Open your phone's camera app</li>
+                        <li class="mb-2">Point camera at the QR code above</li>
+                        <li class="mb-2">Tap the link that appears</li>
+                        <li class="mb-2">Login with your credentials</li>
+                        <li>Bookmark the page for quick access</li>
+                    </ol>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <div class="small">
+                            The library website is fully responsive and works perfectly on all mobile devices.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadQRCode()">
+                    <i class="bi bi-download me-2"></i>Download QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Login Page Specific Styles */
+    .login-page {
+        padding-bottom: 4rem;
+    }
+    
+    /* Form Styling */
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .input-group-text {
+        border-right: none;
+    }
+    
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25);
+        border-radius: 8px;
+    }
+    
+    /* Features Sidebar */
+    .login-features {
+        border-radius: 0 16px 16px 0;
+    }
+    
+    .feature-item {
+        padding-left: 0.5rem;
+        border-left: 3px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+    
+    /* CAPTCHA Styling */
+    .captcha-display {
+        font-family: monospace;
+        letter-spacing: 2px;
+        user-select: none;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    /* Social Login Buttons */
+    .btn-outline-dark:hover {
+        background-color: #212529;
+        color: white;
+    }
+    
+    /* Mobile Cards */
+    .shadow-sm {
+        transition: all 0.3s ease;
+    }
+    
+    .shadow-sm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* QR Code */
+    .qr-code {
+        transition: all 0.3s ease;
+    }
+    
+    .qr-code:hover {
+        transform: scale(1.02);
+    }
+    
+    /* Animation */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    .shake {
+        animation: shake 0.5s ease;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .login-features {
+            display: none !important;
+        }
+        
+        .card-body.p-5 {
+            padding: 3rem !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .card-body.p-5 {
+            padding: 2rem !important;
+        }
+        
+        .social-login .col-6 {
+            margin-bottom: 0.5rem;
+        }
+    }
+    
+    /* Dark Mode Support */
+    [data-theme="dark"] .input-group-text {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    [data-theme="dark"] .form-control {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    [data-theme="dark"] .form-control:focus {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password visibility toggle
+        window.togglePassword = function(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+                button.setAttribute('title', 'Hide password');
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+                button.setAttribute('title', 'Show password');
+            }
+        };
+        
+        // Auto-focus username field
+        const usernameInput = document.getElementById('username');
+        if (usernameInput && !usernameInput.value) {
+            usernameInput.focus();
+        }
+        
+        // Form submission handling
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        if (loginForm) {
+            // Track failed login attempts
+            let failedAttempts = 0;
+            const maxAttempts = 3;
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Basic validation
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                
+                if (!username || !password) {
+                    showToast('error', 'Please fill in all required fields');
+                    return;
+                }
+                
+                // Show CAPTCHA after multiple failed attempts
+                if (failedAttempts >= maxAttempts) {
+                    const captchaSection = document.getElementById('captchaSection');
+                    const captchaInput = document.getElementById('captchaInput');
+                    
+                    captchaSection.style.display = 'block';
+                    
+                    if (!captchaInput.value) {
+                        showToast('error', 'Please complete the security check');
+                        captchaInput.focus();
+                        return;
+                    }
+                    
+                    if (captchaInput.value.toUpperCase() !== document.getElementById('captchaText').textContent) {
+                        showToast('error', 'Security code is incorrect');
+                        refreshCaptcha();
+                        captchaInput.value = '';
+                        captchaInput.focus();
+                        return;
+                    }
+                }
+                
+                // Show loading state
+                const originalText = loginBtn.innerHTML;
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing In...';
+                loginBtn.disabled = true;
+                
+                // Simulate login process (in real app, this submits the form)
+                setTimeout(() => {
+                    // Check for demo credentials
+                    if (isDemoCredentials(username, password)) {
+                        // Successful login for demo
+                        simulateSuccessfulLogin();
+                    } else {
+                        // Failed login
+                        failedAttempts++;
+                        
+                        if (failedAttempts >= maxAttempts) {
+                            document.getElementById('captchaSection').style.display = 'block';
+                            generateCaptcha();
+                        }
+                        
+                        showLoginError();
+                        loginBtn.innerHTML = originalText;
+                        loginBtn.disabled = false;
+                        
+                        // Shake form on error
+                        loginForm.classList.add('shake');
+                        setTimeout(() => {
+                            loginForm.classList.remove('shake');
+                        }, 500);
+                    }
+                }, 1500);
+            });
+        }
+        
+        // Demo credentials check (for demonstration only)
+        function isDemoCredentials(username, password) {
+            const demoUsers = [
+                { username: 'demo', password: 'demo123' },
+                { username: 'student', password: 'student123' },
+                { username: 'faculty', password: 'faculty123' },
+                { username: 'admin', password: 'admin123' }
+            ];
+            
+            return demoUsers.some(user => 
+                (username === user.username || username === `${user.username}@unimaid.edu.ng`) && 
+                password === user.password
+            );
+        }
+        
+        // Simulate successful login
+        function simulateSuccessfulLogin() {
+            // Create success overlay
+            const successOverlay = document.createElement('div');
+            successOverlay.className = 'success-overlay';
+            successOverlay.innerHTML = `
+                <div class="success-content text-center">
+                    <div class="mb-4">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #198754, #20c997); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <i class="bi bi-check-lg text-white fs-1"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-3">Login Successful!</h4>
+                    <p class="text-muted">Redirecting to your dashboard...</p>
+                    <div class="progress mt-4" style="height: 6px;">
+                        <div class="progress-bar" id="redirectProgress" style="width: 0%;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Style the overlay
+            successOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.95);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            document.body.appendChild(successOverlay);
+            
+            // Animate progress bar
+            let progress = 0;
+            const progressBar = document.getElementById('redirectProgress');
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    // Redirect to dashboard
+                    window.location.href = "{% url 'accounts:dashboard' %}";
+                }
+            }, 30);
+            
+            // Store remember me preference
+            const rememberMe = document.getElementById('rememberMe').checked;
+            if (rememberMe) {
+                localStorage.setItem('rememberLogin', 'true');
+                localStorage.setItem('lastUsername', document.getElementById('username').value);
+            } else {
+                localStorage.removeItem('rememberLogin');
+                localStorage.removeItem('lastUsername');
+            }
+        }
+        
+        // Show login error
+        function showLoginError() {
+            // Create error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+            errorDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>
+                        <strong>Login failed</strong>
+                        <p class="mb-0 small">Invalid username or password. Please try again.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert after form
+            const form = document.getElementById('loginForm');
+            const existingAlert = form.querySelector('.alert.alert-danger');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            form.insertBefore(errorDiv, form.querySelector('#captchaSection'));
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // CAPTCHA functions
+        window.refreshCaptcha = function() {
+            generateCaptcha();
+            document.getElementById('captchaInput').value = '';
+        };
+        
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let captcha = '';
+            
+            for (let i = 0; i < 6; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            document.getElementById('captchaText').textContent = captcha;
+            
+            // Add visual distortion (simulated)
+            const captchaDisplay = document.querySelector('.captcha-display');
+            captchaDisplay.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+            captchaDisplay.style.letterSpacing = `${1 + Math.random() * 3}px`;
+        }
+        
+        // Social login simulation
+        window.socialLogin = function(provider) {
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting...';
+            btn.disabled = true;
+            
+            // Simulate OAuth flow
+            setTimeout(() => {
+                showToast('info', `Redirecting to ${provider} login...`);
+                
+                // In real app, this would redirect to OAuth provider
+                // For demo, show instructions
+                setTimeout(() => {
+                    const modalContent = `
+                        <div class="text-center p-4">
+                            <div class="mb-4">
+                                <i class="bi bi-${provider} fs-1 text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">${provider.charAt(0).toUpperCase() + provider.slice(1)} Login</h4>
+                            <p class="text-muted mb-4">
+                                This would normally redirect you to ${provider}'s authentication page.
+                                For this demo, please use the form login.
+                            </p>
+                            <button class="btn btn-primary" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Login
+                            </button>
+                        </div>
+                    `;
+                    
+                    showCustomModal(`${provider} Login`, modalContent);
+                    
+                    // Reset button
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1000);
+            }, 500);
+        };
+        
+        // Mobile instructions
+        window.showMobileInstructions = function() {
+            const modal = new bootstrap.Modal(document.getElementById('mobileInstructionsModal'));
+            modal.show();
+        };
+        
+        // Download QR code (simulated)
+        window.downloadQRCode = function() {
+            showToast('info', 'QR code download would start...');
+            // In real implementation, this would generate and download a QR code
+        };
+        
+        // Load remembered username
+        const rememberedUsername = localStorage.getItem('lastUsername');
+        const rememberLogin = localStorage.getItem('rememberLogin');
+        
+        if (rememberedUsername && rememberLogin === 'true') {
+            document.getElementById('username').value = rememberedUsername;
+            document.getElementById('rememberMe').checked = true;
+        }
+        
+        // Enter key to submit form
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.target.id === 'username' || e.target.id === 'password')) {
+                if (!e.shiftKey) {
+                    e.preventDefault();
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+        
+        // Show/hide password on Caps Lock
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'CapsLock') {
+                const capsWarning = document.getElementById('capsWarning');
+                if (!capsWarning) {
+                    const warning = document.createElement('div');
+                    warning.id = 'capsWarning';
+                    warning.className = 'alert alert-warning alert-dismissible fade show mt-2';
+                    warning.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-keyboard me-2"></i>
+                            <div class="small">Caps Lock is ON</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    const passwordField = document.getElementById('password');
+                    passwordField.parentNode.parentNode.appendChild(warning);
+                }
+            }
+        });
+        
+        // Generate initial CAPTCHA if needed
+        if (failedAttempts >= maxAttempts) {
+            generateCaptcha();
+        }
+        
+        // Toast notification function
+        function showToast(type, message) {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.custom-toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = `custom-toast alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}-fill fs-4 me-3"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+        
+        // Custom modal function
+        function showCustomModal(title, content) {
+            const modalId = 'customModal';
+            let modal = document.getElementById(modalId);
+            
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-header bg-gradient text-white">
+                                <h5 class="modal-title">${title}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${content}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            
+            // Remove modal from DOM after hiding
+            modal.addEventListener('hidden.bs.modal', function() {
+                modal.remove();
+            });
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

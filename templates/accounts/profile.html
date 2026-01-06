@@ -1,0 +1,1554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}" class="text-decoration-none">
+    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">My Profile</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-person-circle fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">My Profile</h1>
+                <p class="lead text-muted">Manage your personal information and account settings</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Profile Page Content -->
+<div class="profile-page">
+    <div class="container-fluid">
+        <!-- Profile Header -->
+        <div class="row mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <!-- Profile Picture -->
+                            <div class="col-md-4 text-center mb-4 mb-md-0">
+                                <div class="profile-picture-container position-relative d-inline-block">
+                                    <div class="profile-picture" style="width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 5px solid var(--light-blue);">
+                                        {% if user.profile_picture %}
+                                        <img src="{{ user.profile_picture.url }}" 
+                                             alt="{{ user.get_full_name }}" 
+                                             id="profileImage"
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                        {% else %}
+                                        <div id="profileInitials" 
+                                             class="w-100 h-100 d-flex align-items-center justify-content-center bg-gradient"
+                                             style="background: var(--gradient-2);">
+                                            <span class="display-3 text-white fw-bold">
+                                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <button class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle" 
+                                            style="width: 40px; height: 40px;"
+                                            onclick="document.getElementById('profilePictureInput').click()">
+                                        <i class="bi bi-camera"></i>
+                                    </button>
+                                    <input type="file" 
+                                           id="profilePictureInput" 
+                                           accept="image/*" 
+                                           style="display: none;"
+                                           onchange="previewProfilePicture(event)">
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('profilePictureInput').click()">
+                                        <i class="bi bi-upload me-1"></i>Change Photo
+                                    </button>
+                                    {% if user.profile_picture %}
+                                    <button class="btn btn-outline-danger btn-sm ms-2" onclick="removeProfilePicture()">
+                                        <i class="bi bi-trash me-1"></i>Remove
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- User Info -->
+                            <div class="col-md-8">
+                                <div class="user-info">
+                                    <h2 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h2>
+                                    <p class="text-muted mb-3">
+                                        <i class="bi bi-person-badge me-1"></i>
+                                        {{ user.get_membership_type_display }}
+                                        {% if user.department %}
+                                        • <i class="bi bi-building ms-2 me-1"></i>{{ user.department }}
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-sm-6">
+                                            <div class="info-item">
+                                                <small class="text-muted d-block">Member Since</small>
+                                                <strong>{{ user.date_joined|date:"F d, Y" }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-item">
+                                                <small class="text-muted d-block">Last Login</small>
+                                                <strong>{{ user.last_login|date:"F d, Y"|default:"Never" }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-item">
+                                                <small class="text-muted d-block">Account Status</small>
+                                                <span class="badge bg-success">Active</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="info-item">
+                                                <small class="text-muted d-block">Library ID</small>
+                                                <strong>{{ user.student_id|default:user.faculty_id|default:"Not assigned" }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                                        </button>
+                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                            <i class="bi bi-key me-2"></i>Change Password
+                                        </button>
+                                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-graph-up me-2"></i>Library Activity
+                        </h5>
+                        
+                        <div class="activity-stats">
+                            <div class="stat-item mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Books Borrowed</span>
+                                    <strong class="text-primary">42</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">On-time Returns</span>
+                                    <strong class="text-success">92%</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 92%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Library Visits</span>
+                                    <strong class="text-info">156</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: 78%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Member Level</span>
+                                    <strong class="text-warning">Gold</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: 95%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{% url 'accounts:dashboard' %}#history-section" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-clock-history me-2"></i>View Full History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-light px-4 py-3 border-0">
+                        <ul class="nav nav-tabs nav-tabs-custom border-0" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+                                    <i class="bi bi-person me-2"></i>Personal Info
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button">
+                                    <i class="bi bi-telephone me-2"></i>Contact Details
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button">
+                                    <i class="bi bi-gear me-2"></i>Preferences
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button">
+                                    <i class="bi bi-shield-check me-2"></i>Security
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button">
+                                    <i class="bi bi-file-earmark me-2"></i>Documents
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="profileTabsContent">
+                            <!-- Personal Info Tab -->
+                            <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-card-checklist me-2"></i>Basic Information
+                                            </h5>
+                                            <div class="info-grid">
+                                                <div class="info-row">
+                                                    <span class="info-label">Full Name</span>
+                                                    <span class="info-value">{{ user.get_full_name|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Username</span>
+                                                    <span class="info-value">{{ user.username }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Membership Type</span>
+                                                    <span class="info-value">{{ user.get_membership_type_display }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Date of Birth</span>
+                                                    <span class="info-value">{{ user.date_of_birth|date:"F d, Y"|default:"Not set" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-building me-2"></i>Academic Information
+                                            </h5>
+                                            <div class="info-grid">
+                                                <div class="info-row">
+                                                    <span class="info-label">Department</span>
+                                                    <span class="info-value">{{ user.department|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Student ID</span>
+                                                    <span class="info-value">{{ user.student_id|default:"Not applicable" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Faculty ID</span>
+                                                    <span class="info-value">{{ user.faculty_id|default:"Not applicable" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Academic Year</span>
+                                                    <span class="info-value">{{ user.academic_year|default:"Not set" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                        <i class="bi bi-pencil-square me-2"></i>Edit Personal Information
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Details Tab -->
+                            <div class="tab-pane fade" id="contact" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-envelope me-2"></i>Contact Information
+                                            </h5>
+                                            <div class="info-grid">
+                                                <div class="info-row">
+                                                    <span class="info-label">Email Address</span>
+                                                    <span class="info-value">{{ user.email|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Phone Number</span>
+                                                    <span class="info-value">{{ user.phone|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Alternate Phone</span>
+                                                    <span class="info-value">{{ user.alternate_phone|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Address</span>
+                                                    <span class="info-value">{{ user.address|default:"Not set" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-person-plus me-2"></i>Emergency Contact
+                                            </h5>
+                                            <div class="info-grid">
+                                                <div class="info-row">
+                                                    <span class="info-label">Contact Person</span>
+                                                    <span class="info-value">{{ user.emergency_contact_name|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Relationship</span>
+                                                    <span class="info-value">{{ user.emergency_contact_relation|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Phone Number</span>
+                                                    <span class="info-value">{{ user.emergency_contact_phone|default:"Not set" }}</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="info-label">Email</span>
+                                                    <span class="info-value">{{ user.emergency_contact_email|default:"Not set" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                        <div>
+                                            <strong>Contact Information Usage:</strong> Your contact details are used only for 
+                                            library-related communications and emergency purposes. We never share your information 
+                                            with third parties.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editContactModal">
+                                        <i class="bi bi-pencil-square me-2"></i>Edit Contact Information
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Preferences Tab -->
+                            <div class="tab-pane fade" id="preferences" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-bell me-2"></i>Notification Preferences
+                                            </h5>
+                                            <div class="preferences-list">
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                                        <label class="form-check-label" for="emailNotifications">
+                                                            Email Notifications
+                                                        </label>
+                                                        <small class="text-muted d-block">Receive notifications about due dates, reservations, and library news</small>
+                                                    </div>
+                                                </div>
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="smsNotifications">
+                                                        <label class="form-check-label" for="smsNotifications">
+                                                            SMS Notifications
+                                                        </label>
+                                                        <small class="text-muted d-block">Receive urgent alerts via SMS (data charges may apply)</small>
+                                                    </div>
+                                                </div>
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="eventReminders" checked>
+                                                        <label class="form-check-label" for="eventReminders">
+                                                            Event Reminders
+                                                        </label>
+                                                        <small class="text-muted d-block">Reminders for library workshops and events you've registered for</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-6">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-display me-2"></i>Display Preferences
+                                            </h5>
+                                            <div class="preferences-list">
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="darkMode">
+                                                        <label class="form-check-label" for="darkMode">
+                                                            Dark Mode
+                                                        </label>
+                                                        <small class="text-muted d-block">Use dark theme for reduced eye strain</small>
+                                                    </div>
+                                                </div>
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="compactView">
+                                                        <label class="form-check-label" for="compactView">
+                                                            Compact View
+                                                        </label>
+                                                        <small class="text-muted d-block">Show more content with less spacing</small>
+                                                    </div>
+                                                </div>
+                                                <div class="preference-item mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="autoRenew" checked>
+                                                        <label class="form-check-label" for="autoRenew">
+                                                            Auto-Renew Loans
+                                                        </label>
+                                                        <small class="text-muted d-block">Automatically renew loans when available</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <button class="btn btn-primary" onclick="savePreferences()">
+                                        <i class="bi bi-check-circle me-2"></i>Save Preferences
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Security Tab -->
+                            <div class="tab-pane fade" id="security" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-shield-lock me-2"></i>Account Security
+                                            </h5>
+                                            <div class="security-list">
+                                                <div class="security-item mb-4">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="fw-bold mb-1">Password Strength</h6>
+                                                            <p class="text-muted small mb-2">Last changed 30 days ago</p>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar bg-success" style="width: 90%;"></div>
+                                                            </div>
+                                                        </div>
+                                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                                            Change
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="security-item mb-4">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="fw-bold mb-1">Two-Factor Authentication</h6>
+                                                            <p class="text-muted small mb-2">Add an extra layer of security to your account</p>
+                                                        </div>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                                                            <label class="form-check-label" for="twoFactorAuth"></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="security-item mb-4">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="bi bi-info-circle-fill text-info mt-1 me-3 fs-5"></i>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="fw-bold mb-1">Active Sessions</h6>
+                                                            <p class="text-muted small mb-2">You're logged in on 2 devices</p>
+                                                            <div class="sessions-list">
+                                                                <div class="session-item d-flex align-items-center mb-2">
+                                                                    <i class="bi bi-laptop me-2"></i>
+                                                                    <div class="flex-grow-1">
+                                                                        <small class="fw-bold">Chrome on Windows</small>
+                                                                        <small class="text-muted d-block">Current session • Lagos, Nigeria</small>
+                                                                    </div>
+                                                                    <span class="badge bg-success small">Active</span>
+                                                                </div>
+                                                                <div class="session-item d-flex align-items-center">
+                                                                    <i class="bi bi-phone me-2"></i>
+                                                                    <div class="flex-grow-1">
+                                                                        <small class="fw-bold">Safari on iPhone</small>
+                                                                        <small class="text-muted d-block">2 hours ago • Maiduguri, Nigeria</small>
+                                                                    </div>
+                                                                    <button class="btn btn-outline-danger btn-sm" onclick="logoutSession(this)">
+                                                                        Logout
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-4">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-clock-history me-2"></i>Recent Activity
+                                            </h5>
+                                            <div class="activity-log">
+                                                <div class="log-item mb-3">
+                                                    <small class="fw-bold d-block">Profile Updated</small>
+                                                    <small class="text-muted">Yesterday, 2:30 PM</small>
+                                                </div>
+                                                <div class="log-item mb-3">
+                                                    <small class="fw-bold d-block">Password Changed</small>
+                                                    <small class="text-muted">1 month ago</small>
+                                                </div>
+                                                <div class="log-item mb-3">
+                                                    <small class="fw-bold d-block">New Device Login</small>
+                                                    <small class="text-muted">2 months ago</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                                        <div>
+                                            <strong>Security Tip:</strong> Always log out from shared computers and 
+                                            never share your password with anyone. Report any suspicious activity 
+                                            immediately to library staff.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Documents Tab -->
+                            <div class="tab-pane fade" id="documents" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-folder me-2"></i>Uploaded Documents
+                                            </h5>
+                                            <div class="documents-list">
+                                                {% if user.documents.all %}
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Document Name</th>
+                                                                <th>Type</th>
+                                                                <th>Upload Date</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for doc in user.documents.all|slice:":5" %}
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                                                                        <span>{{ doc.name|truncatechars:30 }}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-info">{{ doc.get_document_type_display }}</span>
+                                                                </td>
+                                                                <td>{{ doc.upload_date|date:"M d, Y" }}</td>
+                                                                <td>
+                                                                    {% if doc.is_verified %}
+                                                                    <span class="badge bg-success">Verified</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-warning">Pending</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="{{ doc.file.url }}" class="btn btn-outline-primary" target="_blank">
+                                                                            <i class="bi bi-download"></i>
+                                                                        </a>
+                                                                        <button class="btn btn-outline-danger" onclick="deleteDocument({{ doc.id }})">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                {% else %}
+                                                <div class="text-center py-4">
+                                                    <i class="bi bi-folder-x display-1 text-muted mb-3"></i>
+                                                    <h5 class="text-muted mb-3">No Documents Uploaded</h5>
+                                                    <p class="text-muted mb-4">Upload your academic documents for verification</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                                                        <i class="bi bi-upload me-2"></i>Upload Document
+                                                    </button>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-4">
+                                        <div class="info-section mb-4">
+                                            <h5 class="fw-bold mb-3">
+                                                <i class="bi bi-cloud-arrow-up me-2"></i>Upload New Document
+                                            </h5>
+                                            <div class="upload-area p-4 border rounded text-center">
+                                                <i class="bi bi-cloud-arrow-up display-4 text-muted mb-3"></i>
+                                                <h6>Drag & Drop Files Here</h6>
+                                                <p class="small text-muted mb-3">or click to browse</p>
+                                                <input type="file" id="documentUpload" class="d-none" multiple>
+                                                <button class="btn btn-outline-primary" onclick="document.getElementById('documentUpload').click()">
+                                                    <i class="bi bi-folder2-open me-2"></i>Browse Files
+                                                </button>
+                                                <p class="small text-muted mt-3 mb-0">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Supported: PDF, JPG, PNG (Max: 10MB)
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if user.documents.all %}
+                                <div class="text-end">
+                                    <a href="{% url 'accounts:documents' %}" class="btn btn-primary">
+                                        <i class="bi bi-folder2-open me-2"></i>View All Documents
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Edit Personal Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editProfileForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" value="{{ user.last_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ user.username }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="dateOfBirth" value="{{ user.date_of_birth|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department">
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if user.department == dept.name %}selected{% endif %}>
+                                    {{ dept.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="studentId" class="form-label">Student ID</label>
+                            <input type="text" class="form-control" id="studentId" value="{{ user.student_id }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="facultyId" class="form-label">Faculty/Staff ID</label>
+                            <input type="text" class="form-control" id="facultyId" value="{{ user.faculty_id }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="academicYear" class="form-label">Academic Year</label>
+                            <select class="form-select" id="academicYear">
+                                <option value="">Select Year</option>
+                                {% for year in academic_years %}
+                                <option value="{{ year }}" {% if user.academic_year == year %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfileChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="changePasswordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                        <div class="form-text">Must be at least 8 characters with letters and numbers</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" required>
+                    </div>
+                    <div class="password-strength mb-3">
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" id="passwordStrengthBar" style="width: 0%;"></div>
+                        </div>
+                        <small class="text-muted" id="passwordStrengthText">Password strength</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Contact Modal -->
+<div class="modal fade" id="editContactModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Edit Contact Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editContactForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" value="{{ user.phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="alternatePhone" class="form-label">Alternate Phone</label>
+                            <input type="tel" class="form-control" id="alternatePhone" value="{{ user.alternate_phone }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="3">{{ user.address }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emergencyName" class="form-label">Emergency Contact Name</label>
+                            <input type="text" class="form-control" id="emergencyName" value="{{ user.emergency_contact_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emergencyRelation" class="form-label">Relationship</label>
+                            <input type="text" class="form-control" id="emergencyRelation" value="{{ user.emergency_contact_relation }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emergencyPhone" class="form-label">Emergency Phone</label>
+                            <input type="tel" class="form-control" id="emergencyPhone" value="{{ user.emergency_contact_phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emergencyEmail" class="form-label">Emergency Email</label>
+                            <input type="email" class="form-control" id="emergencyEmail" value="{{ user.emergency_contact_email }}">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveContactChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Upload Document</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="uploadDocumentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="documentType" class="form-label">Document Type</label>
+                            <select class="form-select" id="documentType" required>
+                                <option value="">Select Type</option>
+                                <option value="id_card">ID Card</option>
+                                <option value="admission_letter">Admission Letter</option>
+                                <option value="course_form">Course Registration Form</option>
+                                <option value="fee_receipt">Fee Receipt</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="documentName" class="form-label">Document Name</label>
+                            <input type="text" class="form-control" id="documentName" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="documentDescription" class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" id="documentDescription" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="documentFile" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="documentFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <div class="form-text">Maximum file size: 10MB. Supported formats: PDF, JPG, PNG</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="uploadDocument()">Upload Document</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Profile Page Specific Styles */
+    .profile-page {
+        padding-bottom: 4rem;
+    }
+    
+    /* Profile Picture */
+    .profile-picture-container {
+        position: relative;
+    }
+    
+    .profile-picture {
+        transition: all 0.3s ease;
+    }
+    
+    .profile-picture:hover {
+        border-color: var(--accent-blue);
+        transform: scale(1.02);
+    }
+    
+    /* User Info */
+    .info-item {
+        padding: 0.5rem 0;
+    }
+    
+    .info-item small {
+        font-size: 0.85rem;
+    }
+    
+    /* Tabs Customization */
+    .nav-tabs-custom .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--dark-text);
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        margin: 0 0.5rem;
+    }
+    
+    .nav-tabs-custom .nav-link.active {
+        color: var(--primary-blue);
+        border-bottom-color: var(--accent-blue);
+        background: transparent;
+    }
+    
+    .nav-tabs-custom .nav-link:hover:not(.active) {
+        color: var(--accent-blue);
+        border-bottom-color: rgba(58, 134, 255, 0.3);
+    }
+    
+    /* Info Grid */
+    .info-grid {
+        background: var(--gray-bg);
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .info-value {
+        color: var(--primary-blue);
+        font-weight: 500;
+    }
+    
+    /* Preferences List */
+    .preferences-list .form-check {
+        padding: 0.8rem;
+        background: var(--gray-bg);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .preferences-list .form-check-label {
+        font-weight: 500;
+    }
+    
+    /* Security Items */
+    .security-item {
+        padding: 1rem;
+        background: var(--gray-bg);
+        border-radius: 10px;
+    }
+    
+    .session-item {
+        padding: 0.8rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid var(--light-blue);
+    }
+    
+    /* Upload Area */
+    .upload-area {
+        border: 2px dashed #dee2e6;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .upload-area:hover {
+        border-color: var(--accent-blue);
+        background: rgba(58, 134, 255, 0.05);
+    }
+    
+    /* Activity Stats */
+    .activity-stats .progress {
+        border-radius: 10px;
+    }
+    
+    /* Log Items */
+    .log-item {
+        padding: 0.8rem;
+        background: var(--gray-bg);
+        border-radius: 8px;
+        border-left: 3px solid var(--accent-blue);
+    }
+    
+    /* Modal Customization */
+    .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .nav-tabs-custom .nav-link {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+        
+        .profile-picture {
+            width: 140px !important;
+            height: 140px !important;
+        }
+        
+        .info-grid {
+            padding: 1rem;
+        }
+        
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .info-value {
+            margin-top: 0.2rem;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .nav-tabs-custom,
+        .btn,
+        .modal,
+        .upload-area {
+            display: none !important;
+        }
+        
+        .tab-content > .tab-pane {
+            display: block !important;
+            opacity: 1 !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const profileTabs = document.getElementById('profileTabs');
+        if (profileTabs) {
+            profileTabs.addEventListener('shown.bs.tab', function(event) {
+                // Save active tab to localStorage
+                const activeTab = event.target.id;
+                localStorage.setItem('activeProfileTab', activeTab);
+            });
+            
+            // Restore active tab
+            const savedTab = localStorage.getItem('activeProfileTab');
+            if (savedTab) {
+                const tabButton = document.querySelector(`#${savedTab}`);
+                if (tabButton) {
+                    new bootstrap.Tab(tabButton).show();
+                }
+            }
+        }
+        
+        // Profile picture preview
+        window.previewProfilePicture = function(event) {
+            const input = event.target;
+            const profilePicture = document.getElementById('profileImage');
+            const profileInitials = document.getElementById('profileInitials');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (profilePicture) {
+                        profilePicture.src = e.target.result;
+                        profilePicture.style.display = 'block';
+                    }
+                    if (profileInitials) {
+                        profileInitials.style.display = 'none';
+                    }
+                    
+                    // Show save button
+                    const saveButton = document.querySelector('.profile-picture-container .btn-primary');
+                    if (saveButton) {
+                        saveButton.innerHTML = '<i class="bi bi-check"></i>';
+                        saveButton.onclick = saveProfilePicture;
+                    }
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+        
+        // Remove profile picture
+        window.removeProfilePicture = function() {
+            if (confirm('Are you sure you want to remove your profile picture?')) {
+                const profilePicture = document.getElementById('profileImage');
+                const profileInitials = document.getElementById('profileInitials');
+                
+                if (profilePicture) {
+                    profilePicture.style.display = 'none';
+                }
+                if (profileInitials) {
+                    profileInitials.style.display = 'flex';
+                }
+                
+                // Show toast
+                showToast('success', 'Profile picture removed successfully');
+                
+                // In real app, make API call to remove picture
+                // fetch('/api/profile/picture/', { method: 'DELETE' })
+            }
+        };
+        
+        // Save profile picture
+        function saveProfilePicture() {
+            const input = document.getElementById('profilePictureInput');
+            if (!input.files[0]) return;
+            
+            const formData = new FormData();
+            formData.append('profile_picture', input.files[0]);
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                showToast('success', 'Profile picture updated successfully');
+                button.innerHTML = '<i class="bi bi-camera"></i>';
+                button.disabled = false;
+                button.onclick = function() { document.getElementById('profilePictureInput').click(); };
+            }, 1000);
+            
+            // In real app:
+            // fetch('/api/profile/picture/', {
+            //     method: 'POST',
+            //     body: formData
+            // }).then(response => {
+            //     if (response.ok) {
+            //         showToast('success', 'Profile picture updated successfully');
+            //     }
+            // });
+        }
+        
+        // Save profile changes
+        window.saveProfileChanges = function() {
+            const form = document.getElementById('editProfileForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            
+            // Collect form data
+            const formData = {
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                date_of_birth: document.getElementById('dateOfBirth').value,
+                department: document.getElementById('department').value,
+                student_id: document.getElementById('studentId').value,
+                faculty_id: document.getElementById('facultyId').value,
+                academic_year: document.getElementById('academicYear').value
+            };
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Update UI
+                document.querySelector('.user-info h2').textContent = 
+                    `${formData.first_name} ${formData.last_name}`;
+                
+                // Update info grid
+                updateInfoGrid(formData);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                modal.hide();
+                
+                // Show success message
+                showToast('success', 'Profile updated successfully');
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1500);
+        };
+        
+        // Save contact changes
+        window.saveContactChanges = function() {
+            const form = document.getElementById('editContactForm');
+            
+            // Collect form data
+            const formData = {
+                phone: document.getElementById('phone').value,
+                alternate_phone: document.getElementById('alternatePhone').value,
+                address: document.getElementById('address').value,
+                emergency_name: document.getElementById('emergencyName').value,
+                emergency_relation: document.getElementById('emergencyRelation').value,
+                emergency_phone: document.getElementById('emergencyPhone').value,
+                emergency_email: document.getElementById('emergencyEmail').value
+            };
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editContactModal'));
+                modal.hide();
+                
+                // Show success message
+                showToast('success', 'Contact information updated successfully');
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1500);
+        };
+        
+        // Change password
+        window.changePassword = function() {
+            const form = document.getElementById('changePasswordForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('error', 'New passwords do not match');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showToast('error', 'Password must be at least 8 characters');
+                return;
+            }
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                modal.hide();
+                
+                // Clear form
+                form.reset();
+                
+                // Show success message
+                showToast('success', 'Password changed successfully');
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1500);
+        };
+        
+        // Password strength checker
+        const newPasswordInput = document.getElementById('newPassword');
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strengthBar = document.getElementById('passwordStrengthBar');
+                const strengthText = document.getElementById('passwordStrengthText');
+                
+                let strength = 0;
+                let color = 'bg-danger';
+                let text = 'Very Weak';
+                
+                if (password.length >= 8) strength += 25;
+                if (/[a-z]/.test(password)) strength += 25;
+                if (/[A-Z]/.test(password)) strength += 25;
+                if (/[0-9]/.test(password)) strength += 25;
+                
+                if (strength >= 75) {
+                    color = 'bg-success';
+                    text = 'Strong';
+                } else if (strength >= 50) {
+                    color = 'bg-warning';
+                    text = 'Medium';
+                } else if (strength >= 25) {
+                    color = 'bg-info';
+                    text = 'Weak';
+                }
+                
+                strengthBar.style.width = `${strength}%`;
+                strengthBar.className = `progress-bar ${color}`;
+                strengthText.textContent = text;
+                strengthText.className = `text-${color.replace('bg-', '')}`;
+            });
+        }
+        
+        // Save preferences
+        window.savePreferences = function() {
+            const preferences = {
+                email_notifications: document.getElementById('emailNotifications').checked,
+                sms_notifications: document.getElementById('smsNotifications').checked,
+                event_reminders: document.getElementById('eventReminders').checked,
+                dark_mode: document.getElementById('darkMode').checked,
+                compact_view: document.getElementById('compactView').checked,
+                auto_renew: document.getElementById('autoRenew').checked,
+                two_factor_auth: document.getElementById('twoFactorAuth').checked
+            };
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Save to localStorage
+                localStorage.setItem('userPreferences', JSON.stringify(preferences));
+                
+                // Apply dark mode if changed
+                if (preferences.dark_mode) {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+                
+                // Show success message
+                showToast('success', 'Preferences saved successfully');
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1000);
+        };
+        
+        // Load saved preferences
+        const savedPreferences = localStorage.getItem('userPreferences');
+        if (savedPreferences) {
+            const preferences = JSON.parse(savedPreferences);
+            Object.keys(preferences).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.checked = preferences[key];
+                }
+            });
+        }
+        
+        // Logout session
+        window.logoutSession = function(button) {
+            if (confirm('Log out this device?')) {
+                const sessionItem = button.closest('.session-item');
+                sessionItem.style.opacity = '0.5';
+                button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    sessionItem.remove();
+                    showToast('info', 'Device logged out successfully');
+                }, 800);
+            }
+        };
+        
+        // Upload document
+        window.uploadDocument = function() {
+            const form = document.getElementById('uploadDocumentForm');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            
+            const fileInput = document.getElementById('documentFile');
+            if (!fileInput.files[0]) {
+                showToast('error', 'Please select a file to upload');
+                return;
+            }
+            
+            // Check file size (10MB max)
+            if (fileInput.files[0].size > 10 * 1024 * 1024) {
+                showToast('error', 'File size must be less than 10MB');
+                return;
+            }
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+            button.disabled = true;
+            
+            // Simulate upload
+            setTimeout(() => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('uploadDocumentModal'));
+                modal.hide();
+                
+                // Clear form
+                form.reset();
+                
+                // Show success message
+                showToast('success', 'Document uploaded successfully');
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // Refresh documents list
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }, 2000);
+        };
+        
+        // Delete document
+        window.deleteDocument = function(docId) {
+            if (confirm('Are you sure you want to delete this document?')) {
+                // Show loading
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                button.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    showToast('success', 'Document deleted successfully');
+                    
+                    // In real app, remove from DOM or reload
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                }, 1000);
+            }
+        };
+        
+        // Update info grid helper
+        function updateInfoGrid(data) {
+            // Update personal info
+            if (data.first_name && data.last_name) {
+                document.querySelectorAll('.info-row').forEach(row => {
+                    const label = row.querySelector('.info-label');
+                    if (label) {
+                        const labelText = label.textContent.trim();
+                        const valueSpan = row.querySelector('.info-value');
+                        
+                        switch(labelText) {
+                            case 'Full Name':
+                                valueSpan.textContent = `${data.first_name} ${data.last_name}`;
+                                break;
+                            case 'Username':
+                                if (data.username) valueSpan.textContent = data.username;
+                                break;
+                            case 'Email Address':
+                                if (data.email) valueSpan.textContent = data.email;
+                                break;
+                            case 'Department':
+                                if (data.department) valueSpan.textContent = getDepartmentName(data.department);
+                                break;
+                            case 'Student ID':
+                                if (data.student_id) valueSpan.textContent = data.student_id;
+                                break;
+                            case 'Faculty ID':
+                                if (data.faculty_id) valueSpan.textContent = data.faculty_id;
+                                break;
+                            case 'Academic Year':
+                                if (data.academic_year) valueSpan.textContent = data.academic_year;
+                                break;
+                        }
+                    }
+                });
+            }
+        }
+        
+        function getDepartmentName(deptId) {
+            const departments = {
+                '1': 'Computer Science',
+                '2': 'Mathematics',
+                '3': 'Physics',
+                '4': 'Chemistry',
+                '5': 'Biology'
+            };
+            return departments[deptId] || deptId;
+        }
+        
+        // Toast notification function
+        function showToast(type, message) {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.custom-toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = `custom-toast alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}-fill fs-4 me-3"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

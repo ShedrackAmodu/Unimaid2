@@ -1,0 +1,1397 @@
+{% extends 'base.html' %}
+{% load filters %}
+
+{% block title %}Publishers - Library Catalog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item active" aria-current="page">Publishers</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Library Publishers</h1>
+                <p class="lead text-muted mb-0">
+                    Browse {{ publishers.paginator.count|default:"5,000+" }} publishers in our collection
+                </p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <a href="/catalog/" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+                </a>
+                {% if user.is_staff %}
+                <a href="/admin/catalog/publisher/add/" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add Publisher
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search & Filter Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-end">
+                    <!-- Search Form -->
+                    <div class="col-lg-6">
+                        <form method="get" class="search-form">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-search text-primary"></i>
+                                </span>
+                                <input type="text" name="q" class="form-control border-0" 
+                                       placeholder="Search publishers by name, location, or keywords..."
+                                       value="{{ request.GET.q|default:'' }}"
+                                       aria-label="Search publishers">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Filter Controls -->
+                    <div class="col-lg-6">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <select class="form-select filter-select" name="sort" onchange="updateFilter(this)">
+                                    <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>
+                                        Sort by Name (A-Z)
+                                    </option>
+                                    <option value="books" {% if request.GET.sort == "books" %}selected{% endif %}>
+                                        Most Books
+                                    </option>
+                                    <option value="popular" {% if request.GET.sort == "popular" %}selected{% endif %}>
+                                        Most Popular
+                                    </option>
+                                    <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>
+                                        Newly Added
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select filter-select" name="letter" onchange="updateFilter(this)">
+                                    <option value="">All Letters</option>
+                                    {% for letter in alphabet %}
+                                    <option value="{{ letter }}" 
+                                            {% if request.GET.letter == letter %}selected{% endif %}>
+                                        {{ letter }}
+                                    </option>
+                                    {% endfor %}
+                                    <option value="0-9" {% if request.GET.letter == "0-9" %}selected{% endif %}>
+                                        0-9
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Filters -->
+                {% if request.GET.q or request.GET.letter or request.GET.sort != "name" %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap align-items-center">
+                            <span class="text-muted me-3">Active filters:</span>
+                            
+                            {% if request.GET.q %}
+                            <span class="badge bg-primary me-2 mb-2">
+                                Search: "{{ request.GET.q }}"
+                                <a href="?{{ request.GET.urlencode|remove_param:'q' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            
+                            {% if request.GET.letter %}
+                            <span class="badge bg-success me-2 mb-2">
+                                Letter: {{ request.GET.letter }}
+                                <a href="?{{ request.GET.urlencode|remove_param:'letter' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            
+                            {% if request.GET.sort and request.GET.sort != "name" %}
+                            <span class="badge bg-warning me-2 mb-2">
+                                Sorted: {{ request.GET.sort|title }}
+                                <a href="?{{ request.GET.urlencode|remove_param:'sort' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+                            
+                            {% if request.GET.q or request.GET.letter or request.GET.sort != "name" %}
+                            <a href="/catalog/publishers/" class="btn btn-sm btn-outline-danger mb-2">
+                                <i class="bi bi-x-circle me-1"></i>Clear All
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Alphabet Navigation -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alphabet-nav">
+                            <div class="d-flex flex-wrap justify-content-center gap-1">
+                                <a href="/catalog/publishers/" 
+                                   class="btn btn-sm {% if not request.GET.letter %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    All
+                                </a>
+                                {% for letter in alphabet %}
+                                <a href="?letter={{ letter }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                                   class="btn btn-sm {% if request.GET.letter == letter %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    {{ letter }}
+                                </a>
+                                {% endfor %}
+                                <a href="?letter=0-9{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                                   class="btn btn-sm {% if request.GET.letter == "0-9" %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    0-9
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-0">
+                    {% if publishers %}
+                    Showing {{ publishers.start_index }} - {{ publishers.end_index }} of {{ publishers.paginator.count }} publishers
+                    {% else %}
+                    No publishers found
+                    {% endif %}
+                </h5>
+                {% if search_query %}
+                <p class="text-muted small mb-0">Search results for "{{ search_query }}"</p>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-muted me-3">View:</span>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" id="viewGrid">
+                        <i class="bi bi-grid"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="viewList">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Publishers Grid View -->
+<div id="publishersGrid" class="view-content">
+    {% if publishers %}
+    <div class="row g-4">
+        {% for publisher in publishers %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card publisher-card h-100 border-0 shadow-hover">
+                <div class="card-body p-4">
+                    <!-- Publisher Logo -->
+                    <div class="publisher-logo-container mb-4">
+                        <div class="publisher-logo mx-auto">
+                            <div class="logo-placeholder rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 100px; height: 100px; background: linear-gradient(135deg, 
+                                        {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
+                                        {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <span class="text-white fs-2 fw-bold">{{ publisher.name|first|upper }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Publisher Info -->
+                    <div class="publisher-info text-center">
+                        <h5 class="fw-bold mb-2">
+                            <a href="/catalog/publishers/{{ publisher.id }}/" class="text-decoration-none text-dark">
+                                {{ publisher.name|truncatechars:30 }}
+                            </a>
+                        </h5>
+                        
+                        {% if publisher.address %}
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-geo-alt me-1"></i>{{ publisher.address|truncatechars:40 }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="publisher-stats mb-4">
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-book me-1"></i>{{ publisher.books.count }} books
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="publisher-actions text-center">
+                        <a href="/catalog/publishers/{{ publisher.id }}/" class="btn btn-sm btn-primary me-2">
+                            <i class="bi bi-building me-1"></i>View Details
+                        </a>
+                        <a href="/catalog/books/?publisher={{ publisher.id }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-book me-1"></i>View Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Results Found -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-building text-muted" style="font-size: 5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold text-muted mb-3">No Publishers Found</h3>
+                    <p class="text-muted mb-4">
+                        {% if search_query %}
+                        No publishers match your search for "{{ search_query }}". Try different keywords or clear filters.
+                        {% else %}
+                        There are currently no publishers in this category. Check back soon for new additions.
+                        {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/catalog/publishers/" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Clear Search
+                        </a>
+                        <a href="/catalog/" class="btn btn-outline-primary">
+                            <i class="bi bi-house me-2"></i>Browse Catalog
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Publishers List View (Hidden by Default) -->
+<div id="publishersList" class="view-content d-none">
+    {% if publishers %}
+    <div class="card border-0 shadow-lg">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 60px;"></th>
+                            <th scope="col">Publisher Name</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Books</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for publisher in publishers %}
+                        <tr class="publisher-list-row">
+                            <td>
+                                <div class="list-logo rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 50px; height: 50px; background: linear-gradient(135deg, 
+                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
+                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                    <span class="text-white fw-bold">{{ publisher.name|first|upper }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <h6 class="fw-bold mb-1">{{ publisher.name }}</h6>
+                                {% if publisher.website %}
+                                <a href="{{ publisher.website }}" target="_blank" class="text-muted small">
+                                    <i class="bi bi-globe me-1"></i>Website
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <p class="text-muted small mb-0">
+                                    {{ publisher.address|truncatechars:40|default:"Location not specified" }}
+                                </p>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ publisher.books.count }} books</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <a href="/catalog/publishers/{{ publisher.id }}/" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="/catalog/books/?publisher={{ publisher.id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-book"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if publishers and publishers.paginator.num_pages > 1 %}
+<div class="row mt-5">
+    <div class="col-12">
+        <nav aria-label="Publishers pagination">
+            <ul class="pagination justify-content-center">
+                {% if publishers.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ publishers.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </span>
+                </li>
+                {% endif %}
+                
+                {% for num in publishers.paginator.page_range %}
+                    {% if publishers.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > publishers.number|add:"-3" and num < publishers.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if publishers.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ publishers.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                Page {{ publishers.number }} of {{ publishers.paginator.num_pages }}
+            </small>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Publishers -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">Featured Publishers</h3>
+                <p class="text-muted mb-0 small">Leading publishers in our collection</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for publisher in featured_publishers|slice:":4" %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-publisher-card text-center">
+                            <div class="featured-logo mb-3 mx-auto">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px; background: linear-gradient(135deg, 
+                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
+                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                    <span class="text-white fs-1 fw-bold">{{ publisher.name|first|upper }}</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ publisher.name|truncatechars:25 }}</h5>
+                            <p class="text-muted small mb-3">
+                                {{ publisher.address|truncatechars:40|default:"International publisher" }}
+                            </p>
+                            <div class="mb-3">
+                                <span class="badge bg-primary">{{ publisher.books.count }} books</span>
+                            </div>
+                            <a href="/catalog/publishers/{{ publisher.id }}/" class="btn btn-sm btn-outline-primary">
+                                View Publisher
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <!-- Default Featured Publishers -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-publisher-card text-center">
+                            <div class="featured-logo mb-3 mx-auto">
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px;">
+                                    <span class="text-white fs-1 fw-bold">O</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Oxford University Press</h5>
+                            <p class="text-muted small mb-3">Oxford, United Kingdom</p>
+                            <div class="mb-3">
+                                <span class="badge bg-primary">2,500+ books</span>
+                            </div>
+                            <a href="/catalog/books/?publisher=oxford" class="btn btn-sm btn-outline-primary">
+                                View Books
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-publisher-card text-center">
+                            <div class="featured-logo mb-3 mx-auto">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px;">
+                                    <span class="text-white fs-1 fw-bold">C</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Cambridge University Press</h5>
+                            <p class="text-muted small mb-3">Cambridge, United Kingdom</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success">2,000+ books</span>
+                            </div>
+                            <a href="/catalog/books/?publisher=cambridge" class="btn btn-sm btn-outline-primary">
+                                View Books
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-publisher-card text-center">
+                            <div class="featured-logo mb-3 mx-auto">
+                                <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px;">
+                                    <span class="text-white fs-1 fw-bold">P</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Penguin Random House</h5>
+                            <p class="text-muted small mb-3">New York, USA</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning">1,800+ books</span>
+                            </div>
+                            <a href="/catalog/books/?publisher=penguin" class="btn btn-sm btn-outline-primary">
+                                View Books
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-publisher-card text-center">
+                            <div class="featured-logo mb-3 mx-auto">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center"
+                                     style="width: 120px; height: 120px;">
+                                    <span class="text-white fs-1 fw-bold">H</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">HarperCollins</h5>
+                            <p class="text-muted small mb-3">New York, USA</p>
+                            <div class="mb-3">
+                                <span class="badge bg-info">1,500+ books</span>
+                            </div>
+                            <a href="/catalog/books/?publisher=harpercollins" class="btn btn-sm btn-outline-primary">
+                                View Books
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats & Information -->
+<div class="row mt-5">
+    <div class="col-lg-8 mb-4 mb-lg-0">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4">Publisher Statistics</h4>
+                <div class="row text-center">
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-circle mx-auto mb-3">
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-building text-white fs-3"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold text-primary">{{ total_publishers|default:"5,000+" }}</h3>
+                        <p class="text-muted mb-0">Total Publishers</p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-circle mx-auto mb-3">
+                            <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-book text-white fs-3"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold text-success">{{ total_books|default:"50,000+" }}</h3>
+                        <p class="text-muted mb-0">Total Books</p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-circle mx-auto mb-3">
+                            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center"
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-graph-up text-white fs-3"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold text-warning">{{ avg_books_per_publisher|default:"10" }}</h3>
+                        <p class="text-muted mb-0">Avg Books per Publisher</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-3">Top Publishers by Book Count</h6>
+                    <div class="progress-stats">
+                        <div class="progress-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="small">Oxford University Press</span>
+                                <span class="small fw-bold">2,500 books</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="small">Cambridge University Press</span>
+                                <span class="small fw-bold">2,000 books</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="small">Penguin Random House</span>
+                                <span class="small fw-bold">1,800 books</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: 65%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4">Browse by Region</h4>
+                <div class="region-links">
+                    <a href="/catalog/publishers/?region=north_america" class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe-americas text-primary me-3"></i>
+                            <span>North America</span>
+                        </div>
+                        <span class="badge bg-primary">1,800+</span>
+                    </a>
+                    <a href="/catalog/publishers/?region=europe" class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe-europe-africa text-success me-3"></i>
+                            <span>Europe</span>
+                        </div>
+                        <span class="badge bg-success">2,000+</span>
+                    </a>
+                    <a href="/catalog/publishers/?region=asia" class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe-asia-australia text-warning me-3"></i>
+                            <span>Asia</span>
+                        </div>
+                        <span class="badge bg-warning">800+</span>
+                    </a>
+                    <a href="/catalog/publishers/?region=africa" class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe-central-south-asia text-info me-3"></i>
+                            <span>Africa</span>
+                        </div>
+                        <span class="badge bg-info">300+</span>
+                    </a>
+                    <a href="/catalog/publishers/?region=australia" class="d-flex align-items-center justify-content-between py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe2 text-danger me-3"></i>
+                            <span>Australia</span>
+                        </div>
+                        <span class="badge bg-danger">100+</span>
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <a href="/catalog/books/" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-book me-2"></i>Browse All Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Help -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 bg-light">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-2">Looking for a Specific Publisher?</h5>
+                        <p class="text-muted mb-0">
+                            Can't find the publisher you're looking for? Our librarians can help you locate publishers or suggest alternatives.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a href="/accounts/contact/" class="btn btn-primary me-2">
+                            <i class="bi bi-envelope me-1"></i>Contact Librarian
+                        </a>
+                        <a href="/accounts/staff_directory/" class="btn btn-outline-primary">
+                            <i class="bi bi-people me-1"></i>Staff Directory
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Publisher List Specific Styles */
+    .search-form .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 31, 63, 0.1);
+    }
+    
+    .search-form .form-control {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .search-form .btn {
+        padding: 1rem 2rem;
+    }
+    
+    .filter-select {
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .filter-select:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
+    
+    /* Alphabet Navigation */
+    .alphabet-nav .btn {
+        min-width: 40px;
+        padding: 0.25rem 0;
+        font-weight: 600;
+    }
+    
+    .alphabet-nav .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Publisher Card Styles */
+    .publisher-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .publisher-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(0, 31, 63, 0.15) !important;
+        border-color: var(--accent-blue);
+    }
+    
+    .logo-placeholder {
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .publisher-card:hover .logo-placeholder {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Publisher Info */
+    .publisher-info h5 a {
+        transition: color 0.2s ease;
+    }
+    
+    .publisher-card:hover .publisher-info h5 a {
+        color: var(--accent-blue) !important;
+    }
+    
+    /* List View Styles */
+    .publisher-list-row {
+        transition: all 0.2s ease;
+    }
+    
+    .publisher-list-row:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .list-logo {
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .publisher-list-row:hover .list-logo {
+        transform: scale(1.1);
+    }
+    
+    /* View Toggle */
+    .view-content {
+        transition: opacity 0.3s ease;
+    }
+    
+    .btn-group .btn {
+        padding: 0.5rem 1rem;
+    }
+    
+    .btn-group .btn.active {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+    }
+    
+    /* Featured Publishers */
+    .featured-publisher-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: var(--light-text);
+        transition: all 0.3s ease;
+    }
+    
+    .featured-publisher-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .featured-logo {
+        transition: all 0.3s ease;
+    }
+    
+    .featured-publisher-card:hover .featured-logo {
+        transform: scale(1.05);
+    }
+    
+    /* Stats */
+    .stat-circle {
+        transition: all 0.3s ease;
+    }
+    
+    .stat-circle:hover {
+        transform: scale(1.1);
+    }
+    
+    .progress-stats .progress-bar {
+        border-radius: 4px;
+    }
+    
+    .progress-item {
+        transition: opacity 0.2s ease;
+    }
+    
+    .progress-item:hover {
+        opacity: 0.9;
+    }
+    
+    /* Region Links */
+    .region-links a {
+        color: var(--dark-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .region-links a:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin-left: -1rem;
+        margin-right: -1rem;
+    }
+    
+    .region-links a:hover .badge {
+        transform: scale(1.1);
+    }
+    
+    /* Active Filters */
+    .badge a {
+        text-decoration: none;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    
+    .badge a:hover {
+        opacity: 1;
+    }
+    
+    /* Pagination */
+    .page-link {
+        border-radius: 6px;
+        margin: 0 3px;
+        border: none;
+        color: var(--dark-text);
+        font-weight: 500;
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+    }
+    
+    .page-link:hover {
+        background-color: var(--light-blue);
+        color: var(--dark-text);
+    }
+    
+    /* Table Styles */
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: var(--primary-blue);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .search-form .input-group {
+            flex-direction: column;
+        }
+        
+        .search-form .form-control {
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: none;
+        }
+        
+        .search-form .btn {
+            border-radius: 0 0 12px 12px;
+            width: 100%;
+        }
+        
+        .filter-select {
+            margin-bottom: 0.5rem;
+        }
+        
+        .alphabet-nav .btn {
+            min-width: 35px;
+            padding: 0.25rem;
+            font-size: 0.85rem;
+        }
+        
+        .publisher-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .featured-publisher-card {
+            padding: 1rem;
+        }
+        
+        .featured-logo {
+            width: 80px !important;
+            height: 80px !important;
+        }
+        
+        .featured-logo span {
+            font-size: 1.5rem !important;
+        }
+    }
+    
+    /* Loading Animation */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View Toggle Functionality
+        const viewGridBtn = document.getElementById('viewGrid');
+        const viewListBtn = document.getElementById('viewList');
+        const publishersGrid = document.getElementById('publishersGrid');
+        const publishersList = document.getElementById('publishersList');
+        
+        viewGridBtn.addEventListener('click', () => {
+            viewGridBtn.classList.add('active');
+            viewListBtn.classList.remove('active');
+            publishersGrid.classList.remove('d-none');
+            publishersList.classList.add('d-none');
+            
+            // Save preference to localStorage
+            localStorage.setItem('publisherViewPreference', 'grid');
+        });
+        
+        viewListBtn.addEventListener('click', () => {
+            viewListBtn.classList.add('active');
+            viewGridBtn.classList.remove('active');
+            publishersList.classList.remove('d-none');
+            publishersGrid.classList.add('d-none');
+            
+            // Save preference to localStorage
+            localStorage.setItem('publisherViewPreference', 'list');
+        });
+        
+        // Load saved view preference
+        const savedView = localStorage.getItem('publisherViewPreference');
+        if (savedView === 'list') {
+            viewListBtn.click();
+        }
+        
+        // Filter Update Function
+        window.updateFilter = function(selectElement) {
+            const params = new URLSearchParams(window.location.search);
+            const name = selectElement.name;
+            const value = selectElement.value;
+            
+            if (value) {
+                params.set(name, value);
+            } else {
+                params.delete(name);
+            }
+            
+            // Update page to 1 when changing filters
+            params.set('page', '1');
+            
+            // Show loading state
+            const container = document.querySelector('.view-content:not(.d-none)');
+            if (container) {
+                container.classList.add('loading');
+            }
+            
+            // Navigate to new URL
+            window.location.href = window.location.pathname + '?' + params.toString();
+        };
+        
+        // Publisher Card Hover Effects
+        const publisherCards = document.querySelectorAll('.publisher-card');
+        publisherCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const logo = this.querySelector('.logo-placeholder');
+                if (logo) {
+                    logo.style.transform = 'scale(1.1) rotate(5deg)';
+                }
+                
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'translateY(-2px)';
+                });
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const logo = this.querySelector('.logo-placeholder');
+                if (logo) {
+                    logo.style.transform = 'scale(1) rotate(0)';
+                }
+                
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'translateY(0)';
+                });
+            });
+        });
+        
+        // List View Row Hover Effects
+        const listRows = document.querySelectorAll('.publisher-list-row');
+        listRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                const logo = this.querySelector('.list-logo');
+                if (logo) {
+                    logo.style.transform = 'scale(1.1)';
+                }
+                
+                const actions = this.querySelectorAll('.btn');
+                actions.forEach(btn => {
+                    btn.style.transform = 'scale(1.05)';
+                });
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                const logo = this.querySelector('.list-logo');
+                if (logo) {
+                    logo.style.transform = 'scale(1)';
+                }
+                
+                const actions = this.querySelectorAll('.btn');
+                actions.forEach(btn => {
+                    btn.style.transform = 'scale(1)';
+                });
+            });
+        });
+        
+        // Featured Publisher Card Effects
+        const featuredCards = document.querySelectorAll('.featured-publisher-card');
+        featuredCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const logo = this.querySelector('.featured-logo');
+                if (logo) {
+                    logo.style.transform = 'scale(1.05)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const logo = this.querySelector('.featured-logo');
+                if (logo) {
+                    logo.style.transform = 'scale(1)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Alphabet Navigation Click Effects
+        const alphabetButtons = document.querySelectorAll('.alphabet-nav .btn');
+        alphabetButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                alphabetButtons.forEach(b => b.classList.remove('active', 'btn-primary'));
+                alphabetButtons.forEach(b => b.classList.add('btn-outline-primary'));
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary', 'active');
+                
+                // Add click animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+        
+        // Region Links Hover Effects
+        const regionLinks = document.querySelectorAll('.region-links a');
+        regionLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('i');
+                const badge = this.querySelector('.badge');
+                
+                if (icon) {
+                    icon.style.transform = 'translateX(5px)';
+                }
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('i');
+                const badge = this.querySelector('.badge');
+                
+                if (icon) {
+                    icon.style.transform = 'translateX(0)';
+                }
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Search Suggestions (Simulated)
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                if (query.length > 2) {
+                    // In a real implementation, fetch suggestions from API
+                    console.log('Searching for:', query);
+                    
+                    // Simulate suggestions for common publisher names
+                    if (query.toLowerCase().includes('oxford')) {
+                        showSearchSuggestions(['Oxford University Press', 'Oxford Press', 'Oxford publications']);
+                    }
+                }
+            });
+            
+            searchInput.addEventListener('focus', function() {
+                this.parentElement.parentElement.classList.add('focused');
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                this.parentElement.parentElement.classList.remove('focused');
+            });
+        }
+        
+        function showSearchSuggestions(suggestions) {
+            // Remove existing suggestions
+            const existingSuggestions = document.querySelector('.search-suggestions');
+            if (existingSuggestions) {
+                existingSuggestions.remove();
+            }
+            
+            if (suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'search-suggestions card border-0 shadow-lg position-absolute w-100 mt-1';
+                suggestionsDiv.style.zIndex = '1000';
+                
+                let html = '<div class="card-body p-2">';
+                suggestions.forEach(suggestion => {
+                    html += `
+                        <a href="/catalog/publishers/?q=${encodeURIComponent(suggestion)}" 
+                           class="d-block p-2 text-decoration-none text-dark hover-bg">
+                            <i class="bi bi-building me-2"></i>${suggestion}
+                        </a>
+                    `;
+                });
+                html += '</div>';
+                
+                suggestionsDiv.innerHTML = html;
+                document.querySelector('.search-form').appendChild(suggestionsDiv);
+                
+                // Add hover effect to suggestions
+                suggestionsDiv.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('mouseenter', () => {
+                        link.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+                    });
+                    link.addEventListener('mouseleave', () => {
+                        link.style.backgroundColor = 'transparent';
+                    });
+                });
+                
+                // Remove suggestions when clicking outside
+                document.addEventListener('click', function removeSuggestions(e) {
+                    if (!searchInput.closest('.search-form').contains(e.target)) {
+                        suggestionsDiv.remove();
+                        document.removeEventListener('click', removeSuggestions);
+                    }
+                });
+            }
+        }
+        
+        // Quick Stats Animation
+        const statNumbers = document.querySelectorAll('.fw-bold.text-primary, .fw-bold.text-success, .fw-bold.text-warning');
+        statNumbers.forEach(stat => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add animation class
+                        entry.target.classList.add('animate__animated', 'animate__pulse');
+                        
+                        // Animate counting if it's a number
+                        const text = entry.target.textContent;
+                        if (text.includes('+')) {
+                            const number = parseInt(text.replace('+', ''));
+                            let current = 0;
+                            const increment = number / 20;
+                            
+                            const updateCounter = () => {
+                                if (current < number) {
+                                    current += increment;
+                                    entry.target.textContent = Math.ceil(current).toLocaleString() + '+';
+                                    requestAnimationFrame(updateCounter);
+                                } else {
+                                    entry.target.textContent = text;
+                                }
+                            };
+                            
+                            updateCounter();
+                        }
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(stat);
+        });
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1060';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3000
+            });
+            
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + F to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                if (searchInput) searchInput.focus();
+            }
+            
+            // G for grid view, L for list view
+            if (e.key === 'g' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                viewGridBtn.click();
+            }
+            if (e.key === 'l' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                viewListBtn.click();
+            }
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Show loading animation on filter change
+        const filterSelects = document.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                const viewContent = document.querySelector('.view-content:not(.d-none)');
+                if (viewContent) {
+                    viewContent.classList.add('loading');
+                }
+            });
+        });
+        
+        // Infinite scroll simulation
+        const lastPublisherCard = publisherCards[publisherCards.length - 1];
+        if (lastPublisherCard) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Simulate loading more publishers
+                        console.log('Loading more publishers...');
+                        showToast('Loading more publishers...', 'info');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(lastPublisherCard);
+        }
+        
+        // Quick View Books Modal
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.view-books-quick')) {
+                e.preventDefault();
+                const publisherId = e.target.closest('.view-books-quick').dataset.publisherId;
+                const publisherName = e.target.closest('.view-books-quick').dataset.publisherName;
+                
+                // Create and show modal
+                const modal = new bootstrap.Modal(document.createElement('div'));
+                const modalElement = document.createElement('div');
+                modalElement.className = 'modal fade';
+                modalElement.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold">Books by ${publisherName}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading books...</span>
+                                    </div>
+                                    <p class="mt-3">Loading books from ${publisherName}...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalElement);
+                const bsModal = new bootstrap.Modal(modalElement);
+                bsModal.show();
+                
+                // Simulate loading books (in real app, fetch from API)
+                setTimeout(() => {
+                    modalElement.querySelector('.modal-body').innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            In a real application, this would show books from ${publisherName}
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="/catalog/books/?publisher=${publisherId}" class="btn btn-primary">
+                                View All Books by ${publisherName}
+                            </a>
+                        </div>
+                    `;
+                }, 1000);
+                
+                // Remove from DOM after hiding
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalElement);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

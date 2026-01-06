@@ -1,0 +1,1165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Virtual Tour - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Home
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Virtual Tour</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-camera-video fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Virtual Tour</h1>
+                <p class="lead text-muted">Explore Ramat Library's facilities from anywhere in the world</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Virtual Tour Page Content -->
+<div class="virtual-tour-page">
+    <div class="container-fluid">
+        <!-- Tour Introduction -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5 text-center">
+                        <div class="mb-4">
+                            <div class="tour-icon mx-auto mb-4" style="width: 100px; height: 100px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-360 text-white fs-1"></i>
+                            </div>
+                            <h2 class="fw-bold mb-3">Welcome to the Virtual Tour</h2>
+                            <p class="lead text-muted mb-4">
+                                Experience our state-of-the-art facilities through this interactive virtual tour. 
+                                Navigate through different library spaces, explore collections, and discover services 
+                                available to our academic community.
+                            </p>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Interactive 360° Views</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Audio Descriptions</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Mobile Friendly</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                <div>
+                                    <strong>Tip:</strong> Click and drag to look around in 360° views. Use the navigation 
+                                    arrows or click on hotspots to move between locations.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tour Viewer -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg overflow-hidden">
+                    <div class="card-header bg-gradient text-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <i class="bi bi-compass me-2"></i>Interactive Tour
+                            </h3>
+                            <div class="d-flex align-items-center">
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" id="audioToggle" checked>
+                                    <label class="form-check-label text-white" for="audioToggle">
+                                        <i class="bi bi-volume-up me-1"></i>Audio Guide
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoRotateToggle">
+                                    <label class="form-check-label text-white" for="autoRotateToggle">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Auto Rotate
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Tour Viewer Container -->
+                        <div class="tour-viewer" style="height: 600px; position: relative;">
+                            <!-- 360 Viewer Placeholder -->
+                            <div id="tourViewer" class="w-100 h-100 d-flex align-items-center justify-content-center" 
+                                 style="background: linear-gradient(rgba(10, 36, 114, 0.1), rgba(10, 36, 114, 0.2)), url('{% static "images/frontview.png" %}') center/cover;">
+                                <div class="text-center text-white p-4 rounded" style="background: rgba(0, 0, 0, 0.7); max-width: 500px;">
+                                    <i class="bi bi-camera-video-fill fs-1 mb-3"></i>
+                                    <h4>Interactive Tour Viewer</h4>
+                                    <p class="mb-4">Click the locations below to explore different library spaces</p>
+                                    <button class="btn btn-primary" onclick="startTour()">
+                                        <i class="bi bi-play-circle me-2"></i>Start Guided Tour
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation Controls -->
+                            <div class="tour-controls position-absolute" style="top: 20px; right: 20px;">
+                                <div class="btn-group-vertical shadow">
+                                    <button class="btn btn-light" onclick="zoomIn()" title="Zoom In">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </button>
+                                    <button class="btn btn-light" onclick="zoomOut()" title="Zoom Out">
+                                        <i class="bi bi-zoom-out"></i>
+                                    </button>
+                                    <button class="btn btn-light" onclick="resetView()" title="Reset View">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                    <button class="btn btn-light" onclick="fullscreen()" title="Fullscreen">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Hotspot Indicators -->
+                            <div class="hotspots position-absolute w-100 h-100">
+                                <div class="hotspot" style="top: 40%; left: 30%;" data-target="entrance">
+                                    <div class="hotspot-marker">
+                                        <i class="bi bi-door-open"></i>
+                                        <div class="hotspot-label">Main Entrance</div>
+                                    </div>
+                                </div>
+                                <div class="hotspot" style="top: 60%; left: 50%;" data-target="reading-room">
+                                    <div class="hotspot-marker">
+                                        <i class="bi bi-book"></i>
+                                        <div class="hotspot-label">Reading Room</div>
+                                    </div>
+                                </div>
+                                <div class="hotspot" style="top: 30%; left: 70%;" data-target="digital-lab">
+                                    <div class="hotspot-marker">
+                                        <i class="bi bi-laptop"></i>
+                                        <div class="hotspot-label">Digital Lab</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tour Progress -->
+                        <div class="tour-progress p-3 border-top">
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-3" style="height: 10px;">
+                                    <div class="progress-bar bg-gradient" role="progressbar" style="width: 25%;" 
+                                         aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="text-muted small">
+                                    <span id="currentLocation">Main Entrance</span> • 
+                                    <span id="tourStep">1 of 8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tour Locations Grid -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-light py-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-map me-2"></i>Explore Library Spaces
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Main Entrance -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="entrance">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/frontview.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Main Entrance"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-primary">1</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Main Entrance</h6>
+                                            <p class="small text-muted mb-3">
+                                                Grand entrance to Ramat Library with security checkpoints and information desk.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-primary w-100 visit-location">
+                                                <i class="bi bi-camera me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reading Room -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="reading-room">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/students_reading.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Reading Room"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-success">2</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Reading Room</h6>
+                                            <p class="small text-muted mb-3">
+                                                Quiet study area with comfortable seating, natural lighting, and reference materials.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-success w-100 visit-location">
+                                                <i class="bi bi-book me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Digital Lab -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="digital-lab">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/ramat_ai5.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Digital Lab"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-warning">3</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Digital Lab</h6>
+                                            <p class="small text-muted mb-3">
+                                                Computer workstations with academic software and high-speed internet access.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-warning w-100 visit-location">
+                                                <i class="bi bi-laptop me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Book Stacks -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="book-stacks">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/librarybooks.jfif' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Book Stacks"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-info">4</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Book Stacks</h6>
+                                            <p class="small text-muted mb-3">
+                                                Organized collection of academic books across all disciplines and subjects.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-info w-100 visit-location">
+                                                <i class="bi bi-bookshelf me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Circulation Desk -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="circulation">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/staff.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Circulation Desk"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-danger">5</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Circulation Desk</h6>
+                                            <p class="small text-muted mb-3">
+                                                Borrow and return books, get assistance from library staff, and manage your account.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-danger w-100 visit-location">
+                                                <i class="bi bi-person-check me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Group Study Rooms -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="group-study">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/ramat_a4i.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Group Study Rooms"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-purple">6</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Group Study Rooms</h6>
+                                            <p class="small text-muted mb-3">
+                                                Bookable rooms for collaborative work with whiteboards and presentation equipment.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-purple w-100 visit-location">
+                                                <i class="bi bi-people me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Special Collections -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="special-collections">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/ramat_ai2.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Special Collections"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-brown">7</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Special Collections</h6>
+                                            <p class="small text-muted mb-3">
+                                                Rare books, manuscripts, and archival materials with controlled access.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-brown w-100 visit-location">
+                                                <i class="bi bi-archive me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Auditorium -->
+                            <div class="col-lg-3 col-md-6">
+                                <div class="location-card" data-target="auditorium">
+                                    <div class="card h-100 border-0 shadow-hover">
+                                        <div class="position-relative">
+                                            <img src="{% static 'images/ramat_ai3.png' %}" 
+                                                 class="card-img-top" 
+                                                 alt="Auditorium"
+                                                 style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 end-0 m-3">
+                                                <span class="badge bg-teal">8</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold mb-2">Auditorium</h6>
+                                            <p class="small text-muted mb-3">
+                                                Event space for workshops, seminars, and academic conferences.
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-teal w-100 visit-location">
+                                                <i class="bi bi-mic me-1"></i> Visit Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accessibility Information -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-universal-access me-2"></i>Accessibility Features
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Wheelchair Access</h6>
+                                        <p class="small text-muted mb-0">Ramps and elevators on all floors</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Braille Signage</h6>
+                                        <p class="small text-muted mb-0">Tactile signs throughout the library</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Assistive Technology</h6>
+                                        <p class="small text-muted mb-0">Screen readers and magnifiers available</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Accessible Restrooms</h6>
+                                        <p class="small text-muted mb-0">On every floor with proper facilities</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="/accounts/contact/" class="btn btn-outline-primary">
+                                <i class="bi bi-question-circle me-2"></i>Request Accessibility Assistance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Visitor Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="visitorInfoAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hoursCollapse">
+                                        <i class="bi bi-clock me-2"></i>Opening Hours
+                                    </button>
+                                </h2>
+                                <div id="hoursCollapse" class="accordion-collapse collapse show" data-bs-parent="#visitorInfoAccordion">
+                                    <div class="accordion-body">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th>Monday - Friday</th>
+                                                <td>8:00 AM - 10:00 PM</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Saturday</th>
+                                                <td>9:00 AM - 6:00 PM</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Sunday</th>
+                                                <td>12:00 PM - 8:00 PM</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Exam Period</th>
+                                                <td>24/7 Access</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rulesCollapse">
+                                        <i class="bi bi-list-check me-2"></i>Library Rules
+                                    </button>
+                                </h2>
+                                <div id="rulesCollapse" class="accordion-collapse collapse" data-bs-parent="#visitorInfoAccordion">
+                                    <div class="accordion-body">
+                                        <ul class="small mb-0">
+                                            <li>ID card required for entry</li>
+                                            <li>Silence must be maintained in reading areas</li>
+                                            <li>No food or drinks except in designated areas</li>
+                                            <li>Mobile phones must be on silent mode</li>
+                                            <li>Personal belongings must be kept in lockers</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#servicesCollapse">
+                                        <i class="bi bi-gear me-2"></i>Available Services
+                                    </button>
+                                </h2>
+                                <div id="servicesCollapse" class="accordion-collapse collapse" data-bs-parent="#visitorInfoAccordion">
+                                    <div class="accordion-body">
+                                        <ul class="small mb-0">
+                                            <li>Book borrowing and returns</li>
+                                            <li>Reference and research assistance</li>
+                                            <li>Interlibrary loan services</li>
+                                            <li>Printing and photocopying</li>
+                                            <li>Computer and internet access</li>
+                                            <li>Study room bookings</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="/events/" class="btn btn-outline-primary">
+                                <i class="bi bi-calendar-event me-2"></i>View Library Events
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Virtual Tour Specific Styles */
+    .virtual-tour-page {
+        padding-bottom: 4rem;
+    }
+    
+    .tour-icon {
+        transition: transform 0.5s ease;
+    }
+    
+    .tour-icon:hover {
+        transform: rotate(360deg);
+    }
+    
+    .tour-viewer {
+        background: #000;
+        overflow: hidden;
+        border-radius: 4px 4px 0 0;
+    }
+    
+    .hotspot {
+        position: absolute;
+        cursor: pointer;
+        z-index: 10;
+        animation: pulse 2s infinite;
+    }
+    
+    .hotspot-marker {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-blue);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .hotspot-marker:hover {
+        transform: scale(1.2);
+        background: white;
+        color: var(--accent-blue);
+    }
+    
+    .hotspot-label {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .hotspot:hover .hotspot-label {
+        opacity: 1;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(58, 134, 255, 0.7);
+        }
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 10px rgba(58, 134, 255, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(58, 134, 255, 0);
+        }
+    }
+    
+    .tour-controls .btn {
+        border-radius: 0;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .tour-controls .btn:first-child {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+    
+    .tour-controls .btn:last-child {
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .location-card {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .location-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .location-card .badge {
+        font-size: 0.8rem;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .bg-purple {
+        background-color: #6f42c1 !important;
+        color: white;
+    }
+    
+    .btn-outline-purple {
+        color: #6f42c1;
+        border-color: #6f42c1;
+    }
+    
+    .btn-outline-purple:hover {
+        background-color: #6f42c1;
+        color: white;
+    }
+    
+    .bg-brown {
+        background-color: #8B4513 !important;
+        color: white;
+    }
+    
+    .btn-outline-brown {
+        color: #8B4513;
+        border-color: #8B4513;
+    }
+    
+    .btn-outline-brown:hover {
+        background-color: #8B4513;
+        color: white;
+    }
+    
+    .bg-teal {
+        background-color: #20c997 !important;
+        color: white;
+    }
+    
+    .btn-outline-teal {
+        color: #20c997;
+        border-color: #20c997;
+    }
+    
+    .btn-outline-teal:hover {
+        background-color: #20c997;
+        color: white;
+    }
+    
+    .shadow-hover {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .shadow-hover:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Accordion Customization */
+    .accordion-button {
+        font-weight: 600;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: var(--light-blue);
+        color: var(--primary-blue);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .tour-viewer {
+            height: 400px !important;
+        }
+        
+        .tour-controls {
+            top: 10px !important;
+            right: 10px !important;
+        }
+        
+        .tour-controls .btn {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        
+        .hotspot-marker {
+            width: 45px !important;
+            height: 45px !important;
+            font-size: 1.2rem !important;
+        }
+        
+        .location-card .card-body {
+            padding: 1rem !important;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .tour-viewer,
+        .tour-controls,
+        .hotspots,
+        .visit-location,
+        .form-check {
+            display: none !important;
+        }
+        
+        .location-card {
+            break-inside: avoid;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tour state management
+        const tourState = {
+            currentLocation: 'entrance',
+            currentStep: 1,
+            totalSteps: 8,
+            audioEnabled: true,
+            autoRotate: false,
+            zoomLevel: 1
+        };
+        
+        // Tour locations data
+        const tourLocations = {
+            'entrance': {
+                title: 'Main Entrance',
+                step: 1,
+                image: "{% static 'images/frontview.png' %}",
+                description: 'The grand entrance to Ramat Library features security checkpoints, information desk, and access control systems.'
+            },
+            'reading-room': {
+                title: 'Reading Room',
+                step: 2,
+                image: "{% static 'images/students_reading.png' %}",
+                description: 'Quiet study area with comfortable seating, natural lighting, and extensive reference materials.'
+            },
+            'digital-lab': {
+                title: 'Digital Lab',
+                step: 3,
+                image: "{% static 'images/ramat_ai5.png' %}",
+                description: 'Computer workstations equipped with academic software, high-speed internet, and printing facilities.'
+            },
+            'book-stacks': {
+                title: 'Book Stacks',
+                step: 4,
+                image: "{% static 'images/librarybooks.jfif' %}",
+                description: 'Organized collection of over 50,000 academic books across all disciplines.'
+            },
+            'circulation': {
+                title: 'Circulation Desk',
+                step: 5,
+                image: "{% static 'images/staff.png' %}",
+                description: 'Borrow and return books, get assistance from library staff, and manage your account.'
+            },
+            'group-study': {
+                title: 'Group Study Rooms',
+                step: 6,
+                image: "{% static 'images/ramat_a4i.png' %}",
+                description: 'Bookable rooms for collaborative work with whiteboards and presentation equipment.'
+            },
+            'special-collections': {
+                title: 'Special Collections',
+                step: 7,
+                image: "{% static 'images/ramat_ai2.png' %}",
+                description: 'Rare books, manuscripts, and archival materials with controlled access.'
+            },
+            'auditorium': {
+                title: 'Auditorium',
+                step: 8,
+                image: "{% static 'images/ramat_ai3.png' %}",
+                description: 'Event space for workshops, seminars, and academic conferences with seating for 200 people.'
+            }
+        };
+        
+        // Initialize tour
+        updateTourDisplay();
+        
+        // Toggle audio guide
+        const audioToggle = document.getElementById('audioToggle');
+        if (audioToggle) {
+            audioToggle.addEventListener('change', function() {
+                tourState.audioEnabled = this.checked;
+                if (tourState.audioEnabled) {
+                    playLocationAudio(tourState.currentLocation);
+                }
+            });
+        }
+        
+        // Toggle auto rotate
+        const autoRotateToggle = document.getElementById('autoRotateToggle');
+        if (autoRotateToggle) {
+            autoRotateToggle.addEventListener('change', function() {
+                tourState.autoRotate = this.checked;
+                toggleAutoRotate();
+            });
+        }
+        
+        // Hotspot click handlers
+        document.querySelectorAll('.hotspot').forEach(hotspot => {
+            hotspot.addEventListener('click', function() {
+                const target = this.dataset.target;
+                navigateToLocation(target);
+            });
+        });
+        
+        // Location card click handlers
+        document.querySelectorAll('.location-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const target = this.dataset.target;
+                navigateToLocation(target);
+            });
+        });
+        
+        // Visit buttons
+        document.querySelectorAll('.visit-location').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const card = this.closest('.location-card');
+                const target = card.dataset.target;
+                navigateToLocation(target);
+            });
+        });
+        
+        // Tour navigation functions
+        function navigateToLocation(locationId) {
+            if (tourLocations[locationId]) {
+                tourState.currentLocation = locationId;
+                tourState.currentStep = tourLocations[locationId].step;
+                updateTourDisplay();
+                
+                // Play audio if enabled
+                if (tourState.audioEnabled) {
+                    playLocationAudio(locationId);
+                }
+                
+                // Scroll to viewer
+                document.querySelector('.tour-viewer').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }
+        }
+        
+        function updateTourDisplay() {
+            const location = tourLocations[tourState.currentLocation];
+            
+            // Update viewer background
+            const viewer = document.getElementById('tourViewer');
+            if (viewer && location) {
+                viewer.style.backgroundImage = `linear-gradient(rgba(10, 36, 114, 0.1), rgba(10, 36, 114, 0.2)), url('${location.image}')`;
+            }
+            
+            // Update progress
+            const progressBar = document.querySelector('.progress-bar');
+            const currentLocationSpan = document.getElementById('currentLocation');
+            const tourStepSpan = document.getElementById('tourStep');
+            
+            if (progressBar) {
+                const progress = (tourState.currentStep / tourState.totalSteps) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressBar.setAttribute('aria-valuenow', progress);
+            }
+            
+            if (currentLocationSpan) {
+                currentLocationSpan.textContent = location ? location.title : '';
+            }
+            
+            if (tourStepSpan) {
+                tourStepSpan.textContent = `${tourState.currentStep} of ${tourState.totalSteps}`;
+            }
+            
+            // Highlight active location card
+            document.querySelectorAll('.location-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.target === tourState.currentLocation) {
+                    card.classList.add('active');
+                    card.querySelector('.card').style.border = '2px solid var(--accent-blue)';
+                } else {
+                    card.querySelector('.card').style.border = '';
+                }
+            });
+        }
+        
+        function playLocationAudio(locationId) {
+            // In a real implementation, this would play actual audio files
+            console.log(`Playing audio for ${locationId}`);
+            
+            // Show audio playing indicator
+            const audioIndicator = document.createElement('div');
+            audioIndicator.className = 'audio-indicator position-absolute top-0 start-0 m-3';
+            audioIndicator.innerHTML = `
+                <div class="d-flex align-items-center bg-success text-white px-3 py-2 rounded">
+                    <i class="bi bi-volume-up me-2"></i>
+                    <span>Audio Guide Playing...</span>
+                </div>
+            `;
+            
+            const viewer = document.querySelector('.tour-viewer');
+            const existingIndicator = viewer.querySelector('.audio-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            viewer.appendChild(audioIndicator);
+            
+            // Remove indicator after 3 seconds
+            setTimeout(() => {
+                if (audioIndicator.parentNode) {
+                    audioIndicator.remove();
+                }
+            }, 3000);
+        }
+        
+        function toggleAutoRotate() {
+            if (tourState.autoRotate) {
+                console.log('Auto-rotate enabled');
+                // In a real 360 viewer, this would start automatic rotation
+            } else {
+                console.log('Auto-rotate disabled');
+                // Stop rotation
+            }
+        }
+        
+        // Tour control functions
+        window.startTour = function() {
+            // Reset to beginning
+            tourState.currentStep = 1;
+            tourState.currentLocation = 'entrance';
+            updateTourDisplay();
+            
+            // Show tour guide
+            const tourViewer = document.getElementById('tourViewer');
+            tourViewer.innerHTML = `
+                <div class="tour-guide w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.8);">
+                    <div class="text-center text-white p-4" style="max-width: 600px;">
+                        <h3 class="mb-4">Guided Tour Started</h3>
+                        <p class="mb-4">Follow the hotspots or use the navigation below to explore the library.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button class="btn btn-outline-light" onclick="prevLocation()">
+                                <i class="bi bi-chevron-left me-2"></i>Previous
+                            </button>
+                            <button class="btn btn-primary" onclick="nextLocation()">
+                                Next <i class="bi bi-chevron-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Play welcome audio
+            if (tourState.audioEnabled) {
+                setTimeout(() => {
+                    playLocationAudio('entrance');
+                }, 500);
+            }
+        };
+        
+        window.nextLocation = function() {
+            if (tourState.currentStep < tourState.totalSteps) {
+                const nextStep = tourState.currentStep + 1;
+                const nextLocation = Object.keys(tourLocations).find(
+                    key => tourLocations[key].step === nextStep
+                );
+                if (nextLocation) {
+                    navigateToLocation(nextLocation);
+                }
+            }
+        };
+        
+        window.prevLocation = function() {
+            if (tourState.currentStep > 1) {
+                const prevStep = tourState.currentStep - 1;
+                const prevLocation = Object.keys(tourLocations).find(
+                    key => tourLocations[key].step === prevStep
+                );
+                if (prevLocation) {
+                    navigateToLocation(prevLocation);
+                }
+            }
+        };
+        
+        window.zoomIn = function() {
+            if (tourState.zoomLevel < 2) {
+                tourState.zoomLevel += 0.1;
+                updateZoom();
+            }
+        };
+        
+        window.zoomOut = function() {
+            if (tourState.zoomLevel > 0.5) {
+                tourState.zoomLevel -= 0.1;
+                updateZoom();
+            }
+        };
+        
+        window.resetView = function() {
+            tourState.zoomLevel = 1;
+            updateZoom();
+        };
+        
+        window.fullscreen = function() {
+            const viewer = document.querySelector('.tour-viewer');
+            if (viewer.requestFullscreen) {
+                viewer.requestFullscreen();
+            } else if (viewer.webkitRequestFullscreen) {
+                viewer.webkitRequestFullscreen();
+            } else if (viewer.msRequestFullscreen) {
+                viewer.msRequestFullscreen();
+            }
+        };
+        
+        function updateZoom() {
+            const viewer = document.getElementById('tourViewer');
+            if (viewer) {
+                viewer.style.transform = `scale(${tourState.zoomLevel})`;
+                viewer.style.transformOrigin = 'center center';
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                    e.preventDefault();
+                    nextLocation();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    prevLocation();
+                    break;
+                case '+':
+                case '=':
+                    e.preventDefault();
+                    zoomIn();
+                    break;
+                case '-':
+                    e.preventDefault();
+                    zoomOut();
+                    break;
+                case '0':
+                    e.preventDefault();
+                    resetView();
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    fullscreen();
+                    break;
+            }
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Auto-start tour for first-time visitors
+        const hasVisitedTour = localStorage.getItem('tourVisited');
+        if (!hasVisitedTour) {
+            setTimeout(() => {
+                if (confirm('Would you like to start the guided tour?')) {
+                    startTour();
+                }
+                localStorage.setItem('tourVisited', 'true');
+            }, 2000);
+        }
+        
+        // Print tour information
+        const printButton = document.querySelector('.btn-print');
+        if (printButton) {
+            printButton.addEventListener('click', function() {
+                window.print();
+            });
+        }
+    });
+    
+    // Fullscreen change event
+    document.addEventListener('fullscreenchange', function() {
+        const fullscreenBtn = document.querySelector('[onclick="fullscreen()"]');
+        if (fullscreenBtn) {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="bi bi-fullscreen-exit"></i>';
+                fullscreenBtn.setAttribute('title', 'Exit Fullscreen');
+            } else {
+                fullscreenBtn.innerHTML = '<i class="bi bi-arrows-fullscreen"></i>';
+                fullscreenBtn.setAttribute('title', 'Fullscreen');
+            }
+        }
+    });
+</script>
+{% endblock %}

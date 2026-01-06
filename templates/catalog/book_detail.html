@@ -1,0 +1,1211 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} - Library Catalog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item"><a href="/catalog/books/">Books</a></li>
+<li class="breadcrumb-item"><a href="/catalog/genres/{{ book.genre.id }}/">{{ book.genre.name }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ book.title|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ book.title }}</h1>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {% for author in book.authors.all %}
+                    <a href="/catalog/authors/{{ author.id }}/" class="badge bg-primary text-decoration-none">
+                        <i class="bi bi-person me-1"></i>{{ author.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="d-flex align-items-center text-muted">
+                    <i class="bi bi-building me-2"></i>
+                    <span class="me-4">{{ book.publisher.name }}</span>
+                    <i class="bi bi-calendar me-2"></i>
+                    <span>{{ book.publication_date|date:"F Y" }}</span>
+                </div>
+            </div>
+            <div class="mt-3 mt-md-0">
+                {% if user.is_staff %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" 
+                            data-bs-toggle="dropdown">
+                        <i class="bi bi-gear me-1"></i>Manage
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="/admin/catalog/book/{{ book.id }}/change/">
+                                <i class="bi bi-pencil me-2"></i>Edit Book
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/admin/catalog/bookcopy/add/?book={{ book.id }}">
+                                <i class="bi bi-plus-circle me-2"></i>Add Copy
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="/admin/catalog/book/{{ book.id }}/delete/">
+                                <i class="bi bi-trash me-2"></i>Delete Book
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Book Details Section -->
+<div class="row mb-5">
+    <!-- Book Cover & Actions -->
+    <div class="col-lg-4 mb-5 mb-lg-0">
+        <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
+            <div class="card-body p-4">
+                <!-- Book Cover -->
+                <div class="book-cover-container mb-4">
+                    <div class="book-cover-main position-relative rounded-4 overflow-hidden">
+                        <img src="images/librarybooks.jfif" alt="{{ book.title }}" 
+                             class="img-fluid w-100" style="height: 400px; object-fit: cover;">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            {% if book.publication_date.year >= 2023 %}
+                            <span class="badge bg-danger px-3 py-2 fs-6">NEW</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Availability Status -->
+                <div class="availability-card mb-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body p-4 text-center">
+                            {% if is_available %}
+                            <div class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                            </div>
+                            <h4 class="fw-bold text-success mb-2">Available</h4>
+                            <p class="text-muted mb-3">
+                                {{ available_copies }} of {{ total_copies }} copies available
+                            </p>
+                            {% if user.is_authenticated %}
+                            <a href="/circulation/reserve/{{ book.id }}/" 
+                               class="btn btn-primary btn-lg w-100 mb-2">
+                                <i class="bi bi-bookmark-plus me-2"></i>Reserve Now
+                            </a>
+                            {% else %}
+                            <a href="/accounts/login/?next=/catalog/books/{{ book.id }}/" 
+                               class="btn btn-primary btn-lg w-100 mb-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Reserve
+                            </a>
+                            {% endif %}
+                            {% else %}
+                            <div class="mb-3">
+                                <i class="bi bi-clock-history text-warning fs-1"></i>
+                            </div>
+                            <h4 class="fw-bold text-warning mb-2">Checked Out</h4>
+                            <p class="text-muted mb-3">
+                                All copies are currently checked out
+                            </p>
+                            {% if user.is_authenticated %}
+                            <button class="btn btn-warning btn-lg w-100 mb-2" 
+                                    data-bs-toggle="modal" data-bs-target="#waitlistModal">
+                                <i class="bi bi-bell me-2"></i>Join Waitlist
+                            </button>
+                            {% else %}
+                            <a href="/accounts/login/?next=/catalog/books/{{ book.id }}/" 
+                               class="btn btn-warning btn-lg w-100 mb-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login for Waitlist
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                            <small class="text-muted d-block">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Average wait time: 1-2 weeks
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions mb-4">
+                    <div class="d-grid gap-2">
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-outline-primary" id="addToFavorites">
+                            <i class="bi bi-heart me-2"></i>
+                            <span>Add to Favorites</span>
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-outline-primary" onclick="printBookDetails()">
+                            <i class="bi bi-printer me-2"></i>
+                            <span>Print Details</span>
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="shareBook()">
+                            <i class="bi bi-share me-2"></i>
+                            <span>Share Book</span>
+                        </button>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" 
+                                data-bs-target="#citationModal">
+                            <i class="bi bi-quote me-2"></i>
+                            <span>Get Citation</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Book Info Cards -->
+                <div class="book-info-cards">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-tag text-primary mb-2 d-block"></i>
+                                    <h6 class="fw-bold mb-1">{{ book.genre.name }}</h6>
+                                    <small class="text-muted">Genre</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-translate text-primary mb-2 d-block"></i>
+                                    <h6 class="fw-bold mb-1">{{ book.language }}</h6>
+                                    <small class="text-muted">Language</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-file-text text-primary mb-2 d-block"></i>
+                                    <h6 class="fw-bold mb-1">{{ book.pages }}</h6>
+                                    <small class="text-muted">Pages</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-book text-primary mb-2 d-block"></i>
+                                    <h6 class="fw-bold mb-1">{{ book.edition|default:"1st" }}</h6>
+                                    <small class="text-muted">Edition</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Book Details & Description -->
+    <div class="col-lg-8">
+        <!-- Description -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">Description</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="book-description">
+                    {{ book.description|linebreaks|default:"No description available for this book." }}
+                </div>
+                
+                {% if book.description|length > 500 %}
+                <button class="btn btn-link text-primary mt-3" id="readMoreBtn">
+                    Read More <i class="bi bi-chevron-down"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Book Details -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Book Details</h5>
+                        <div class="detail-list">
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-upc-scan text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">ISBN</small>
+                                        <span class="fw-bold">{{ book.isbn }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-date text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Publication Date</small>
+                                        <span class="fw-bold">{{ book.publication_date|date:"F j, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-building text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Publisher</small>
+                                        <span class="fw-bold">{{ book.publisher.name }}</span>
+                                        {% if book.publisher.website %}
+                                        <a href="{{ book.publisher.website }}" target="_blank" 
+                                           class="text-primary small ms-2">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-text text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Format</small>
+                                        <span class="fw-bold">Hardcover</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Library Information</h5>
+                        <div class="detail-list">
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-book text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Total Copies</small>
+                                        <span class="fw-bold">{{ total_copies }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Available Copies</small>
+                                        <span class="fw-bold text-success">{{ available_copies }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-clock-history text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Average Loan Period</small>
+                                        <span class="fw-bold">14 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt text-primary me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Location</small>
+                                        <span class="fw-bold">Main Library, Section {{ book.genre.name|slice:":3"|upper }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Author(s) Information -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">About the Author{% if book.authors.count > 1 %}s{% endif %}</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for author in book.authors.all %}
+                    <div class="col-md-{% if book.authors.count == 1 %}12{% else %}6{% endif %}">
+                        <div class="author-card">
+                            <div class="d-flex align-items-start">
+                                <div class="author-avatar me-3">
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                         style="width: 60px; height: 60px;">
+                                        <span class="text-white fs-5">{{ author.name|first|upper }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-2">
+                                        <a href="/catalog/authors/{{ author.id }}/" class="text-decoration-none">
+                                            {{ author.name }}
+                                        </a>
+                                    </h5>
+                                    {% if author.bio %}
+                                    <p class="text-muted mb-3">{{ author.bio|truncatechars:200 }}</p>
+                                    {% else %}
+                                    <p class="text-muted mb-3">Author biography not available.</p>
+                                    {% endif %}
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-light text-dark me-2">
+                                            {{ author.books.count }} books
+                                        </span>
+                                        <a href="/catalog/authors/{{ author.id }}/" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            View All Works
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-4">
+                            <i class="bi bi-person-x text-muted fs-1 mb-3"></i>
+                            <p class="text-muted">Author information not available.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copies Available -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                <h3 class="fw-bold mb-0">Available Copies</h3>
+                <span class="badge bg-primary">{{ available_copies }} Available</span>
+            </div>
+            <div class="card-body p-4">
+                {% if book.copies.exists %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Copy ID</th>
+                                <th scope="col">Condition</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for copy in book.copies.all|slice:":5" %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold">{{ copy.barcode }}</span>
+                                </td>
+                                <td>
+                                    {% if copy.condition == 'excellent' %}
+                                    <span class="badge bg-success">Excellent</span>
+                                    {% elif copy.condition == 'good' %}
+                                    <span class="badge bg-info">Good</span>
+                                    {% elif copy.condition == 'fair' %}
+                                    <span class="badge bg-warning">Fair</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Poor</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ copy.location }}</small>
+                                </td>
+                                <td>
+                                    {% if copy.status == 'available' %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Available
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-clock me-1"></i>Checked Out
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if copy.status == 'available' and user.is_authenticated %}
+                                    <a href="/circulation/reserve/{{ book.id }}/?copy={{ copy.id }}" 
+                                       class="btn btn-sm btn-primary">
+                                        Reserve This Copy
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        Not Available
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if book.copies.count > 5 %}
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" 
+                            data-bs-target="#copiesModal">
+                        View All {{ book.copies.count }} Copies
+                    </button>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-book text-muted fs-1 mb-3"></i>
+                    <h5 class="text-muted mb-3">No Copies Available</h5>
+                    <p class="text-muted">This book currently has no copies in our collection.</p>
+                    {% if user.is_staff %}
+                    <a href="/admin/catalog/bookcopy/add/?book={{ book.id }}" 
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add First Copy
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Similar Books -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">Similar Books</h3>
+                <p class="text-muted mb-0 small">Books in the same genre or by the same author</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for similar_book in similar_books|slice:":4" %}
+                    <div class="col-md-6 col-lg-3">
+                        <div class="similar-book-card">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="position-relative">
+                                    <img src="images/librarybooks.jfif" class="card-img-top" 
+                                         alt="{{ similar_book.title }}" 
+                                         style="height: 150px; object-fit: cover;">
+                                    {% if similar_book.is_available %}
+                                    <span class="position-absolute top-0 start-0 m-2 badge bg-success">
+                                        Available
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-2">{{ similar_book.title|truncatechars:40 }}</h6>
+                                    <p class="text-muted small mb-3">
+                                        {% for author in similar_book.authors.all|slice:":1" %}
+                                        {{ author.name }}
+                                        {% endfor %}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-light text-dark">{{ similar_book.genre.name }}</span>
+                                        <a href="/catalog/books/{{ similar_book.id }}/" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-4">
+                            <i class="bi bi-book text-muted fs-1 mb-3"></i>
+                            <p class="text-muted">No similar books found.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/catalog/genres/{{ book.genre.id }}/" class="btn btn-outline-primary">
+                        Browse More in {{ book.genre.name }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Waitlist Modal -->
+<div class="modal fade" id="waitlistModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Join Waitlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You'll be notified when <strong>{{ book.title }}</strong> becomes available.</p>
+                <div class="mb-3">
+                    <label class="form-label">Notification Method</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="emailNotify" checked>
+                        <label class="form-check-label" for="emailNotify">
+                            Email notification
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="smsNotify">
+                        <label class="form-check-label" for="smsNotify">
+                            SMS notification (recommended for faster updates)
+                        </label>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Current waitlist position: <strong>#{{ waitlist_position|default:"3" }}</strong><br>
+                    Estimated wait time: <strong>1-2 weeks</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="joinWaitlist()">
+                    Join Waitlist
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Copies Modal -->
+<div class="modal fade" id="copiesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">All Copies of "{{ book.title }}"</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Copy ID</th>
+                                <th>Condition</th>
+                                <th>Acquisition Date</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for copy in book.copies.all %}
+                            <tr>
+                                <td><strong>{{ copy.barcode }}</strong></td>
+                                <td>
+                                    {% if copy.condition == 'excellent' %}
+                                    <span class="badge bg-success">Excellent</span>
+                                    {% elif copy.condition == 'good' %}
+                                    <span class="badge bg-info">Good</span>
+                                    {% elif copy.condition == 'fair' %}
+                                    <span class="badge bg-warning">Fair</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Poor</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ copy.acquisition_date|date:"M d, Y" }}</td>
+                                <td>{{ copy.location }}</td>
+                                <td>
+                                    {% if copy.status == 'available' %}
+                                    <span class="badge bg-success">Available</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Checked Out</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if copy.status == 'available' and user.is_authenticated %}
+                                    <a href="/circulation/reserve/{{ book.id }}/?copy={{ copy.id }}" 
+                                       class="btn btn-sm btn-primary">
+                                        Reserve
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        Not Available
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Citation Modal -->
+<div class="modal fade" id="citationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Citation for "{{ book.title }}"</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" 
+                                onclick="showCitationFormat('apa')">
+                            APA
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" 
+                                onclick="showCitationFormat('mla')">
+                            MLA
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" 
+                                onclick="showCitationFormat('chicago')">
+                            Chicago
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" 
+                                onclick="showCitationFormat('harvard')">
+                            Harvard
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="apaCitation" class="citation-content">
+                    <pre class="bg-light p-3 rounded">{{ book.authors.first.last_name|default:"Author" }}, {{ book.authors.first.name|first|default:"A" }}. ({{ book.publication_date.year }}). <em>{{ book.title }}</em>. {{ book.publisher.name }}.</pre>
+                </div>
+                
+                <div id="mlaCitation" class="citation-content d-none">
+                    <pre class="bg-light p-3 rounded">{{ book.authors.first.last_name|default:"Author" }}, {{ book.authors.first.name|first|default:"A" }}. <em>{{ book.title }}</em>. {{ book.publisher.name }}, {{ book.publication_date.year }}.</pre>
+                </div>
+                
+                <div id="chicagoCitation" class="citation-content d-none">
+                    <pre class="bg-light p-3 rounded">{{ book.authors.first.last_name|default:"Author" }}, {{ book.authors.first.name|first|default:"A" }}. {{ book.publication_date.year }}. <em>{{ book.title }}</em>. {{ book.publisher.name }}.</pre>
+                </div>
+                
+                <div id="harvardCitation" class="citation-content d-none">
+                    <pre class="bg-light p-3 rounded">{{ book.authors.first.last_name|default:"Author" }}, {{ book.authors.first.name|first|default:"A" }}. ({{ book.publication_date.year }}) <em>{{ book.title }}</em>, {{ book.publisher.name }}.</pre>
+                </div>
+                
+                <div class="mt-4">
+                    <button class="btn btn-outline-primary" onclick="copyCitation()">
+                        <i class="bi bi-clipboard me-2"></i>Copy Citation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Book Detail Specific Styles */
+    .book-cover-main {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+    
+    .book-cover-main:hover {
+        transform: scale(1.02);
+    }
+    
+    .availability-card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .quick-actions .btn {
+        transition: all 0.2s ease;
+    }
+    
+    .quick-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .book-info-cards .card {
+        transition: all 0.2s ease;
+    }
+    
+    .book-info-cards .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Book Description */
+    .book-description {
+        line-height: 1.8;
+        color: var(--dark-text);
+        max-height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .book-description.expanded {
+        max-height: none;
+    }
+    
+    .book-description::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        background: linear-gradient(transparent, var(--light-text));
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+    
+    .book-description.expanded::after {
+        opacity: 0;
+    }
+    
+    /* Detail List */
+    .detail-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Author Card */
+    .author-card {
+        padding: 1rem;
+        border-radius: 8px;
+        background: var(--light-text);
+        transition: all 0.2s ease;
+    }
+    
+    .author-card:hover {
+        background: rgba(0, 123, 255, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .author-avatar .rounded-circle {
+        transition: all 0.3s ease;
+    }
+    
+    .author-card:hover .author-avatar .rounded-circle {
+        transform: scale(1.1);
+    }
+    
+    /* Similar Books */
+    .similar-book-card .card {
+        transition: all 0.3s ease;
+    }
+    
+    .similar-book-card .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Table Styles */
+    .table th {
+        background-color: rgba(0, 31, 63, 0.05);
+        border-bottom: 2px solid var(--primary-blue);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+    
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-header {
+        border-bottom: 2px solid var(--primary-blue);
+        background: var(--gradient-1);
+        color: white;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .modal-title {
+        color: white;
+    }
+    
+    /* Citation Styles */
+    .citation-content pre {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .book-cover-main img {
+            height: 300px;
+        }
+        
+        .availability-card .btn-lg {
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        
+        .btn-group {
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 0.5rem;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .navbar, .footer, .quick-actions, .modal {
+            display: none !important;
+        }
+        
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #dee2e6;
+        }
+        
+        .book-cover-main {
+            max-width: 300px;
+            margin: 0 auto 2rem;
+        }
+        
+        .availability-card {
+            page-break-inside: avoid;
+        }
+        
+        a {
+            color: black !important;
+            text-decoration: none !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Read More/Less functionality for book description
+        const description = document.querySelector('.book-description');
+        const readMoreBtn = document.getElementById('readMoreBtn');
+        
+        if (readMoreBtn && description) {
+            readMoreBtn.addEventListener('click', function() {
+                description.classList.toggle('expanded');
+                
+                if (description.classList.contains('expanded')) {
+                    this.innerHTML = 'Read Less <i class="bi bi-chevron-up"></i>';
+                } else {
+                    this.innerHTML = 'Read More <i class="bi bi-chevron-down"></i>';
+                }
+            });
+        }
+        
+        // Add to Favorites functionality
+        const addToFavoritesBtn = document.getElementById('addToFavorites');
+        if (addToFavoritesBtn) {
+            addToFavoritesBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                const text = this.querySelector('span');
+                
+                // Toggle active state
+                this.classList.toggle('active');
+                
+                if (this.classList.contains('active')) {
+                    icon.className = 'bi bi-heart-fill';
+                    text.textContent = 'Added to Favorites';
+                    this.classList.add('btn-primary');
+                    this.classList.remove('btn-outline-primary');
+                    showToast('Added to your favorites!', 'success');
+                    
+                    // In real implementation, send AJAX request to server
+                    console.log(`Added book {{ book.id }} to favorites`);
+                } else {
+                    icon.className = 'bi bi-heart';
+                    text.textContent = 'Add to Favorites';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-primary');
+                    showToast('Removed from favorites', 'info');
+                    
+                    // In real implementation, send AJAX request to server
+                    console.log(`Removed book {{ book.id }} from favorites`);
+                }
+                
+                // Add animation
+                this.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+        
+        // Citation format switching
+        window.showCitationFormat = function(format) {
+            // Update button states
+            document.querySelectorAll('#citationModal .btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show selected citation
+            document.querySelectorAll('.citation-content').forEach(content => {
+                content.classList.add('d-none');
+            });
+            document.getElementById(format + 'Citation').classList.remove('d-none');
+        };
+        
+        // Copy citation to clipboard
+        window.copyCitation = function() {
+            const activeCitation = document.querySelector('.citation-content:not(.d-none)');
+            const citationText = activeCitation.querySelector('pre').textContent;
+            
+            navigator.clipboard.writeText(citationText).then(() => {
+                showToast('Citation copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showToast('Failed to copy citation', 'danger');
+            });
+        };
+        
+        // Join waitlist function
+        window.joinWaitlist = function() {
+            const emailNotify = document.getElementById('emailNotify').checked;
+            const smsNotify = document.getElementById('smsNotify').checked;
+            
+            // Show loading state
+            const modal = bootstrap.Modal.getInstance(document.getElementById('waitlistModal'));
+            const joinBtn = modal._element.querySelector('.btn-primary');
+            const originalText = joinBtn.innerHTML;
+            
+            joinBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Joining...';
+            joinBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Success
+                showToast(`Successfully added to waitlist! Position #{{ waitlist_position|default:"3" }}`, 'success');
+                
+                // Update modal
+                modal.hide();
+                
+                // Update availability card to show waitlist status
+                const availabilityCard = document.querySelector('.availability-card');
+                if (availabilityCard) {
+                    availabilityCard.innerHTML = `
+                        <div class="card border-0 bg-warning bg-opacity-10">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-bell-fill text-warning fs-1"></i>
+                                </div>
+                                <h4 class="fw-bold text-warning mb-2">On Waitlist</h4>
+                                <p class="text-muted mb-3">
+                                    You're position <strong>#{{ waitlist_position|default:"3" }}</strong> on the waitlist
+                                </p>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    You'll be notified when a copy becomes available
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Reset button
+                joinBtn.innerHTML = originalText;
+                joinBtn.disabled = false;
+            }, 1500);
+        };
+        
+        // Print book details
+        window.printBookDetails = function() {
+            window.print();
+        };
+        
+        // Share book function
+        window.shareBook = function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ book.title }}',
+                    text: 'Check out this book from Ramat Library: {{ book.title }}',
+                    url: window.location.href,
+                })
+                .then(() => showToast('Book shared successfully!', 'success'))
+                .catch(error => {
+                    console.log('Error sharing:', error);
+                    copyToClipboard(window.location.href);
+                    showToast('Link copied to clipboard', 'info');
+                });
+            } else {
+                copyToClipboard(window.location.href);
+                showToast('Link copied to clipboard', 'info');
+            }
+        };
+        
+        // Helper function to copy to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1060';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3000
+            });
+            
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Book cover image zoom on hover
+        const bookCover = document.querySelector('.book-cover-main');
+        if (bookCover) {
+            bookCover.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            bookCover.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+            
+            // Click to view larger image
+            bookCover.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.createElement('div'));
+                const modalElement = document.createElement('div');
+                modalElement.className = 'modal fade';
+                modalElement.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">{{ book.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <img src="images/librarybooks.jfif" class="img-fluid w-100" 
+                                     alt="{{ book.title }}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalElement);
+                const bsModal = new bootstrap.Modal(modalElement);
+                bsModal.show();
+                
+                // Remove from DOM after hiding
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalElement);
+                });
+            });
+        }
+        
+        // Similar books hover effect
+        const similarBooks = document.querySelectorAll('.similar-book-card .card');
+        similarBooks.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const img = this.querySelector('img');
+                if (img) {
+                    img.style.transform = 'scale(1.05)';
+                    img.style.transition = 'transform 0.3s ease';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const img = this.querySelector('img');
+                if (img) {
+                    img.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Author card hover effect
+        const authorCards = document.querySelectorAll('.author-card');
+        authorCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const avatar = this.querySelector('.rounded-circle');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const avatar = this.querySelector('.rounded-circle');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // 'r' to reserve/book
+            if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+                const reserveBtn = document.querySelector('.availability-card .btn-primary');
+                if (reserveBtn && !reserveBtn.disabled) {
+                    e.preventDefault();
+                    reserveBtn.click();
+                }
+            }
+            
+            // 'f' to add to favorites
+            if (e.key === 'f' && !e.ctrlKey && !e.metaKey && addToFavoritesBtn) {
+                e.preventDefault();
+                addToFavoritesBtn.click();
+            }
+            
+            // 'p' to print
+            if (e.key === 'p' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                window.printBookDetails();
+            }
+        });
+    });
+</script>
+{% endblock %}

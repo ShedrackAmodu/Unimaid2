@@ -1,0 +1,1510 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ genre.name }} - Genre Details{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item"><a href="/catalog/genres/">Genres</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ genre.name|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div class="d-flex align-items-center">
+                <!-- Genre Icon -->
+                <div class="genre-detail-icon me-4">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-lg"
+                         style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                        <i class="bi bi-tags text-white fs-1"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="display-4 fw-bold mb-2">{{ genre.name }}</h1>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span class="badge bg-primary">
+                            <i class="bi bi-book me-1"></i>{{ books.paginator.count }} Books
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-percent me-1"></i>{{ percentage_of_collection|default:"0" }}% of Collection
+                        </span>
+                        {% if genre.created_at %}
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-calendar me-1"></i>Added {{ genre.created_at|date:"M Y" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if genre.description %}
+                    <p class="lead text-muted mb-0">{{ genre.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mt-3 mt-md-0">
+                {% if user.is_staff %}
+                <div class="btn-group" role="group">
+                    <a href="/admin/catalog/genre/{{ genre.id }}/change/" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="/admin/catalog/genre/{{ genre.id }}/delete/" class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Main Genre Info -->
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <!-- Genre Description -->
+        {% if genre.description %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-info-circle me-2"></i>About {{ genre.name }}
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <p class="mb-0">{{ genre.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Books in this Genre -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-book me-2"></i>Books in {{ genre.name }}
+                </h3>
+                <span class="badge bg-primary fs-6">{{ books.paginator.count }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if books %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" style="width: 60px;">#</th>
+                                <th scope="col">Book Title</th>
+                                <th scope="col">Authors</th>
+                                <th scope="col">Publisher</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr class="book-row">
+                                <td class="text-muted">{{ forloop.counter }}</td>
+                                <td>
+                                    <h6 class="fw-bold mb-1">{{ book.title|truncatechars:50 }}</h6>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-calendar me-1"></i>{{ book.publication_date.year }}
+                                        {% if book.isbn %}
+                                        | <i class="bi bi-upc-scan ms-2 me-1"></i>{{ book.isbn }}
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        {% for author in book.authors.all|slice:":2" %}
+                                        <small class="text-muted">{{ author.name|truncatechars:25 }}</small>
+                                        {% endfor %}
+                                        {% if book.authors.count > 2 %}
+                                        <small class="text-muted">+{{ book.authors.count|add:"-2" }} more</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ book.publisher.name|truncatechars:20 }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="/catalog/books/{{ book.id }}/" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        {% if user.is_authenticated and book.is_available %}
+                                        <a href="/circulation/reserve/{{ book.id }}/" class="btn btn-outline-success">
+                                            <i class="bi bi-bookmark-check"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if user.is_staff %}
+                                        <a href="/admin/catalog/book/{{ book.id }}/change/" class="btn btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination for Books -->
+                {% if books.paginator.num_pages > 1 %}
+                <div class="card-footer bg-transparent border-0">
+                    <nav aria-label="Books pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if books.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ books.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in books.paginator.page_range %}
+                                {% if books.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > books.number|add:"-3" and num < books.number|add:"3" %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if books.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ books.next_page_number }}">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">No Books Found</h4>
+                    <p class="text-muted">This genre doesn't have any books in our collection yet.</p>
+                    {% if user.is_staff %}
+                    <a href="/admin/catalog/book/add/?genre={{ genre.id }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add Book to Genre
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-lightning-charge text-primary me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-2">
+                    <a href="/catalog/books/?genre={{ genre.id }}" class="btn btn-primary">
+                        <i class="bi bi-search me-2"></i>Search All Books
+                    </a>
+                    <a href="/catalog/genres/" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Genres
+                    </a>
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-outline-success" onclick="toggleFollowGenre()">
+                        <i class="bi bi-bookmark me-2"></i>
+                        <span id="followText">Follow Genre</span>
+                    </button>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="/admin/catalog/book/add/?genre={{ genre.id }}" class="btn btn-outline-warning">
+                        <i class="bi bi-plus-circle me-2"></i>Add Book to Genre
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Genre Statistics -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-graph-up text-primary me-2"></i>Genre Statistics
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-box text-center p-3">
+                            <div class="stat-number text-primary fw-bold fs-4 mb-2">
+                                {{ books.paginator.count|default:"0" }}
+                            </div>
+                            <div class="stat-label text-muted small">Total Books</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box text-center p-3">
+                            <div class="stat-number text-success fw-bold fs-4 mb-2">
+                                {{ available_books|default:"0" }}
+                            </div>
+                            <div class="stat-label text-muted small">Available Now</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box text-center p-3">
+                            <div class="stat-number text-warning fw-bold fs-4 mb-2">
+                                {{ unique_authors|default:"0" }}
+                            </div>
+                            <div class="stat-label text-muted small">Authors</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box text-center p-3">
+                            <div class="stat-number text-info fw-bold fs-4 mb-2">
+                                {{ unique_publishers|default:"0" }}
+                            </div>
+                            <div class="stat-label text-muted small">Publishers</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collection Percentage -->
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-3">Percentage of Collection</h6>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                             role="progressbar" 
+                             style="width: {{ percentage_of_collection|default:0 }}%"
+                             aria-valuenow="{{ percentage_of_collection|default:0 }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ percentage_of_collection|default:"0" }}%
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        This genre represents {{ percentage_of_collection|default:"0" }}% of our total collection
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Authors in this Genre -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-person-badge text-primary me-2"></i>Top Authors
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for author in top_authors|slice:":5" %}
+                    <a href="/catalog/authors/{{ author.id }}/" 
+                       class="list-group-item list-group-item-action border-0 py-3 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="author-avatar me-3">
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                     style="width: 40px; height: 40px;">
+                                    <span class="text-white fw-bold">{{ author.name|first|upper }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1">{{ author.name|truncatechars:25 }}</h6>
+                                <small class="text-muted">{{ author.book_count }} books in this genre</small>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted"></i>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-person text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No authors found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if top_authors|length > 5 %}
+                <div class="card-footer bg-transparent border-0 text-center py-3">
+                    <a href="/catalog/authors/?genre={{ genre.id }}" class="btn btn-sm btn-outline-primary">
+                        View All Authors <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Top Publishers in this Genre -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-building text-primary me-2"></i>Top Publishers
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for publisher in top_publishers|slice:":5" %}
+                    <a href="/catalog/publishers/{{ publisher.id }}/" 
+                       class="list-group-item list-group-item-action border-0 py-3 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="publisher-logo me-3">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                     style="width: 40px; height: 40px;">
+                                    <span class="text-white fw-bold">{{ publisher.name|first|upper }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1">{{ publisher.name|truncatechars:25 }}</h6>
+                                <small class="text-muted">{{ publisher.book_count }} books in this genre</small>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted"></i>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-building text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2 mb-0">No publishers found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if top_publishers|length > 5 %}
+                <div class="card-footer bg-transparent border-0 text-center py-3">
+                    <a href="/catalog/publishers/?genre={{ genre.id }}" class="btn btn-sm btn-outline-primary">
+                        View All Publishers <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yearly Publication Trends -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-calendar-range text-primary me-2"></i>Publication Trends
+                </h3>
+                <p class="text-muted mb-0 small">Books published by year in {{ genre.name }}</p>
+            </div>
+            <div class="card-body p-4">
+                {% if publication_years %}
+                <div class="trends-chart-container">
+                    <div class="trends-years mb-4">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for year in publication_years|slice:":10" %}
+                            <span class="badge bg-light text-dark">
+                                {{ year.year }}: {{ year.count }} books
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="trends-visual">
+                        <div class="d-flex align-items-end" style="height: 100px;">
+                            {% for year in publication_years|slice:":10" %}
+                            <div class="trend-bar me-2" style="flex: 1;">
+                                <div class="bg-primary rounded-top" 
+                                     style="height: {% widthratio year.count max_books 100 %}px;"
+                                     data-bs-toggle="tooltip" 
+                                     data-bs-placement="top" 
+                                     title="{{ year.year }}: {{ year.count }} books">
+                                </div>
+                                <small class="d-block text-center text-muted mt-1">{{ year.year }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-graph-up text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3 mb-0">No publication data available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Genres -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-stars text-primary me-2"></i>Related Genres
+                </h3>
+                <p class="text-muted mb-0 small">Other genres you might be interested in</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for related_genre in related_genres|slice:":4" %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="related-genre-card text-center">
+                            <div class="related-icon mb-3 mx-auto">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px; background: linear-gradient(135deg, 
+                                            var(--primary-blue), var(--accent-blue));">
+                                    <i class="bi bi-tags text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ related_genre.name|truncatechars:25 }}</h5>
+                            <p class="text-muted small mb-3">
+                                {{ related_genre.books.count }} books
+                            </p>
+                            <div class="mb-3">
+                                <span class="badge bg-primary">{{ related_genre.percentage }}% of collection</span>
+                            </div>
+                            <a href="/catalog/genres/{{ related_genre.id }}/" class="btn btn-sm btn-outline-primary">
+                                Explore Genre
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <!-- Default Related Genres -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="related-genre-card text-center">
+                            <div class="related-icon mb-3 mx-auto">
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-journal-text text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Non-Fiction</h5>
+                            <p class="text-muted small mb-3">12,000+ books</p>
+                            <div class="mb-3">
+                                <span class="badge bg-primary">24% of collection</span>
+                            </div>
+                            <a href="/catalog/genres/{{ genre.id }}/related/?genre=non-fiction" class="btn btn-sm btn-outline-primary">
+                                Explore
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="related-genre-card text-center">
+                            <div class="related-icon mb-3 mx-auto">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-bezier2 text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Science</h5>
+                            <p class="text-muted small mb-3">8,000+ books</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success">16% of collection</span>
+                            </div>
+                            <a href="/catalog/genres/{{ genre.id }}/related/?genre=science" class="btn btn-sm btn-outline-success">
+                                Explore
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="related-genre-card text-center">
+                            <div class="related-icon mb-3 mx-auto">
+                                <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-clock-history text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">History</h5>
+                            <p class="text-muted small mb-3">4,500+ books</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning">9% of collection</span>
+                            </div>
+                            <a href="/catalog/genres/{{ genre.id }}/related/?genre=history" class="btn btn-sm btn-outline-warning">
+                                Explore
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="related-genre-card text-center">
+                            <div class="related-icon mb-3 mx-auto">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-laptop text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">Technology</h5>
+                            <p class="text-muted small mb-3">3,500+ books</p>
+                            <div class="mb-3">
+                                <span class="badge bg-info">7% of collection</span>
+                            </div>
+                            <a href="/catalog/genres/{{ genre.id }}/related/?genre=technology" class="btn btn-sm btn-outline-info">
+                                Explore
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Books -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-star-fill text-warning me-2"></i>Featured Books
+                </h3>
+                <p class="text-muted mb-0 small">Popular books in {{ genre.name }}</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for featured_book in featured_books|slice:":4" %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="featured-book-card">
+                            <div class="book-cover mb-3">
+                                <img src="images/librarybooks.jfif" class="img-fluid rounded shadow" 
+                                     alt="{{ featured_book.title }}" style="height: 200px; object-fit: cover;">
+                                {% if featured_book.is_available %}
+                                <span class="position-absolute top-0 start-0 m-2 badge bg-success">
+                                    Available
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h6 class="fw-bold mb-2">{{ featured_book.title|truncatechars:40 }}</h6>
+                            <p class="text-muted small mb-3">
+                                {% for author in featured_book.authors.all|slice:":1" %}
+                                {{ author.name|truncatechars:25 }}
+                                {% endfor %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ featured_book.publication_date.year }}</small>
+                                <a href="/catalog/books/{{ featured_book.id }}/" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-4">
+                        <i class="bi bi-stars text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3 mb-0">No featured books available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reading Recommendations -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-2">Need Reading Recommendations?</h5>
+                        <p class="text-muted mb-0">
+                            Not sure which book to start with in {{ genre.name }}? Our librarians can provide personalized recommendations based on your interests.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a href="/accounts/contact/" class="btn btn-primary me-2">
+                            <i class="bi bi-envelope me-1"></i>Ask a Librarian
+                        </a>
+                        <a href="/accounts/staff_directory/" class="btn btn-outline-primary">
+                            <i class="bi bi-people me-1"></i>Staff Directory
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Genre Analytics -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-bar-chart text-primary me-2"></i>Genre Analytics
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="analytics-box text-center p-4">
+                            <div class="analytics-icon mb-3">
+                                <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold text-primary">{{ publication_range.years|default:"0" }}</h4>
+                            <p class="text-muted mb-0">Years of Publication Range</p>
+                            <small class="text-muted">
+                                {{ earliest_publication|default:"N/A" }} - {{ latest_publication|default:"N/A" }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="analytics-box text-center p-4">
+                            <div class="analytics-icon mb-3">
+                                <i class="bi bi-book-half fs-1 text-success"></i>
+                            </div>
+                            <h4 class="fw-bold text-success">{{ avg_pages|default:"0" }}</h4>
+                            <p class="text-muted mb-0">Average Pages per Book</p>
+                            <small class="text-muted">Based on {{ books.paginator.count }} books</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="analytics-box text-center p-4">
+                            <div class="analytics-icon mb-3">
+                                <i class="bi bi-trophy fs-1 text-warning"></i>
+                            </div>
+                            <h4 class="fw-bold text-warning">{{ most_productive_year.year|default:"N/A" }}</h4>
+                            <p class="text-muted mb-0">Most Productive Year</p>
+                            <small class="text-muted">
+                                {{ most_productive_year.count|default:"0" }} books published
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Genre -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 bg-light">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-2">Share This Genre</h5>
+                        <p class="text-muted mb-0">
+                            Found interesting books? Share this genre with friends or colleagues.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-outline-primary btn-sm share-btn" data-platform="facebook" 
+                                    title="Share on Facebook">
+                                <i class="bi bi-facebook"></i>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm share-btn" data-platform="twitter" 
+                                    title="Share on Twitter">
+                                <i class="bi bi-twitter"></i>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm share-btn" data-platform="linkedin" 
+                                    title="Share on LinkedIn">
+                                <i class="bi bi-linkedin"></i>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm share-btn" data-platform="copy" 
+                                    title="Copy link">
+                                <i class="bi bi-link-45deg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Genre Detail Styles */
+    .genre-detail-icon .rounded-circle {
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(10, 36, 114, 0.2);
+    }
+    
+    .genre-detail-icon .rounded-circle:hover {
+        transform: scale(1.05) rotate(5deg);
+    }
+    
+    /* Stat Box */
+    .stat-box {
+        border-radius: 12px;
+        background: var(--light-text);
+        border: 2px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Progress Bar */
+    .progress {
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .progress-bar-striped {
+        background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+        background-size: 1rem 1rem;
+    }
+    
+    /* Book Row */
+    .book-row {
+        transition: all 0.2s ease;
+    }
+    
+    .book-row:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transform: translateX(5px);
+    }
+    
+    /* Author & Publisher Avatar */
+    .author-avatar .rounded-circle,
+    .publisher-logo .rounded-circle {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .list-group-item:hover .author-avatar .rounded-circle,
+    .list-group-item:hover .publisher-logo .rounded-circle {
+        transform: scale(1.1);
+    }
+    
+    /* Trends Visualization */
+    .trend-bar .bg-primary {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .trend-bar:hover .bg-primary {
+        transform: scaleY(1.1);
+        transform-origin: bottom;
+        background-color: var(--accent-blue) !important;
+    }
+    
+    /* Related Genre Card */
+    .related-genre-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: var(--light-text);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .related-genre-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border-color: var(--accent-blue);
+    }
+    
+    .related-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .related-genre-card:hover .related-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    /* Featured Book Card */
+    .featured-book-card {
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--light-text);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .featured-book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .book-cover {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .book-cover img {
+        transition: transform 0.5s ease;
+    }
+    
+    .featured-book-card:hover .book-cover img {
+        transform: scale(1.05);
+    }
+    
+    /* Analytics Box */
+    .analytics-box {
+        border-radius: 12px;
+        background: var(--light-text);
+        border: 2px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .analytics-box:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analytics-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .analytics-box:hover .analytics-icon {
+        transform: scale(1.1);
+    }
+    
+    /* Share Buttons */
+    .share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .share-btn:hover {
+        transform: translateY(-3px) scale(1.1);
+    }
+    
+    .share-btn[data-platform="facebook"]:hover {
+        background-color: #1877f2 !important;
+        border-color: #1877f2;
+        color: white;
+    }
+    
+    .share-btn[data-platform="twitter"]:hover {
+        background-color: #1da1f2 !important;
+        border-color: #1da1f2;
+        color: white;
+    }
+    
+    .share-btn[data-platform="linkedin"]:hover {
+        background-color: #0077b5 !important;
+        border-color: #0077b5;
+        color: white;
+    }
+    
+    .share-btn[data-platform="copy"]:hover {
+        background-color: #6c757d !important;
+        border-color: #6c757d;
+        color: white;
+    }
+    
+    /* Table Styling */
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: var(--primary-blue);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+    
+    /* Pagination */
+    .pagination .page-link {
+        border-radius: 6px;
+        margin: 0 2px;
+        border: none;
+        color: var(--dark-text);
+        font-weight: 500;
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: var(--light-blue);
+        color: var(--dark-text);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .genre-detail-icon {
+            margin-bottom: 1.5rem;
+        }
+        
+        .genre-detail-icon .rounded-circle {
+            width: 80px !important;
+            height: 80px !important;
+        }
+        
+        .stat-box {
+            margin-bottom: 1rem;
+        }
+        
+        .analytics-box {
+            margin-bottom: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .table th, .table td {
+            padding: 0.75rem;
+        }
+        
+        .related-genre-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .featured-book-card {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .trend-bar {
+            margin-right: 0.5rem !important;
+        }
+        
+        .trend-bar .bg-primary {
+            min-height: 5px;
+        }
+    }
+    
+    /* Loading Animation */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Follow Genre Functionality
+        window.toggleFollowGenre = function() {
+            const followText = document.getElementById('followText');
+            const isFollowing = followText.textContent === 'Following';
+            
+            // Toggle state
+            if (isFollowing) {
+                followText.textContent = 'Follow Genre';
+                showToast('Unfollowed genre', 'info');
+            } else {
+                followText.textContent = 'Following';
+                showToast('Now following genre', 'success');
+            }
+            
+            // In a real application, send AJAX request to server
+            // fetch('/api/follow-genre/{{ genre.id }}/', { method: 'POST' })
+            //   .then(response => response.json())
+            //   .then(data => {
+            //       showToast(data.message, data.success ? 'success' : 'error');
+            //   });
+        };
+        
+        // Share Buttons Functionality
+        const shareButtons = document.querySelectorAll('.share-btn');
+        shareButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const platform = this.dataset.platform;
+                const url = window.location.href;
+                const title = '{{ genre.name }} - Ramat Library';
+                const text = 'Check out {{ genre.name }} books on Ramat Library!';
+                
+                switch (platform) {
+                    case 'facebook':
+                        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                        break;
+                    case 'twitter':
+                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+                        break;
+                    case 'linkedin':
+                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+                        break;
+                    case 'copy':
+                        navigator.clipboard.writeText(url).then(() => {
+                            showToast('Link copied to clipboard!', 'success');
+                        }).catch(() => {
+                            // Fallback for older browsers
+                            const textArea = document.createElement('textarea');
+                            textArea.value = url;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                            showToast('Link copied to clipboard!', 'success');
+                        });
+                        break;
+                }
+                
+                // Add click animation
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+            });
+        });
+        
+        // Book Row Hover Effects
+        const bookRows = document.querySelectorAll('.book-row');
+        bookRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'scale(1.05)';
+                });
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'scale(1)';
+                });
+            });
+        });
+        
+        // Author & Publisher List Hover Effects
+        const listItems = document.querySelectorAll('.list-group-item');
+        listItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('.bi-chevron-right');
+                if (icon) {
+                    icon.style.transform = 'translateX(5px)';
+                    icon.style.color = 'var(--accent-blue)';
+                }
+                
+                const avatar = this.querySelector('.rounded-circle');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('.bi-chevron-right');
+                if (icon) {
+                    icon.style.transform = 'translateX(0)';
+                    icon.style.color = '';
+                }
+                
+                const avatar = this.querySelector('.rounded-circle');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Trend Bar Hover Effects
+        const trendBars = document.querySelectorAll('.trend-bar .bg-primary');
+        trendBars.forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                this.style.transform = 'scaleY(1.1)';
+                this.style.transformOrigin = 'bottom';
+            });
+            
+            bar.addEventListener('mouseleave', function() {
+                this.style.transform = 'scaleY(1)';
+            });
+        });
+        
+        // Related Genre Cards Hover Effects
+        const relatedCards = document.querySelectorAll('.related-genre-card');
+        relatedCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('.related-icon');
+                if (icon) {
+                    icon.style.transform = 'scale(1.1) rotate(5deg)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('.related-icon');
+                if (icon) {
+                    icon.style.transform = 'scale(1) rotate(0)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Featured Book Card Hover Effects
+        const featuredCards = document.querySelectorAll('.featured-book-card');
+        featuredCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const image = this.querySelector('img');
+                if (image) {
+                    image.style.transform = 'scale(1.05)';
+                }
+                
+                const button = this.querySelector('.btn');
+                if (button) {
+                    button.style.transform = 'translateY(-2px)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const image = this.querySelector('img');
+                if (image) {
+                    image.style.transform = 'scale(1)';
+                }
+                
+                const button = this.querySelector('.btn');
+                if (button) {
+                    button.style.transform = 'translateY(0)';
+                }
+                
+                const badge = this.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Analytics Box Hover Effects
+        const analyticsBoxes = document.querySelectorAll('.analytics-box');
+        analyticsBoxes.forEach(box => {
+            box.addEventListener('mouseenter', function() {
+                const number = this.querySelector('.fw-bold');
+                if (number) {
+                    number.style.transform = 'scale(1.05)';
+                }
+                
+                const icon = this.querySelector('.analytics-icon i');
+                if (icon) {
+                    icon.style.transform = 'rotate(15deg) scale(1.1)';
+                }
+            });
+            
+            box.addEventListener('mouseleave', function() {
+                const number = this.querySelector('.fw-bold');
+                if (number) {
+                    number.style.transform = 'scale(1)';
+                }
+                
+                const icon = this.querySelector('.analytics-icon i');
+                if (icon) {
+                    icon.style.transform = 'rotate(0) scale(1)';
+                }
+            });
+        });
+        
+        // Stat Box Hover Effects
+        const statBoxes = document.querySelectorAll('.stat-box');
+        statBoxes.forEach(box => {
+            box.addEventListener('mouseenter', function() {
+                const number = this.querySelector('.stat-number');
+                if (number) {
+                    number.style.transform = 'scale(1.05)';
+                }
+            });
+            
+            box.addEventListener('mouseleave', function() {
+                const number = this.querySelector('.stat-number');
+                if (number) {
+                    number.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Animate numbers on scroll
+        const animatedNumbers = document.querySelectorAll('.stat-number, .analytics-box h4');
+        animatedNumbers.forEach(number => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add animation class
+                        entry.target.classList.add('animate__animated', 'animate__pulse');
+                        
+                        // Animate counting if it's a number
+                        const text = entry.target.textContent;
+                        const num = parseInt(text.replace(/,/g, ''));
+                        
+                        if (!isNaN(num)) {
+                            let current = 0;
+                            const increment = num / 20;
+                            
+                            const updateCounter = () => {
+                                if (current < num) {
+                                    current += increment;
+                                    entry.target.textContent = Math.ceil(current).toLocaleString();
+                                    requestAnimationFrame(updateCounter);
+                                } else {
+                                    entry.target.textContent = num.toLocaleString();
+                                }
+                            };
+                            
+                            updateCounter();
+                        }
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(number);
+        });
+        
+        // Progress bar animation
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Animate progress bar width
+                        const targetWidth = parseFloat(progressBar.style.width);
+                        progressBar.style.width = '0%';
+                        
+                        setTimeout(() => {
+                            progressBar.style.transition = 'width 1.5s ease-in-out';
+                            progressBar.style.width = targetWidth + '%';
+                        }, 300);
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(progressBar);
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed`;
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1060';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3000
+            });
+            
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        // Export Genre Info
+        const exportBtn = document.createElement('button');
+        exportBtn.className = 'btn btn-outline-info btn-sm mt-3';
+        exportBtn.innerHTML = '<i class="bi bi-download me-1"></i>Export Genre Info';
+        exportBtn.onclick = function() {
+            const genreData = {
+                name: '{{ genre.name }}',
+                description: '{{ genre.description|default:"N/A" }}',
+                bookCount: {{ books.paginator.count|default:0 }},
+                percentage: {{ percentage_of_collection|default:0 }},
+                authorsCount: {{ unique_authors|default:0 }},
+                publishersCount: {{ unique_publishers|default:0 }},
+                topAuthors: [
+                    {% for author in top_authors|slice:":3" %}
+                    { name: '{{ author.name }}', bookCount: {{ author.book_count }} },
+                    {% endfor %}
+                ],
+                topPublishers: [
+                    {% for publisher in top_publishers|slice:":3" %}
+                    { name: '{{ publisher.name }}', bookCount: {{ publisher.book_count }} },
+                    {% endfor %}
+                ]
+            };
+            
+            const dataStr = JSON.stringify(genreData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = '{{ genre.name|slugify }}-genre-info.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Genre info exported successfully!', 'success');
+        };
+        
+        // Add export button after quick actions
+        const quickActionsCard = document.querySelector('.card .card-body');
+        if (quickActionsCard) {
+            quickActionsCard.appendChild(exportBtn);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize trends chart tooltips
+        const trendBarsTooltips = document.querySelectorAll('.trend-bar .bg-primary');
+        trendBarsTooltips.forEach(bar => {
+            new bootstrap.Tooltip(bar);
+        });
+        
+        // Load books preview on hover
+        const authorLinks = document.querySelectorAll('.list-group-item[href*="/authors/"]');
+        authorLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                // In a real app, you could fetch preview of author's books in this genre
+                console.log('Loading author preview...');
+            });
+        });
+        
+        // Genre color scheme
+        const genreIcon = document.querySelector('.genre-detail-icon .rounded-circle');
+        const colorSchemes = [
+            ['#0a2472', '#3a86ff'],
+            ['#001f3f', '#4361ee'],
+            ['#7209b7', '#f72585'],
+            ['#f72585', '#4cc9f0'],
+            ['#4cc9f0', '#4361ee'],
+            ['#4361ee', '#0a2472']
+        ];
+        
+        // Apply random color scheme to genre icon
+        const randomScheme = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+        if (genreIcon) {
+            genreIcon.style.background = `linear-gradient(135deg, ${randomScheme[0]}, ${randomScheme[1]})`;
+        }
+        
+        // Apply same color scheme to related items
+        const relatedIcons = document.querySelectorAll('.related-icon .rounded-circle');
+        relatedIcons.forEach(icon => {
+            icon.style.background = `linear-gradient(135deg, ${randomScheme[0]}, ${randomScheme[1]})`;
+        });
+        
+        // Book filtering by availability
+        const filterAvailableBtn = document.createElement('button');
+        filterAvailableBtn.className = 'btn btn-sm btn-outline-success mb-3';
+        filterAvailableBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Show Available Only';
+        filterAvailableBtn.onclick = function() {
+            showToast('Filtering available books...', 'info');
+            // In real app, this would filter the book list
+        };
+        
+        // Add filter button to books section
+        const booksCardHeader = document.querySelector('.card-header .d-flex');
+        if (booksCardHeader) {
+            booksCardHeader.appendChild(filterAvailableBtn);
+        }
+        
+        // Quick view modal for books
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.quick-view-book')) {
+                e.preventDefault();
+                const bookId = e.target.closest('.quick-view-book').dataset.bookId;
+                const bookTitle = e.target.closest('.quick-view-book').dataset.bookTitle;
+                
+                // Create and show modal
+                const modal = new bootstrap.Modal(document.createElement('div'));
+                const modalElement = document.createElement('div');
+                modalElement.className = 'modal fade';
+                modalElement.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold">Quick View: ${bookTitle}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading book info...</span>
+                                    </div>
+                                    <p class="mt-3">Loading information about ${bookTitle}...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modalElement);
+                const bsModal = new bootstrap.Modal(modalElement);
+                bsModal.show();
+                
+                // Simulate loading book info (in real app, fetch from API)
+                setTimeout(() => {
+                    modalElement.querySelector('.modal-body').innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            In a real application, this would show a quick preview of ${bookTitle}
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="/catalog/books/${bookId}/" class="btn btn-primary">
+                                View Full Details
+                            </a>
+                        </div>
+                    `;
+                }, 1000);
+                
+                // Remove from DOM after hiding
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalElement);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
