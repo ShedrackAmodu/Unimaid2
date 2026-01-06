@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-globe fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Access materials from libraries worldwide through our interlibrary loan service</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="interlibrary-loan-page">
+    <div class="container-fluid">
+        <!-- Services Overview -->
+        <div class="row g-4 mb-5">
+            {% for service in services %}
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-hover">
+                    <div class="card-body p-4 text-center">
+                        <div class="service-icon mb-4">
+                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                <i class="bi {{ service.icon }} fs-2 text-white"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-3">{{ service.title }}</h5>
+                        <p class="text-muted mb-4">{{ service.description }}</p>
+                        <button class="btn btn-outline-primary" onclick="scrollToContact()">
+                            <i class="bi bi-plus-circle me-2"></i>Request Service
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Service Information -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-info-circle me-2"></i>How It Works
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="process-step d-flex mb-4">
+                                    <div class="step-number me-3">
+                                        <div class="badge bg-primary fs-5">1</div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold">Submit Request</h6>
+                                        <p class="text-muted small">Fill out our online request form with the details of the material you need.</p>
+                                    </div>
+                                </div>
+                                <div class="process-step d-flex mb-4">
+                                    <div class="step-number me-3">
+                                        <div class="badge bg-primary fs-5">2</div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold">Review & Approval</h6>
+                                        <p class="text-muted small">Our staff reviews your request and checks availability through our network.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="process-step d-flex mb-4">
+                                    <div class="step-number me-3">
+                                        <div class="badge bg-primary fs-5">3</div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold">Delivery</h6>
+                                        <p class="text-muted small">Materials are delivered electronically or physically depending on the type.</p>
+                                    </div>
+                                </div>
+                                <div class="process-step d-flex">
+                                    <div class="step-number me-3">
+                                        <div class="badge bg-primary fs-5">4</div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold">Return</h6>
+                                        <p class="text-muted small">Return physical items by the due date or manage digital access.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Form -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-send me-2"></i>Request Interlibrary Loan
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <form method="post" action="{% url 'accounts:contact' %}" id="loanForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="subject" value="interlibrary_loan">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label fw-bold">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-bold">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="request_type" class="form-label fw-bold">Request Type</label>
+                                    <select class="form-select" id="request_type" name="request_type">
+                                        <option value="book">Book</option>
+                                        <option value="article">Journal Article</option>
+                                        <option value="document">Document</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="urgency" class="form-label fw-bold">Urgency Level</label>
+                                    <select class="form-select" id="urgency" name="urgency">
+                                        <option value="normal">Normal (2-4 weeks)</option>
+                                        <option value="urgent">Urgent (1-2 weeks)</option>
+                                        <option value="rush">Rush (within 1 week)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="title" class="form-label fw-bold">Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="author" class="form-label fw-bold">Author (if known)</label>
+                                    <input type="text" class="form-control" id="author" name="author">
+                                </div>
+                                <div class="col-12">
+                                    <label for="message" class="form-label fw-bold">Additional Details *</label>
+                                    <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Please provide any additional information that might help locate the material"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i class="bi bi-send me-2"></i>Submit Request
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function scrollToContact() {
+        document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+<style>
+    .service-icon div {
+        transition: transform 0.3s ease;
+    }
+    .card:hover .service-icon div {
+        transform: scale(1.1) rotate(5deg);
+    }
+    .process-step {
+        padding: 1rem;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .process-step:hover {
+        background-color: rgba(10, 36, 114, 0.05);
+    }
+</style>
+{% endblock %}

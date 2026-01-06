@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-shield-check fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">How we protect and handle your personal information</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="privacy-policy-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="last-updated text-muted mb-4">
+                            <small>Last updated: January 6, 2025</small>
+                        </div>
+
+                        <div class="policy-content">
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">1. Information We Collect</h3>
+                                <p>We collect information you provide directly to us, such as when you:</p>
+                                <ul>
+                                    <li>Create an account or use our services</li>
+                                    <li>Contact us for support or assistance</li>
+                                    <li>Register for events or borrow materials</li>
+                                    <li>Participate in surveys or feedback forms</li>
+                                </ul>
+                                <p>This may include personal information such as your name, email address, phone number, and academic information.</p>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">2. How We Use Your Information</h3>
+                                <p>We use the information we collect to:</p>
+                                <ul>
+                                    <li>Provide library services and resources</li>
+                                    <li>Process borrowing transactions and manage accounts</li>
+                                    <li>Communicate with you about your account and services</li>
+                                    <li>Improve our services and develop new features</li>
+                                    <li>Ensure compliance with library policies and regulations</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">3. Information Sharing</h3>
+                                <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except in the following circumstances:</p>
+                                <ul>
+                                    <li>With your explicit consent</li>
+                                    <li>To comply with legal obligations</li>
+                                    <li>To protect our rights and safety</li>
+                                    <li>With trusted service providers who assist our operations</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">4. Data Security</h3>
+                                <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes:</p>
+                                <ul>
+                                    <li>Secure data storage and transmission</li>
+                                    <li>Regular security assessments</li>
+                                    <li>Access controls and authentication</li>
+                                    <li>Staff training on data protection</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">5. Your Rights</h3>
+                                <p>You have the right to:</p>
+                                <ul>
+                                    <li>Access your personal information</li>
+                                    <li>Correct inaccurate information</li>
+                                    <li>Request deletion of your information</li>
+                                    <li>Object to processing in certain circumstances</li>
+                                    <li>Data portability</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">6. Cookies and Tracking</h3>
+                                <p>Our website uses cookies to enhance your browsing experience and provide personalized services. You can control cookie settings through your browser preferences.</p>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">7. Contact Us</h3>
+                                <p>If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
+                                <div class="contact-info mt-3">
+                                    <p><strong>Email:</strong> ramatlibrary@unimaid.edu.ng</p>
+                                    <p><strong>Phone:</strong> +234 80166 253 232</p>
+                                    <p><strong>Address:</strong> University of Maiduguri, Borno State, Nigeria</p>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h3 class="fw-bold mb-3">8. Changes to This Policy</h3>
+                                <p>We may update this Privacy Policy from time to time. We will notify users of any material changes through our website or email communications.</p>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .policy-content section h3 {
+        color: var(--primary-blue);
+        border-bottom: 2px solid var(--accent-blue);
+        padding-bottom: 0.5rem;
+    }
+    .policy-content ul {
+        padding-left: 1.5rem;
+    }
+    .policy-content li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

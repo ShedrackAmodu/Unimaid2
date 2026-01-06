@@ -155,6 +155,151 @@ def contact_view(request):
     return render(request, 'accounts/contact.html')
 
 
+def research_assistance_view(request):
+    """Research assistance services page."""
+    context = {
+        'page_title': 'Research Assistance',
+        'services': [
+            {
+                'title': 'Reference Services',
+                'description': 'Get help with finding information, research strategies, and database searching.',
+                'icon': 'bi-search'
+            },
+            {
+                'title': 'Citation Help',
+                'description': 'Learn proper citation styles and get assistance with bibliographies.',
+                'icon': 'bi-bookmark-check'
+            },
+            {
+                'title': 'Research Consultation',
+                'description': 'Schedule one-on-one sessions with research librarians.',
+                'icon': 'bi-person-lines-fill'
+            },
+            {
+                'title': 'Database Training',
+                'description': 'Workshops on using academic databases and research tools.',
+                'icon': 'bi-pc-display'
+            }
+        ]
+    }
+    return render(request, 'accounts/research_assistance.html', context)
+
+
+def interlibrary_loan_view(request):
+    """Interlibrary loan services page."""
+    context = {
+        'page_title': 'Interlibrary Loan',
+        'services': [
+            {
+                'title': 'Book Requests',
+                'description': 'Request books not available in our collection from other libraries.',
+                'icon': 'bi-book'
+            },
+            {
+                'title': 'Article Delivery',
+                'description': 'Get copies of journal articles delivered electronically.',
+                'icon': 'bi-file-earmark-text'
+            },
+            {
+                'title': 'Document Delivery',
+                'description': 'Access materials from libraries worldwide.',
+                'icon': 'bi-globe'
+            }
+        ]
+    }
+    return render(request, 'accounts/interlibrary_loan.html', context)
+
+
+def study_room_booking_view(request):
+    """Study room booking page."""
+    context = {
+        'page_title': 'Study Room Booking',
+        'rooms': [
+            {
+                'name': 'Individual Study Room',
+                'capacity': '1-2 people',
+                'features': ['Quiet space', 'Power outlets', 'WiFi'],
+                'availability': 'Available 24/7'
+            },
+            {
+                'name': 'Group Study Room',
+                'capacity': '4-6 people',
+                'features': ['Whiteboard', 'Projector', 'Power outlets', 'WiFi'],
+                'availability': '8 AM - 10 PM'
+            },
+            {
+                'name': 'Presentation Room',
+                'capacity': '10-15 people',
+                'features': ['Projector', 'Sound system', 'Whiteboard', 'WiFi'],
+                'availability': 'By reservation only'
+            }
+        ]
+    }
+    return render(request, 'accounts/study_room_booking.html', context)
+
+
+def digital_resources_view(request):
+    """Digital resources and online databases page."""
+    context = {
+        'page_title': 'Digital Resources',
+        'resources': [
+            {
+                'name': 'JSTOR',
+                'description': 'Academic journals and books in various disciplines.',
+                'type': 'Database',
+                'access': 'On-campus & VPN'
+            },
+            {
+                'name': 'IEEE Xplore',
+                'description': 'Engineering and technology research papers.',
+                'type': 'Database',
+                'access': 'On-campus & VPN'
+            },
+            {
+                'name': 'PubMed',
+                'description': 'Biomedical literature database.',
+                'type': 'Database',
+                'access': 'Free access'
+            },
+            {
+                'name': 'EbscoHost',
+                'description': 'Academic journals and research databases.',
+                'type': 'Database',
+                'access': 'On-campus & VPN'
+            },
+            {
+                'name': 'Google Scholar',
+                'description': 'Search across scholarly literature.',
+                'type': 'Search Engine',
+                'access': 'Free access'
+            },
+            {
+                'name': 'Microsoft Academic',
+                'description': 'Research papers and academic content.',
+                'type': 'Search Engine',
+                'access': 'Free access'
+            }
+        ]
+    }
+    return render(request, 'accounts/digital_resources.html', context)
+
+
+def privacy_policy_view(request):
+    """Privacy policy page."""
+    context = {
+        'page_title': 'Privacy Policy'
+    }
+    return render(request, 'accounts/privacy_policy.html', context)
+
+
+def terms_of_use_view(request):
+    """Terms of use page."""
+    context = {
+        'page_title': 'Terms of Use'
+    }
+    return render(request, 'accounts/terms_of_use.html', context)
+
+
 def virtual_tour_view(request):
     """Virtual tour gallery showing library spaces."""
     # For now, static images from media directory

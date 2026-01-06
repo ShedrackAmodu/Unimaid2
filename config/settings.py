@@ -75,7 +75,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "blog.context_processors.blog_context",
+                "apps.blog.context_processors.blog_context",
                 "config.context_processors.admin_context",  # Add this line
             ],
         },
@@ -142,12 +142,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Email configuration
 # https://docs.djangoproject.com/en/5.2/topics/email/
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # Console backend for development
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # Placeholder - configure for production
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ""  # Set in environment variables
-EMAIL_HOST_PASSWORD = ""  # Set in environment variables
+EMAIL_HOST_USER = "piloteaglecrown@gmail.com"
+EMAIL_HOST_PASSWORD = "ugnporqmpdkjytof"
 DEFAULT_FROM_EMAIL = "noreply@ramatlibrary.unimaid.edu.ng"
 
 # Default primary key field type

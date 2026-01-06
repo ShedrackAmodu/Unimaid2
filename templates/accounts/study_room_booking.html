@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-building fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Reserve study spaces and meeting rooms for your academic needs</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="study-room-booking-page">
+    <div class="container-fluid">
+        <!-- Room Types -->
+        <div class="row g-4 mb-5">
+            {% for room in rooms %}
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-hover">
+                    <div class="card-body p-4">
+                        <div class="room-header text-center mb-4">
+                            <h5 class="fw-bold mb-2">{{ room.name }}</h5>
+                            <span class="badge bg-primary mb-3">{{ room.capacity }}</span>
+                        </div>
+                        <div class="room-features mb-4">
+                            <h6 class="fw-bold mb-2">Features:</h6>
+                            <ul class="list-unstyled">
+                                {% for feature in room.features %}
+                                <li><i class="bi bi-check-circle text-success me-2"></i>{{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="room-availability mb-4">
+                            <h6 class="fw-bold mb-2">Availability:</h6>
+                            <p class="text-muted small">{{ room.availability }}</p>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-outline-primary" onclick="scrollToBooking()">
+                                <i class="bi bi-calendar-plus me-2"></i>Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Booking Policies -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-info-circle me-2"></i>Booking Policies & Guidelines
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-clock me-2 text-primary"></i>Booking Hours</h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• Individual rooms: 24/7 access with reservation</li>
+                                    <li>• Group rooms: 8:00 AM - 10:00 PM</li>
+                                    <li>• Presentation room: By advance reservation only</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-person-check me-2 text-primary"></i>Usage Guidelines</h6>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• Maximum 4 hours per day per person</li>
+                                    <li>• No food or drinks allowed</li>
+                                    <li>• Keep noise levels appropriate</li>
+                                    <li>• Clean up after use</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-calendar-plus me-2"></i>Make a Reservation
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <form method="post" action="{% url 'accounts:contact' %}" id="bookingForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="subject" value="study_room_booking">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label fw-bold">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-bold">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label fw-bold">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="room_type" class="form-label fw-bold">Room Type *</label>
+                                    <select class="form-select" id="room_type" name="room_type" required>
+                                        <option value="">Select room type</option>
+                                        <option value="individual">Individual Study Room</option>
+                                        <option value="group">Group Study Room</option>
+                                        <option value="presentation">Presentation Room</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="date" class="form-label fw-bold">Preferred Date *</label>
+                                    <input type="date" class="form-control" id="date" name="date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="time" class="form-label fw-bold">Preferred Time *</label>
+                                    <select class="form-select" id="time" name="time" required>
+                                        <option value="">Select time slot</option>
+                                        <option value="morning">Morning (8 AM - 12 PM)</option>
+                                        <option value="afternoon">Afternoon (12 PM - 5 PM)</option>
+                                        <option value="evening">Evening (5 PM - 10 PM)</option>
+                                        <option value="overnight">Overnight (Available for individual rooms)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="duration" class="form-label fw-bold">Duration *</label>
+                                    <select class="form-select" id="duration" name="duration" required>
+                                        <option value="">Select duration</option>
+                                        <option value="1">1 hour</option>
+                                        <option value="2">2 hours</option>
+                                        <option value="3">3 hours</option>
+                                        <option value="4">4 hours</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="people" class="form-label fw-bold">Number of People</label>
+                                    <input type="number" class="form-control" id="people" name="people" min="1" max="15">
+                                </div>
+                                <div class="col-12">
+                                    <label for="purpose" class="form-label fw-bold">Purpose of Use</label>
+                                    <textarea class="form-control" id="purpose" name="purpose" rows="3" placeholder="Please describe how you plan to use the room"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i class="bi bi-send me-2"></i>Submit Booking Request
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function scrollToBooking() {
+        document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+<style>
+    .room-header .badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+    }
+    .room-features ul li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

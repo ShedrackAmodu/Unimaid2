@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Get expert help with your research needs and academic projects</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="research-assistance-page">
+    <div class="container-fluid">
+        <!-- Services Overview -->
+        <div class="row g-4 mb-5">
+            {% for service in services %}
+            <div class="col-lg-6 col-xl-3">
+                <div class="card h-100 border-0 shadow-hover">
+                    <div class="card-body p-4 text-center">
+                        <div class="service-icon mb-4">
+                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                <i class="bi {{ service.icon }} fs-2 text-white"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-3">{{ service.title }}</h5>
+                        <p class="text-muted mb-4">{{ service.description }}</p>
+                        <button class="btn btn-outline-primary" onclick="scrollToContact()">
+                            <i class="bi bi-calendar-event me-2"></i>Request Service
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Research Resources -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-journal-bookmark me-2"></i>Research Resources & Guides
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-6 col-lg-4">
+                                <div class="resource-card p-4 border rounded h-100">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="resource-icon me-3">
+                                            <i class="bi bi-search fs-4 text-primary"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0">Finding Sources</h6>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Learn how to effectively search for scholarly articles, books, and other resources.
+                                    </p>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Database searching techniques</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Advanced search operators</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Source evaluation criteria</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+                                <div class="resource-card p-4 border rounded h-100">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="resource-icon me-3">
+                                            <i class="bi bi-bookmark-check fs-4 text-primary"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0">Citation Help</h6>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Master different citation styles and avoid plagiarism.
+                                    </p>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>APA, MLA, Chicago styles</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Reference management tools</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Plagiarism prevention</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-4">
+                                <div class="resource-card p-4 border rounded h-100">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="resource-icon me-3">
+                                            <i class="bi bi-graph-up fs-4 text-primary"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-0">Data Analysis</h6>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Support for quantitative and qualitative data analysis.
+                                    </p>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Statistical software</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Data visualization</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Research methodology</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form for Research Assistance -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-send me-2"></i>Request Research Assistance
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <form method="post" action="{% url 'accounts:contact' %}" id="researchForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="subject" value="research_assistance">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label fw-bold">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-bold">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="department" class="form-label fw-bold">Department/Program</label>
+                                    <input type="text" class="form-control" id="department" name="department">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="service_type" class="form-label fw-bold">Type of Assistance Needed</label>
+                                    <select class="form-select" id="service_type" name="service_type">
+                                        <option value="reference">Reference Services</option>
+                                        <option value="citation">Citation Help</option>
+                                        <option value="consultation">Research Consultation</option>
+                                        <option value="database">Database Training</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="research_topic" class="form-label fw-bold">Research Topic/Project Title</label>
+                                    <input type="text" class="form-control" id="research_topic" name="research_topic">
+                                </div>
+                                <div class="col-12">
+                                    <label for="message" class="form-label fw-bold">Specific Needs/Questions *</label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i class="bi bi-send me-2"></i>Submit Request
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function scrollToContact() {
+        document.getElementById('researchForm').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+<style>
+    .service-icon div {
+        transition: transform 0.3s ease;
+    }
+    .card:hover .service-icon div {
+        transform: scale(1.1) rotate(5deg);
+    }
+    .resource-card {
+        transition: all 0.3s ease;
+    }
+    .resource-card:hover {
+        border-color: var(--accent-blue) !important;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

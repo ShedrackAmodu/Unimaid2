@@ -120,6 +120,26 @@
             box-shadow: 0 5px 30px rgba(0, 31, 63, 0.3);
         }
 
+        /* Reduce header/navbar height by 20% */
+        /* This scales down padding, brand font-size and logo size safely */
+        .navbar {
+            padding: calc(1.2rem * 0.8) 0;
+        }
+
+        .navbar.scrolled {
+            padding: calc(0.8rem * 0.8) 0;
+        }
+
+        .navbar-brand {
+            font-size: calc(1.8rem * 0.8);
+        }
+
+        .navbar-brand img {
+            width: calc(60px * 0.8) !important;
+            height: calc(60px * 0.8) !important;
+            margin-right: calc(15px * 0.8) !important;
+        }
+
         .navbar-brand {
             font-weight: 800;
             font-size: 1.8rem;
@@ -982,11 +1002,11 @@
                 <div class="col-lg-3 col-md-6">
                     <h5>Our Services</h5>
                     <ul class="footer-links">
-                        <li><a href="/circulation/"><i class="bi bi-chevron-right me-1"></i>Borrowing & Loans</a></li>
-                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Research Assistance</a></li>
-                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Interlibrary Loan</a></li>
-                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Study Room Booking</a></li>
-                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Digital Resources</a></li>
+                        <li><a href="{% url 'circulation:patron_dashboard' %}"><i class="bi bi-chevron-right me-1"></i>Borrowing & Loans</a></li>
+                        <li><a href="{% url 'accounts:research_assistance' %}"><i class="bi bi-chevron-right me-1"></i>Research Assistance</a></li>
+                        <li><a href="{% url 'accounts:interlibrary_loan' %}"><i class="bi bi-chevron-right me-1"></i>Interlibrary Loan</a></li>
+                        <li><a href="{% url 'accounts:study_room_booking' %}"><i class="bi bi-chevron-right me-1"></i>Study Room Booking</a></li>
+                        <li><a href="{% url 'accounts:digital_resources' %}"><i class="bi bi-chevron-right me-1"></i>Digital Resources</a></li>
                     </ul>
                 </div>
 
@@ -1040,9 +1060,9 @@
                         </p>
                     </div>
                     <div class="col-md-6 text-md-end">
-                        <a href="#" class="me-3">Privacy Policy</a>
-                        <a href="#" class="me-3">Terms of Use</a>
-                        <a href="/accounts/contact/">Contact Support</a>
+                        <a href="{% url 'accounts:privacy_policy' %}" class="me-3">Privacy Policy</a>
+                        <a href="{% url 'accounts:terms_of_use' %}" class="me-3">Terms of Use</a>
+                        <a href="{% url 'accounts:contact' %}">Contact Support</a>
                     </div>
                 </div>
             </div>
@@ -1238,23 +1258,3 @@
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                // Recalculate particles on resize
-                animateParticles();
-            }, 250);
-        });
-
-        // Print functionality
-        const printButton = document.createElement('button');
-        printButton.innerHTML = '<i class="bi bi-printer"></i>';
-        printButton.className = 'btn btn-outline-light position-fixed d-none d-md-block';
-        printButton.style.bottom = '2rem';
-        printButton.style.left = '2rem';
-        printButton.style.zIndex = '100';
-        printButton.onclick = () => window.print();
-        document.body.appendChild(printButton);
-    </script>
-
-    <!-- Page-specific scripts -->
-    {% block scripts %}{% endblock %}
-</body>
-</html>

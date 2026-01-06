@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-file-earmark-text fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Terms and conditions for using Ramat Library services</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="terms-of-use-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="last-updated text-muted mb-4">
+                            <small>Last updated: January 6, 2025</small>
+                        </div>
+
+                        <div class="terms-content">
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">1. Acceptance of Terms</h3>
+                                <p>By accessing and using the Ramat Library services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">2. Library Membership</h3>
+                                <h5 class="fw-bold mb-2">Eligibility</h5>
+                                <ul>
+                                    <li>Current students, faculty, and staff of the University of Maiduguri</li>
+                                    <li>Alumni and community members may apply for external membership</li>
+                                    <li>Valid university identification is required for membership</li>
+                                </ul>
+
+                                <h5 class="fw-bold mb-2 mt-3">Responsibilities</h5>
+                                <ul>
+                                    <li>Maintain current contact information</li>
+                                    <li>Report lost or stolen library materials immediately</li>
+                                    <li>Return borrowed materials by the due date</li>
+                                    <li>Respect library policies and other users</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">3. Borrowing Policies</h3>
+                                <h5 class="fw-bold mb-2">Loan Periods</h5>
+                                <ul>
+                                    <li>Books: 14 days for undergraduates, 28 days for postgraduates and faculty</li>
+                                    <li>Journals and magazines: Library use only</li>
+                                    <li>Reference materials: Library use only</li>
+                                    <li>Reserve materials: Limited to 2 hours</li>
+                                </ul>
+
+                                <h5 class="fw-bold mb-2 mt-3">Renewals</h5>
+                                <ul>
+                                    <li>Books may be renewed up to 3 times if no holds are placed</li>
+                                    <li>Renewals may be done online or in person</li>
+                                    <li>Overdue materials cannot be renewed</li>
+                                </ul>
+
+                                <h5 class="fw-bold mb-2 mt-3">Fines and Fees</h5>
+                                <ul>
+                                    <li>Overdue books: ₦50 per day</li>
+                                    <li>Lost books: Replacement cost plus processing fee</li>
+                                    <li>Damaged materials: Repair or replacement cost</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">4. Computer and Internet Use</h3>
+                                <p>Library computers and internet access are provided for academic and research purposes. Users agree to:</p>
+                                <ul>
+                                    <li>Use computers for legal and ethical purposes only</li>
+                                    <li>Not download copyrighted materials illegally</li>
+                                    <li>Not engage in harassment or inappropriate behavior</li>
+                                    <li>Respect time limits when others are waiting</li>
+                                    <li>Not modify computer settings or install software</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">5. Study Room Usage</h3>
+                                <ul>
+                                    <li>Study rooms are available on a first-come, first-served basis</li>
+                                    <li>Maximum usage time is 4 hours per day</li>
+                                    <li>Rooms must be left clean and orderly</li>
+                                    <li>Food and drinks are not permitted</li>
+                                    <li>Noise levels must be kept appropriate for study</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">6. Code of Conduct</h3>
+                                <p>Users are expected to maintain a respectful and appropriate environment:</p>
+                                <ul>
+                                    <li>Treat library staff and other users with courtesy</li>
+                                    <li>Keep noise levels low and conversations brief</li>
+                                    <li>Respect library property and materials</li>
+                                    <li>Follow all university policies and local laws</li>
+                                    <li>Report any suspicious or inappropriate behavior</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">7. Privacy and Confidentiality</h3>
+                                <p>The library respects user privacy and maintains confidentiality of:</p>
+                                <ul>
+                                    <li>Borrowing records and reading history</li>
+                                    <li>Personal information provided to the library</li>
+                                    <li>Research and study habits</li>
+                                </ul>
+                                <p>However, library records may be disclosed when required by law or university policy.</p>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">8. Digital Resources</h3>
+                                <ul>
+                                    <li>Access to digital resources is limited to current library members</li>
+                                    <li>Sharing of login credentials is prohibited</li>
+                                    <li>Downloading of materials must comply with copyright laws</li>
+                                    <li>Commercial use of library resources is not permitted</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">9. Termination of Access</h3>
+                                <p>The library reserves the right to suspend or terminate library privileges for:</p>
+                                <ul>
+                                    <li>Violation of library policies</li>
+                                    <li>Outstanding fines or overdue materials</li>
+                                    <li>Abuse of library resources or facilities</li>
+                                    <li>Illegal activities conducted on library premises</li>
+                                </ul>
+                            </section>
+
+                            <section class="mb-5">
+                                <h3 class="fw-bold mb-3">10. Contact Information</h3>
+                                <p>For questions about these terms or library services:</p>
+                                <div class="contact-info mt-3">
+                                    <p><strong>Email:</strong> ramatlibrary@unimaid.edu.ng</p>
+                                    <p><strong>Phone:</strong> +234 80166 253 232</p>
+                                    <p><strong>Address:</strong> University of Maiduguri, Borno State, Nigeria</p>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h3 class="fw-bold mb-3">11. Changes to Terms</h3>
+                                <p>The library reserves the right to modify these terms at any time. Users will be notified of significant changes through the library website or email communications.</p>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .terms-content section h3 {
+        color: var(--primary-blue);
+        border-bottom: 2px solid var(--accent-blue);
+        padding-bottom: 0.5rem;
+    }
+    .terms-content section h5 {
+        color: var(--secondary-blue);
+        margin-top: 1rem;
+    }
+    .terms-content ul {
+        padding-left: 1.5rem;
+    }
+    .terms-content li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
