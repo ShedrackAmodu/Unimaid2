@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import LibraryUser
+from .models import LibraryUser, StudyRoom, StudyRoomBooking
 from config.admin_mixins import BaseAdminMixin, ExportMixin
 
 
@@ -64,3 +64,59 @@ class LibraryUserAdmin(BaseAdminMixin, ExportMixin, UserAdmin):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} users deactivated successfully.')
     deactivate_users.short_description = "Deactivate selected users"
+
+
+@admin.register(StudyRoom)
+class StudyRoomAdmin(BaseAdminMixin, ExportMixin, admin.ModelAdmin):
+    list_display = ['name', 'room_type', 'capacity', 'is_active', 'location', '_actions']
+    list_filter = ['room_type', 'is_active', 'capacity']
+    search_fields = ['name', 'location']
+    ordering = ['name']
+
+    fieldsets = (
+        (None, {'fields': ('name', 'room_type', 'capacity', 'is_active')}),
+        ('Details', {'fields': ('features', 'location')}),
+    )
+
+    actions = ['activate_rooms', 'deactivate_rooms', 'export_as_csv']
+
+    def activate_rooms(self, request, queryset):
+        """Activate selected rooms."""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} rooms activated successfully.')
+    activate_rooms.short_description = "Activate selected rooms"
+
+    def deactivate_rooms(self, request, queryset):
+        """Deactivate selected rooms."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} rooms deactivated successfully.')
+    deactivate_rooms.short_description = "Deactivate selected rooms"
+
+
+@admin.register(StudyRoomBooking)
+class StudyRoomBookingAdmin(BaseAdminMixin, ExportMixin, admin.ModelAdmin):
+    list_display = ['user', 'room', 'date', 'start_time', 'end_time', 'status', '_actions']
+    list_filter = ['status', 'date', 'room__room_type']
+    search_fields = ['user__username', 'user__email', 'room__name']
+    ordering = ['-date', '-start_time']
+
+    fieldsets = (
+        (None, {'fields': ('user', 'room', 'date', 'start_time', 'end_time')}),
+        ('Details', {'fields': ('duration_hours', 'number_of_people', 'purpose', 'status', 'notes')}),
+    )
+
+    readonly_fields = ['duration_hours']
+
+    actions = ['confirm_bookings', 'cancel_bookings', 'export_as_csv']
+
+    def confirm_bookings(self, request, queryset):
+        """Confirm selected bookings."""
+        updated = queryset.filter(status='pending').update(status='confirmed')
+        self.message_user(request, f'{updated} bookings confirmed successfully.')
+    confirm_bookings.short_description = "Confirm selected bookings"
+
+    def cancel_bookings(self, request, queryset):
+        """Cancel selected bookings."""
+        updated = queryset.filter(status__in=['pending', 'confirmed']).update(status='cancelled')
+        self.message_user(request, f'{updated} bookings cancelled successfully.')
+    cancel_bookings.short_description = "Cancel selected bookings"

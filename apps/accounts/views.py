@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import ListView
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import LibraryUser
+from datetime import datetime, time
+from .models import LibraryUser, StudyRoom, StudyRoomBooking
 from .forms import LibraryUserCreationForm, LibraryUserChangeForm
 from apps.catalog.models import Book, Genre
 from apps.events.models import Event
@@ -90,6 +91,30 @@ class StaffDirectoryView(ListView):
         return LibraryUser.objects.filter(
             membership_type__in=['faculty', 'staff']
         ).order_by('last_name', 'first_name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get department counts for staff members
+        department_counts = LibraryUser.objects.filter(
+            membership_type__in=['faculty', 'staff']
+        ).exclude(department__isnull=True).exclude(department='').values('department').annotate(
+            count=Count('department')
+        ).order_by('department')
+
+        # Create a dictionary mapping department names to counts
+        dept_counts_dict = {item['department']: item['count'] for item in department_counts}
+
+        # Map template department names to actual department values
+        context['department_counts'] = {
+            'circulation': dept_counts_dict.get('Circulation', 0),
+            'reference': dept_counts_dict.get('Reference', 0),
+            'technical': dept_counts_dict.get('Technical', 0),
+            'digital': dept_counts_dict.get('Digital', 0),
+            'special_collections': dept_counts_dict.get('Special Collections', 0),
+        }
+
+        return context
 
 
 def home_view(request):
@@ -210,30 +235,122 @@ def interlibrary_loan_view(request):
     return render(request, 'accounts/interlibrary_loan.html', context)
 
 
+@login_required
 def study_room_booking_view(request):
     """Study room booking page."""
+    if request.method == 'POST':
+        # Handle booking submission
+        room_id = request.POST.get('room_type')
+        date_str = request.POST.get('date')
+        time_slot = request.POST.get('time')
+        duration = int(request.POST.get('duration', 1))
+        people = int(request.POST.get('people', 1))
+        purpose = request.POST.get('purpose', '')
+
+        try:
+            room = StudyRoom.objects.get(id=room_id, is_active=True)
+            booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+            # Parse time slot
+            if time_slot == 'morning':
+                start_time = time(8, 0)
+                end_time = time(12, 0)
+            elif time_slot == 'afternoon':
+                start_time = time(12, 0)
+                end_time = time(17, 0)
+            elif time_slot == 'evening':
+                start_time = time(17, 0)
+                end_time = time(22, 0)
+            elif time_slot == 'overnight':
+                start_time = time(22, 0)
+                end_time = time(8, 0)  # Next day
+            else:
+                raise ValueError("Invalid time slot")
+
+            # Check if booking date is in the future
+            today = timezone.now().date()
+            if booking_date < today:
+                messages.error(request, 'Cannot book rooms for past dates.')
+                return redirect('accounts:study_room_booking')
+
+            # Check capacity
+            if people > room.capacity:
+                messages.error(request, f'This room can only accommodate {room.capacity} people.')
+                return redirect('accounts:study_room_booking')
+
+            # Check availability - no overlapping bookings
+            conflicting_bookings = StudyRoomBooking.objects.filter(
+                room=room,
+                date=booking_date,
+                status__in=['pending', 'confirmed']
+            ).filter(
+                Q(start_time__lt=end_time, end_time__gt=start_time)
+            )
+
+            if conflicting_bookings.exists():
+                messages.error(request, 'This room is not available for the selected time slot.')
+                return redirect('accounts:study_room_booking')
+
+            # Create booking
+            booking = StudyRoomBooking.objects.create(
+                user=request.user,
+                room=room,
+                date=booking_date,
+                start_time=start_time,
+                end_time=end_time,
+                duration_hours=duration,
+                number_of_people=people,
+                purpose=purpose,
+                status='pending'
+            )
+
+            messages.success(request, f'Your booking request for {room.name} has been submitted and is pending approval.')
+            return redirect('accounts:study_room_booking')
+
+        except StudyRoom.DoesNotExist:
+            messages.error(request, 'Selected room is not available.')
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, 'An error occurred while processing your booking.')
+
+        return redirect('accounts:study_room_booking')
+
+    # GET request - show available rooms
+    rooms = StudyRoom.objects.filter(is_active=True).order_by('name')
+
+    # Add availability info for each room
+    room_data = []
+    today = timezone.now().date()
+
+    for room in rooms:
+        # Count today's bookings
+        today_bookings = StudyRoomBooking.objects.filter(
+            room=room,
+            date=today,
+            status__in=['pending', 'confirmed']
+        ).count()
+
+        # Determine availability text based on room type and current bookings
+        if room.room_type == 'individual':
+            availability = 'Available 24/7'
+        elif room.room_type == 'group':
+            availability = '8 AM - 10 PM'
+        else:  # presentation
+            availability = 'By reservation only'
+
+        room_data.append({
+            'id': room.id,
+            'name': room.name,
+            'capacity': f'1-{room.capacity} people' if room.capacity <= 2 else f'{room.capacity} people',
+            'features': room.features,
+            'availability': availability,
+            'today_bookings': today_bookings
+        })
+
     context = {
         'page_title': 'Study Room Booking',
-        'rooms': [
-            {
-                'name': 'Individual Study Room',
-                'capacity': '1-2 people',
-                'features': ['Quiet space', 'Power outlets', 'WiFi'],
-                'availability': 'Available 24/7'
-            },
-            {
-                'name': 'Group Study Room',
-                'capacity': '4-6 people',
-                'features': ['Whiteboard', 'Projector', 'Power outlets', 'WiFi'],
-                'availability': '8 AM - 10 PM'
-            },
-            {
-                'name': 'Presentation Room',
-                'capacity': '10-15 people',
-                'features': ['Projector', 'Sound system', 'Whiteboard', 'WiFi'],
-                'availability': 'By reservation only'
-            }
-        ]
+        'rooms': room_data
     }
     return render(request, 'accounts/study_room_booking.html', context)
 

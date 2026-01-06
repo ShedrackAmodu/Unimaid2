@@ -31,3 +31,63 @@ class LibraryUser(AbstractUser, BaseModel):
     class Meta:
         verbose_name = "Library User"
         verbose_name_plural = "Library Users"
+
+
+class StudyRoom(BaseModel):
+    ROOM_TYPE_CHOICES = [
+        ('individual', 'Individual Study Room'),
+        ('group', 'Group Study Room'),
+        ('presentation', 'Presentation Room'),
+    ]
+
+    name = models.CharField(max_length=100, help_text="Name of the study room")
+    room_type = models.CharField(
+        max_length=20,
+        choices=ROOM_TYPE_CHOICES,
+        help_text="Type of study room"
+    )
+    capacity = models.PositiveIntegerField(help_text="Maximum number of people")
+    features = models.JSONField(default=list, help_text="List of room features")
+    is_active = models.BooleanField(default=True, help_text="Whether the room is available for booking")
+    location = models.CharField(max_length=200, blank=True, help_text="Location description")
+
+    def __str__(self):
+        return f"{self.name} ({self.get_room_type_display()})"
+
+    class Meta:
+        verbose_name = "Study Room"
+        verbose_name_plural = "Study Rooms"
+
+
+class StudyRoomBooking(BaseModel):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+    ]
+
+    user = models.ForeignKey(LibraryUser, on_delete=models.CASCADE, related_name='study_room_bookings')
+    room = models.ForeignKey(StudyRoom, on_delete=models.CASCADE, related_name='bookings')
+    date = models.DateField(help_text="Booking date")
+    start_time = models.TimeField(help_text="Start time")
+    end_time = models.TimeField(help_text="End time")
+    duration_hours = models.PositiveIntegerField(help_text="Duration in hours")
+    number_of_people = models.PositiveIntegerField(default=1, help_text="Number of people using the room")
+    purpose = models.TextField(blank=True, help_text="Purpose of booking")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text="Booking status"
+    )
+    notes = models.TextField(blank=True, help_text="Additional notes")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.room.name} on {self.date}"
+
+    class Meta:
+        verbose_name = "Study Room Booking"
+        verbose_name_plural = "Study Room Bookings"
+        ordering = ['date', 'start_time']
+        unique_together = ('room', 'date', 'start_time')  # Prevent double booking same time slot

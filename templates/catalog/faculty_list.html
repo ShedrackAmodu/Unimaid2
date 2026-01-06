@@ -1,0 +1,651 @@
+{% extends 'base.html' %}
+{% load filters %}
+
+{% block title %}Faculties - Library Catalog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item active" aria-current="page">Faculties</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Academic Faculties</h1>
+                <p class="lead text-muted mb-0">
+                    Explore our academic faculties and their departments
+                </p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <a href="/catalog/" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+                </a>
+                {% if user.is_staff %}
+                <a href="/admin/catalog/faculty/add/" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add Faculty
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Results Summary -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-0">
+                    {% if faculties %}
+                    Showing {{ faculties.start_index }} - {{ faculties.end_index }} of {{ faculties.paginator.count }} faculties
+                    {% else %}
+                    No faculties found
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-muted me-3">View:</span>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" id="viewGrid">
+                        <i class="bi bi-grid"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="viewList">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Faculties Grid View -->
+<div id="facultiesGrid" class="view-content">
+    {% if faculties %}
+    <div class="row g-4">
+        {% for faculty in faculties %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card faculty-card h-100 border-0 shadow-hover">
+                <div class="card-body p-4">
+                    <!-- Faculty Avatar -->
+                    <div class="faculty-avatar-container mb-4">
+                        <div class="faculty-avatar mx-auto">
+                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 100px; height: 100px; background: linear-gradient(135deg,
+                                        {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
+                                        {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <span class="text-white fs-2 fw-bold">{{ faculty.name|first|upper }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Faculty Info -->
+                    <div class="faculty-info text-center">
+                        <h5 class="fw-bold mb-2">
+                            <a href="/catalog/faculties/{{ faculty.id }}/" class="text-decoration-none text-dark">
+                                {{ faculty.name|truncatechars:30 }}
+                            </a>
+                        </h5>
+
+                        <div class="faculty-stats mb-4">
+                            <span class="badge bg-light text-dark me-2">
+                                <i class="bi bi-building me-1"></i>{{ faculty.departments.count }} departments
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-book me-1"></i>{{ faculty.books.count }} books
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="faculty-actions text-center">
+                        <a href="/catalog/faculties/{{ faculty.id }}/" class="btn btn-sm btn-primary me-2">
+                            <i class="bi bi-eye me-1"></i>View Faculty
+                        </a>
+                        <a href="/catalog/books/?faculty={{ faculty.id }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-book me-1"></i>View Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Results Found -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-building-x text-muted" style="font-size: 5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold text-muted mb-3">No Faculties Found</h3>
+                    <p class="text-muted mb-4">
+                        There are currently no faculties in the system. Check back soon for new additions.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/catalog/" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Browse Catalog
+                        </a>
+                        {% if user.is_staff %}
+                        <a href="/admin/catalog/faculty/add/" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add Faculty
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Faculties List View (Hidden by Default) -->
+<div id="facultiesList" class="view-content d-none">
+    {% if faculties %}
+    <div class="card border-0 shadow-lg">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 60px;"></th>
+                            <th scope="col">Faculty Name</th>
+                            <th scope="col">Departments</th>
+                            <th scope="col">Books</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for faculty in faculties %}
+                        <tr class="faculty-list-row">
+                            <td>
+                                <div class="list-avatar rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 50px; height: 50px; background: linear-gradient(135deg,
+                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
+                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                    <span class="text-white fw-bold">{{ faculty.name|first|upper }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <h6 class="fw-bold mb-1">{{ faculty.name }}</h6>
+                                <small class="text-muted">Academic Faculty</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ faculty.departments.count }} departments</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ faculty.books.count }} books</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <a href="/catalog/faculties/{{ faculty.id }}/" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="/catalog/books/?faculty={{ faculty.id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-book"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if faculties and faculties.paginator.num_pages > 1 %}
+<div class="row mt-5">
+    <div class="col-12">
+        <nav aria-label="Faculties pagination">
+            <ul class="pagination justify-content-center">
+                {% if faculties.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ faculties.previous_page_number }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </span>
+                </li>
+                {% endif %}
+
+                {% for num in faculties.paginator.page_range %}
+                    {% if faculties.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > faculties.number|add:"-3" and num < faculties.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if faculties.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ faculties.next_page_number }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    Page {{ faculties.number }} of {{ faculties.paginator.num_pages }}
+                </small>
+            </div>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+<!-- Faculty Statistics -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-0 py-3">
+                <h3 class="fw-bold mb-0">Faculty Overview</h3>
+                <p class="text-muted mb-0 small">Academic structure and collection statistics</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    {% for faculty in faculties|slice:":6" %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="faculty-overview-card text-center">
+                            <div class="overview-avatar mb-3 mx-auto">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px; background: linear-gradient(135deg,
+                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
+                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                    <span class="text-white fs-4 fw-bold">{{ faculty.name|first|upper }}</span>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">{{ faculty.name|truncatechars:25 }}</h5>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number text-primary fw-bold">{{ faculty.departments.count }}</div>
+                                        <div class="stat-label small text-muted">Departments</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number text-success fw-bold">{{ faculty.books.count }}</div>
+                                        <div class="stat-label small text-muted">Books</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="/catalog/faculties/{{ faculty.id }}/" class="btn btn-sm btn-outline-primary mt-3">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <div class="d-inline-block p-4 rounded-circle bg-light mb-4">
+                            <i class="bi bi-building text-primary fs-1"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">No Faculty Overview</h4>
+                        <p class="text-muted">Faculty overview will be displayed once faculties are added to the system.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Help -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 bg-light">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-2">Need Help Finding a Faculty?</h5>
+                        <p class="text-muted mb-0">
+                            Can't find the faculty you're looking for? Our academic advisors can help you navigate our academic structure.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a href="/accounts/contact/" class="btn btn-primary me-2">
+                            <i class="bi bi-envelope me-1"></i>Contact Support
+                        </a>
+                        <a href="/accounts/staff_directory/" class="btn btn-outline-primary">
+                            <i class="bi bi-people me-1"></i>Staff Directory
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Faculty List Specific Styles */
+    .faculty-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .faculty-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(0, 31, 63, 0.15) !important;
+        border-color: var(--accent-blue);
+    }
+
+    .avatar-placeholder {
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .faculty-card:hover .avatar-placeholder {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Faculty Info */
+    .faculty-info h5 a {
+        transition: color 0.2s ease;
+    }
+
+    .faculty-card:hover .faculty-info h5 a {
+        color: var(--accent-blue) !important;
+    }
+
+    /* List View Styles */
+    .faculty-list-row {
+        transition: all 0.2s ease;
+    }
+
+    .faculty-list-row:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .list-avatar {
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .faculty-list-row:hover .list-avatar {
+        transform: scale(1.1);
+    }
+
+    /* View Toggle */
+    .view-content {
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-group .btn {
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-group .btn.active {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+    }
+
+    /* Faculty Overview */
+    .faculty-overview-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: var(--light-text);
+        transition: all 0.3s ease;
+    }
+
+    .faculty-overview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .overview-avatar {
+        transition: all 0.3s ease;
+    }
+
+    .faculty-overview-card:hover .overview-avatar {
+        transform: scale(1.05);
+    }
+
+    .stat-item {
+        padding: 0.5rem 0;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Pagination */
+    .page-link {
+        border-radius: 6px;
+        margin: 0 3px;
+        border: none;
+        color: var(--dark-text);
+        font-weight: 500;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+    }
+
+    .page-link:hover {
+        background-color: var(--light-blue);
+        color: var(--dark-text);
+    }
+
+    /* Table Styles */
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: var(--primary-blue);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .faculty-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .faculty-overview-card {
+            padding: 1rem;
+        }
+
+        .overview-avatar {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .overview-avatar span {
+            font-size: 1rem !important;
+        }
+
+        .stat-number {
+            font-size: 1.25rem !important;
+        }
+    }
+
+    /* Loading Animation */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View Toggle Functionality
+        const viewGridBtn = document.getElementById('viewGrid');
+        const viewListBtn = document.getElementById('viewList');
+        const facultiesGrid = document.getElementById('facultiesGrid');
+        const facultiesList = document.getElementById('facultiesList');
+
+        viewGridBtn.addEventListener('click', () => {
+            viewGridBtn.classList.add('active');
+            viewListBtn.classList.remove('active');
+            facultiesGrid.classList.remove('d-none');
+            facultiesList.classList.add('d-none');
+
+            // Save preference to localStorage
+            localStorage.setItem('facultyViewPreference', 'grid');
+        });
+
+        viewListBtn.addEventListener('click', () => {
+            viewListBtn.classList.add('active');
+            viewGridBtn.classList.remove('active');
+            facultiesList.classList.remove('d-none');
+            facultiesGrid.classList.add('d-none');
+
+            // Save preference to localStorage
+            localStorage.setItem('facultyViewPreference', 'list');
+        });
+
+        // Load saved view preference
+        const savedView = localStorage.getItem('facultyViewPreference');
+        if (savedView === 'list') {
+            viewListBtn.click();
+        }
+
+        // Faculty Card Hover Effects
+        const facultyCards = document.querySelectorAll('.faculty-card');
+        facultyCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const avatar = this.querySelector('.avatar-placeholder');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.1) rotate(5deg)';
+                }
+
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            card.addEventListener('mouseleave', function() {
+                const avatar = this.querySelector('.avatar-placeholder');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1) rotate(0)';
+                }
+
+                const buttons = this.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.style.transform = 'translateY(0)';
+                });
+            });
+        });
+
+        // List View Row Hover Effects
+        const listRows = document.querySelectorAll('.faculty-list-row');
+        listRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                const avatar = this.querySelector('.list-avatar');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.1)';
+                }
+
+                const actions = this.querySelectorAll('.btn');
+                actions.forEach(btn => {
+                    btn.style.transform = 'scale(1.05)';
+                });
+            });
+
+            row.addEventListener('mouseleave', function() {
+                const avatar = this.querySelector('.list-avatar');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1)';
+                }
+
+                const actions = this.querySelectorAll('.btn');
+                actions.forEach(btn => {
+                    btn.style.transform = 'scale(1)';
+                });
+            });
+        });
+
+        // Faculty Overview Card Effects
+        const overviewCards = document.querySelectorAll('.faculty-overview-card');
+        overviewCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const avatar = this.querySelector('.overview-avatar');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1.05)';
+                }
+
+                const badge = this.querySelector('.btn');
+                if (badge) {
+                    badge.style.transform = 'scale(1.05)';
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                const avatar = this.querySelector('.overview-avatar');
+                if (avatar) {
+                    avatar.style.transform = 'scale(1)';
+                }
+
+                const badge = this.querySelector('.btn');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

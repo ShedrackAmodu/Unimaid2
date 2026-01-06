@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Loan, Reservation, Fine
+from .models import Loan, Reservation, Fine, LoanRequest
 
 
 @admin.register(Loan)
@@ -35,3 +35,30 @@ class FineAdmin(admin.ModelAdmin):
     list_display = ['loan', 'amount', 'reason', 'status', 'paid_date']
     list_filter = ['status']
     search_fields = ['loan__user__username', 'reason']
+
+
+@admin.register(LoanRequest)
+class LoanRequestAdmin(admin.ModelAdmin):
+    list_display = ['user', 'book_copy', 'request_date', 'status', 'expiry_date']
+    list_filter = ['status', 'request_date', 'expiry_date']
+    search_fields = ['user__username', 'book_copy__book__title']
+    actions = ['approve_requests', 'reject_requests']
+
+    def approve_requests(self, request, queryset):
+        approved = 0
+        for loan_request in queryset.filter(status='pending'):
+            try:
+                loan_request.approve(request.user)
+                approved += 1
+            except ValueError as e:
+                self.message_user(request, f'Could not approve request for {loan_request}: {e}', level='error')
+        self.message_user(request, f'{approved} loan requests approved.')
+    approve_requests.short_description = 'Approve selected loan requests'
+
+    def reject_requests(self, request, queryset):
+        rejected = 0
+        for loan_request in queryset.filter(status='pending'):
+            loan_request.reject("Rejected by administrator")
+            rejected += 1
+        self.message_user(request, f'{rejected} loan requests rejected.')
+    reject_requests.short_description = 'Reject selected loan requests'

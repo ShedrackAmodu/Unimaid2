@@ -50,9 +50,12 @@
                         <div class="room-availability mb-4">
                             <h6 class="fw-bold mb-2">Availability:</h6>
                             <p class="text-muted small">{{ room.availability }}</p>
+                            {% if room.today_bookings > 0 %}
+                            <p class="text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>{{ room.today_bookings }} booking(s) today</p>
+                            {% endif %}
                         </div>
                         <div class="text-center">
-                            <button class="btn btn-outline-primary" onclick="scrollToBooking()">
+                            <button class="btn btn-outline-primary" onclick="selectRoom({{ room.id }}, '{{ room.name }}')">
                                 <i class="bi bi-calendar-plus me-2"></i>Book Now
                             </button>
                         </div>
@@ -106,29 +109,16 @@
                         </h3>
                     </div>
                     <div class="card-body p-5">
-                        <form method="post" action="{% url 'accounts:contact' %}" id="bookingForm">
+                        <form method="post" action="{% url 'accounts:study_room_booking' %}" id="bookingForm">
                             {% csrf_token %}
-                            <input type="hidden" name="subject" value="study_room_booking">
                             <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label fw-bold">Full Name *</label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="email" class="form-label fw-bold">Email Address *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="phone" class="form-label fw-bold">Phone Number</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone">
-                                </div>
                                 <div class="col-md-6">
                                     <label for="room_type" class="form-label fw-bold">Room Type *</label>
                                     <select class="form-select" id="room_type" name="room_type" required>
                                         <option value="">Select room type</option>
-                                        <option value="individual">Individual Study Room</option>
-                                        <option value="group">Group Study Room</option>
-                                        <option value="presentation">Presentation Room</option>
+                                        {% for room in rooms %}
+                                        <option value="{{ room.id }}">{{ room.name }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -181,8 +171,13 @@
 {% block scripts %}
 {{ block.super }}
 <script>
-    function scrollToBooking() {
+    function selectRoom(roomId, roomName) {
+        // Select the room in the dropdown
+        document.getElementById('room_type').value = roomId;
+        // Scroll to booking form
         document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
+        // Optional: Show a message
+        console.log(`Selected room: ${roomName}`);
     }
 </script>
 <style>

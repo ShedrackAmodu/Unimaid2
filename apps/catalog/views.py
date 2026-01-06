@@ -187,6 +187,28 @@ class PublisherListView(ListView):
     def get_queryset(self):
         return Publisher.objects.prefetch_related('books').order_by('name')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Basic statistics
+        total_publishers = Publisher.objects.count()
+        total_books = Book.objects.active().count()
+        avg_books_per_publisher = round(total_books / total_publishers, 1) if total_publishers > 0 else 0
+
+        # Featured publishers (top by book count)
+        featured_publishers = Publisher.objects.annotate(
+            book_count=Count('books')
+        ).order_by('-book_count', 'name')[:4]
+
+        context.update({
+            'total_publishers': total_publishers,
+            'total_books': total_books,
+            'avg_books_per_publisher': avg_books_per_publisher,
+            'featured_publishers': featured_publishers,
+        })
+
+        return context
+
 
 class PublisherDetailView(DetailView):
     model = Publisher
@@ -208,6 +230,38 @@ class GenreListView(ListView):
 
     def get_queryset(self):
         return Genre.objects.prefetch_related('books').order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Basic statistics
+        total_genres = Genre.objects.count()
+        total_books = Book.objects.active().count()
+        avg_books_per_genre = round(total_books / total_genres, 1) if total_genres > 0 else 0
+
+        # Popular genres (top by book count)
+        popular_genres = Genre.objects.annotate(
+            book_count=Count('books')
+        ).order_by('-book_count', 'name')[:6]
+
+        # Alphabet for filtering
+        alphabet = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
+        # Discover genres (other genres with fewer books)
+        discover_genres = Genre.objects.annotate(
+            book_count=Count('books')
+        ).filter(book_count__gt=0).order_by('?')[:3]
+
+        context.update({
+            'total_genres': total_genres,
+            'total_books': total_books,
+            'avg_books_per_genre': avg_books_per_genre,
+            'popular_genres': popular_genres,
+            'alphabet': alphabet,
+            'discover_genres': discover_genres,
+        })
+
+        return context
 
 
 class GenreDetailView(DetailView):

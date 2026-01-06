@@ -64,6 +64,83 @@ class Reservation(BaseModel):
         ordering = ['-reservation_date']
 
 
+class LoanRequest(BaseModel):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('cancelled', 'Cancelled'),
+        ('expired', 'Expired'),
+    ]
+
+    user = models.ForeignKey(LibraryUser, on_delete=models.CASCADE, related_name='loan_requests', help_text="User making the borrow request")
+    book_copy = models.ForeignKey(BookCopy, on_delete=models.CASCADE, related_name='loan_requests', help_text="The specific book copy requested")
+    request_date = models.DateTimeField(default=timezone.now, help_text="Date the request was made")
+    expiry_date = models.DateTimeField(help_text="Date the request expires if not processed")
+    approval_date = models.DateTimeField(null=True, blank=True, help_text="Date the request was approved")
+    rejection_date = models.DateTimeField(null=True, blank=True, help_text="Date the request was rejected")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', help_text="Current status of the request")
+    notes = models.TextField(blank=True, help_text="Additional notes from staff or user")
+
+    def save(self, *args, **kwargs):
+        # Set expiry date to 24 hours from request if not set
+        if not self.expiry_date:
+            self.expiry_date = self.request_date + timedelta(hours=24)
+        super().save(*args, **kwargs)
+
+    def approve(self, approved_by):
+        """Approve the loan request and create the actual loan."""
+        if self.status != 'pending':
+            raise ValueError("Only pending requests can be approved")
+
+        # Create the loan
+        loan = Loan.objects.create(
+            user=self.user,
+            book_copy=self.book_copy,
+            due_date=timezone.now() + timedelta(days=14)  # Default, will be recalculated
+        )
+        loan.due_date = loan.calculate_due_date()
+        loan.save()
+
+        # Update book copy status
+        self.book_copy.status = 'checked_out'
+        self.book_copy.save()
+
+        # Update request status
+        self.status = 'approved'
+        self.approval_date = timezone.now()
+        self.save()
+
+        return loan
+
+    def reject(self, reason=""):
+        """Reject the loan request."""
+        if self.status != 'pending':
+            raise ValueError("Only pending requests can be rejected")
+
+        self.status = 'rejected'
+        self.rejection_date = timezone.now()
+        if reason:
+            self.notes = reason
+        self.save()
+
+    def cancel(self):
+        """Cancel the loan request."""
+        if self.status != 'pending':
+            raise ValueError("Only pending requests can be cancelled")
+
+        self.status = 'cancelled'
+        self.save()
+
+    def __str__(self):
+        return f"Borrow request: {self.user.username} - {self.book_copy.book.title}"
+
+    class Meta:
+        verbose_name = "Loan Request"
+        verbose_name_plural = "Loan Requests"
+        ordering = ['-request_date']
+
+
 class Fine(BaseModel):
     STATUS_CHOICES = [
         ('unpaid', 'Unpaid'),

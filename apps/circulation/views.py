@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
 from datetime import timedelta
-from .models import Loan, Reservation, Fine
+from .models import Loan, Reservation, Fine, LoanRequest
 from apps.catalog.models import Book, BookCopy
 from apps.accounts.models import LibraryUser
 
@@ -18,12 +18,14 @@ def is_staff_user(user):
 def staff_dashboard(request):
     pending_loans = Loan.objects.filter(status='active').select_related('user', 'book_copy__book')
     pending_reservations = Reservation.objects.filter(status='active').select_related('user', 'book')
+    pending_borrow_requests = LoanRequest.objects.filter(status='pending').select_related('user', 'book_copy__book')
     overdue_loans = Loan.objects.filter(status='active', due_date__lt=timezone.now()).select_related('user', 'book_copy__book')
     recent_returns = Loan.objects.filter(status='returned').order_by('-return_date')[:10]
 
     context = {
         'pending_loans': pending_loans,
         'pending_reservations': pending_reservations,
+        'pending_borrow_requests': pending_borrow_requests,
         'overdue_loans': overdue_loans,
         'recent_returns': recent_returns,
     }
@@ -35,12 +37,14 @@ def patron_dashboard(request):
     user = request.user
     current_loans = Loan.objects.filter(user=user, status='active').select_related('book_copy__book')
     active_reservations = Reservation.objects.filter(user=user, status='active').select_related('book')
+    pending_borrow_requests = LoanRequest.objects.filter(user=user, status='pending').select_related('book_copy__book')
     loan_history = Loan.objects.filter(user=user).exclude(status='active').order_by('-return_date')[:10]
     unpaid_fines = Fine.objects.filter(loan__user=user, status='unpaid')
 
     context = {
         'current_loans': current_loans,
         'active_reservations': active_reservations,
+        'pending_borrow_requests': pending_borrow_requests,
         'loan_history': loan_history,
         'unpaid_fines': unpaid_fines,
         'total_fines': sum(fine.amount for fine in unpaid_fines),
@@ -187,6 +191,91 @@ def pay_fine(request, fine_id):
 
     messages.success(request, f'Fine of ${fine.amount} paid successfully.')
     return redirect('circulation:patron_dashboard')
+
+
+@login_required
+def borrow_book(request, book_id):
+    """Allow patrons to request to borrow a book."""
+    book = get_object_or_404(Book, id=book_id)
+    user = request.user
+
+    # Check if user has unpaid fines
+    if Fine.objects.filter(loan__user=user, status='unpaid').exists():
+        messages.error(request, 'You have unpaid fines. Please pay your fines before borrowing books.')
+        return redirect('circulation:patron_dashboard')
+
+    # Check if user already has an active loan for this book
+    if Loan.objects.filter(user=user, book_copy__book=book, status='active').exists():
+        messages.warning(request, 'You already have this book on loan.')
+        return redirect('catalog:book_detail', pk=book_id)
+
+    # Check if user already has a pending request for this book
+    if LoanRequest.objects.filter(user=user, book_copy__book=book, status='pending').exists():
+        messages.warning(request, 'You already have a pending borrow request for this book.')
+        return redirect('catalog:book_detail', pk=book_id)
+
+    # Find available copies
+    available_copies = book.copies.filter(status='available')
+
+    if not available_copies.exists():
+        messages.error(request, 'No copies of this book are currently available.')
+        return redirect('catalog:book_detail', pk=book_id)
+
+    # For now, just pick the first available copy
+    # In a more sophisticated system, we could let users choose specific copies
+    book_copy = available_copies.first()
+
+    # Create loan request
+    loan_request = LoanRequest.objects.create(
+        user=user,
+        book_copy=book_copy
+    )
+
+    messages.success(request, f'Borrow request submitted for "{book.title}". Staff will review your request shortly.')
+    return redirect('circulation:patron_dashboard')
+
+
+@login_required
+def cancel_borrow_request(request, request_id):
+    """Allow patrons to cancel their pending borrow requests."""
+    loan_request = get_object_or_404(LoanRequest, id=request_id, user=request.user, status='pending')
+
+    loan_request.cancel()
+    messages.success(request, 'Borrow request cancelled successfully.')
+    return redirect('circulation:patron_dashboard')
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def approve_borrow_request(request, request_id):
+    """Allow staff to approve borrow requests."""
+    loan_request = get_object_or_404(LoanRequest, id=request_id, status='pending')
+
+    try:
+        loan = loan_request.approve(request.user)
+        messages.success(request, f'Borrow request approved. Book "{loan.book_copy.book.title}" is now on loan to {loan.user.get_full_name()}.')
+    except ValueError as e:
+        messages.error(request, f'Could not approve request: {e}')
+
+    return redirect('circulation:staff_dashboard')
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def reject_borrow_request(request, request_id):
+    """Allow staff to reject borrow requests."""
+    loan_request = get_object_or_404(LoanRequest, id=request_id, status='pending')
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Request rejected by staff')
+        loan_request.reject(reason)
+        messages.success(request, 'Borrow request rejected.')
+        return redirect('circulation:staff_dashboard')
+
+    context = {
+        'loan_request': loan_request,
+    }
+    return render(request, 'circulation/reject_request.html', context)
 
 
 @login_required
