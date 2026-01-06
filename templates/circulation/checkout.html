@@ -1,0 +1,1224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout Book - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Checkout Book</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-cart-check fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Checkout Book</h1>
+                <p class="lead text-muted">Process new book loans for library patrons</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Available Books -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-search me-2"></i>Available Books
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <input type="text" class="form-control form-control-sm me-2" id="bookSearch" placeholder="Search books..." style="width: 200px;">
+                        <button class="btn btn-sm btn-outline-primary" id="scanIsbnBtn">
+                            <i class="bi bi-upc-scan me-1"></i>Scan ISBN
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                {% if available_copies %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="booksTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="60">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                    </div>
+                                </th>
+                                <th>Book Details</th>
+                                <th>Copy ID</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for copy in available_copies %}
+                            <tr class="book-row" data-book-id="{{ copy.id }}" data-isbn="{{ copy.book.isbn }}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input book-checkbox" type="checkbox" value="{{ copy.id }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            {% if copy.book.cover_image %}
+                                            <img src="{{ copy.book.cover_image.url }}" alt="{{ copy.book.title }}" class="img-fluid rounded" style="width: 60px; height: 80px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 80px;">
+                                                <i class="bi bi-book text-muted fs-4"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ copy.book.title }}</h6>
+                                            <p class="text-muted small mb-1">{{ copy.book.author }}</p>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                <span class="badge bg-light text-dark small">ISBN: {{ copy.book.isbn|default:"N/A" }}</span>
+                                                <span class="badge bg-light text-dark small">{{ copy.book.publication_year }}</span>
+                                                <span class="badge bg-info">{{ copy.book.genre|default:"General" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">#{{ copy.id }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ copy.location|default:"Main Stacks" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Available</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary add-to-cart" data-copy-id="{{ copy.id }}">
+                                        <i class="bi bi-cart-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-book fs-1 mb-3"></i>
+                                        <p class="mb-2">No available books found</p>
+                                        <small>All books are currently checked out</small>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if available_copies.has_other_pages %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if available_copies.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ available_copies.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in available_copies.paginator.page_range %}
+                            <li class="page-item {% if available_copies.number == i %}active{% endif %}">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if available_copies.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ available_copies.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">No Available Books</h4>
+                    <p class="text-muted mb-4">All books are currently checked out or unavailable.</p>
+                    <a href="/circulation/return/" class="btn btn-primary">
+                        <i class="bi bi-arrow-return-left me-2"></i>Process Returns First
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Checkout Form -->
+    <div class="col-lg-4">
+        <div class="sticky-top" style="top: 100px;">
+            <!-- Patron Search Card -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-white border-0 py-4">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-person me-2"></i>Patron Information
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Find Patron</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="patronSearchInput" placeholder="Search by name, ID, or email...">
+                            <button class="btn btn-primary" type="button" id="searchPatronBtn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div id="patronSearchResults" class="mt-2" style="display: none;"></div>
+                    </div>
+                    
+                    <form method="post" id="checkoutForm">
+                        {% csrf_token %}
+                        
+                        <!-- Selected Patron -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Selected Patron</label>
+                            <div id="selectedPatron" class="border rounded p-3 bg-light" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1" id="patronName">No patron selected</h6>
+                                        <p class="text-muted small mb-1" id="patronId">ID: </p>
+                                        <p class="text-muted small mb-0" id="patronType">Type: </p>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="clearPatronBtn">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Active Loans:</small>
+                                            <span class="badge bg-primary" id="activeLoansCount">0</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Fines:</small>
+                                            <span class="badge bg-success" id="finesStatus">None</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="user_id" id="userIdInput">
+                        </div>
+                        
+                        <!-- Selected Books -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Books to Checkout</label>
+                            <div id="selectedBooks" class="border rounded p-3" style="min-height: 150px; max-height: 300px; overflow-y: auto;">
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-cart fs-1 mb-2"></i>
+                                    <p class="mb-0">No books selected</p>
+                                </div>
+                            </div>
+                            <input type="hidden" name="book_copy_id" id="bookCopyIdInput">
+                        </div>
+                        
+                        <!-- Loan Details -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Loan Details</label>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="autoCalculateDate" checked>
+                                        <label class="form-check-label" for="autoCalculateDate">
+                                            Auto-calculate due date based on patron type
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Loan Date</label>
+                                    <input type="date" class="form-control" name="loan_date" value="{% now 'Y-m-d' %}" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Due Date</label>
+                                    <input type="date" class="form-control" name="due_date" id="dueDateInput" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Loan Period</label>
+                                    <select class="form-select" id="loanPeriodSelect">
+                                        <option value="7">7 days (Public)</option>
+                                        <option value="14" selected>14 days (Student)</option>
+                                        <option value="21">21 days (Staff)</option>
+                                        <option value="30">30 days (Faculty)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Notes</label>
+                            <textarea class="form-control" name="notes" rows="3" placeholder="Add any special instructions or notes..."></textarea>
+                        </div>
+                        
+                        <!-- Summary -->
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Checkout Summary</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Books Selected:</span>
+                                    <span id="bookCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Patron Type:</span>
+                                    <span id="summaryPatronType">Not selected</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Loan Period:</span>
+                                    <span id="summaryLoanPeriod">14 days</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Due Date:</span>
+                                    <span id="summaryDueDate">{% now 'M d, Y' %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="checkoutBtn" disabled>
+                                <i class="bi bi-cart-check me-2"></i>Process Checkout
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearAllBtn">
+                                <i class="bi bi-x-circle me-2"></i>Clear All
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Quick Stats</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-primary bg-opacity-10 rounded">
+                                <small class="text-muted d-block">Available</small>
+                                <span class="fw-bold">{{ available_copies.count }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-warning bg-opacity-10 rounded">
+                                <small class="text-muted d-block">Reserved</small>
+                                <span class="fw-bold">23</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-success bg-opacity-10 rounded">
+                                <small class="text-muted d-block">Checked Out</small>
+                                <span class="fw-bold">187</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-danger bg-opacity-10 rounded">
+                                <small class="text-muted d-block">Overdue</small>
+                                <span class="fw-bold">12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Scan ISBN -->
+<div class="modal fade" id="scanIsbnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Scan ISBN Barcode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-upc-scan text-primary" style="font-size: 4rem;"></i>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-center mb-3">Position barcode within the camera view</p>
+                    <div class="border rounded p-4 text-center bg-light">
+                        <div id="scannerView" style="width: 100%; height: 200px; background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 50%, #f0f0f0 50%, #f0f0f0 75%, transparent 75%, transparent); background-size: 20px 20px;">
+                            <!-- Scanner view would be here -->
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm" id="startScannerBtn">
+                                <i class="bi bi-camera-video me-1"></i>Start Scanner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Or enter ISBN manually:</label>
+                    <input type="text" class="form-control" id="manualIsbnInput" placeholder="Enter 13-digit ISBN">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="searchByIsbnBtn">
+                    <i class="bi bi-search me-2"></i>Search by ISBN
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Patron Details -->
+<div class="modal fade" id="patronDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Patron Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="patronDetailsContent">
+                <!-- Patron details loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="selectPatronBtn">
+                    <i class="bi bi-check-circle me-2"></i>Select This Patron
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .book-row {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .book-row:hover {
+        background-color: rgba(var(--primary-rgb), 0.05);
+        transform: translateX(5px);
+    }
+    
+    .book-row.selected {
+        background-color: rgba(var(--primary-rgb), 0.1);
+        border-left: 4px solid var(--primary-blue);
+    }
+    
+    #selectedBooks .book-item {
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    
+    #selectedBooks .book-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sticky-top {
+        position: sticky;
+        z-index: 100;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    #patronSearchResults {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: white;
+    }
+    
+    .patron-result {
+        padding: 10px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .patron-result:hover {
+        background-color: rgba(var(--primary-rgb), 0.05);
+    }
+    
+    .patron-result:last-child {
+        border-bottom: none;
+    }
+    
+    #selectedPatron {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.05), rgba(var(--accent-rgb), 0.05));
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize variables
+        let selectedBooks = new Map(); // Map of copyId -> book data
+        let selectedPatron = null;
+        let selectedPatronId = null;
+        
+        // Set minimum date to today for loan date
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="loan_date"]').min = today;
+        
+        // Calculate default due date (14 days from now)
+        const defaultDueDate = new Date();
+        defaultDueDate.setDate(defaultDueDate.getDate() + 14);
+        const defaultDueDateStr = defaultDueDate.toISOString().split('T')[0];
+        document.getElementById('dueDateInput').value = defaultDueDateStr;
+        document.getElementById('dueDateInput').min = today;
+        
+        // Update summary due date
+        updateSummaryDueDate();
+        
+        // Book selection functionality
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const bookCheckboxes = document.querySelectorAll('.book-checkbox');
+        const bookRows = document.querySelectorAll('.book-row');
+        
+        // Select all books
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            bookCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const row = checkbox.closest('.book-row');
+                if (isChecked) {
+                    row.classList.add('selected');
+                    addBookToSelection(parseInt(checkbox.value));
+                } else {
+                    row.classList.remove('selected');
+                    removeBookFromSelection(parseInt(checkbox.value));
+                }
+            });
+            updateSelectedBooksDisplay();
+            updateCheckoutButton();
+        });
+        
+        // Individual book selection
+        bookCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const row = this.closest('.book-row');
+                const copyId = parseInt(this.value);
+                
+                if (this.checked) {
+                    row.classList.add('selected');
+                    addBookToSelection(copyId);
+                } else {
+                    row.classList.remove('selected');
+                    removeBookFromSelection(copyId);
+                }
+                
+                // Update select all checkbox
+                updateSelectAllCheckbox();
+                updateSelectedBooksDisplay();
+                updateCheckoutButton();
+            });
+        });
+        
+        // Click row to select
+        bookRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (!e.target.closest('.form-check') && !e.target.closest('.add-to-cart')) {
+                    const checkbox = this.querySelector('.book-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+        
+        // Add to cart button
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const copyId = parseInt(this.dataset.copyId);
+                const checkbox = document.querySelector(`.book-checkbox[value="${copyId}"]`);
+                
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+                
+                // Add visual feedback
+                this.innerHTML = '<i class="bi bi-cart-check"></i>';
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="bi bi-cart-plus"></i>';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }, 1000);
+            });
+        });
+        
+        // Book search functionality
+        const bookSearchInput = document.getElementById('bookSearch');
+        bookSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            bookRows.forEach(row => {
+                const title = row.querySelector('h6').textContent.toLowerCase();
+                const author = row.querySelector('p').textContent.toLowerCase();
+                const isbn = row.dataset.isbn || '';
+                
+                if (title.includes(searchTerm) || author.includes(searchTerm) || isbn.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Patron search functionality
+        const patronSearchInput = document.getElementById('patronSearchInput');
+        const searchPatronBtn = document.getElementById('searchPatronBtn');
+        const patronSearchResults = document.getElementById('patronSearchResults');
+        
+        function searchPatrons(query) {
+            // In real implementation, this would be an AJAX call
+            // For demo, we'll simulate search results
+            if (query.length < 2) {
+                patronSearchResults.style.display = 'none';
+                return;
+            }
+            
+            // Simulated search results
+            const results = [
+                {
+                    id: 1,
+                    name: "John Doe",
+                    email: "johndoe@student.unimaid.edu.ng",
+                    membership: "Student",
+                    studentId: "STU2023001",
+                    activeLoans: 3,
+                    fines: 0
+                },
+                {
+                    id: 2,
+                    name: "Dr. Jane Smith",
+                    email: "jsmith@unimaid.edu.ng",
+                    membership: "Faculty",
+                    facultyId: "FAC2022005",
+                    activeLoans: 5,
+                    fines: 500
+                },
+                {
+                    id: 3,
+                    name: "Samuel Johnson",
+                    email: "samuelj@unimaid.edu.ng",
+                    membership: "Staff",
+                    staffId: "STA2021003",
+                    activeLoans: 2,
+                    fines: 0
+                }
+            ];
+            
+            // Filter results based on query
+            const filteredResults = results.filter(patron => 
+                patron.name.toLowerCase().includes(query.toLowerCase()) ||
+                patron.email.toLowerCase().includes(query.toLowerCase()) ||
+                patron.studentId?.toLowerCase().includes(query.toLowerCase()) ||
+                patron.facultyId?.toLowerCase().includes(query.toLowerCase()) ||
+                patron.staffId?.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            // Display results
+            if (filteredResults.length > 0) {
+                let html = '';
+                filteredResults.forEach(patron => {
+                    html += `
+                        <div class="patron-result" data-patron-id="${patron.id}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="fw-bold mb-1">${patron.name}</h6>
+                                    <p class="text-muted small mb-1">${patron.email}</p>
+                                    <span class="badge bg-primary">${patron.membership}</span>
+                                    ${patron.studentId ? `<span class="badge bg-light text-dark ms-1">${patron.studentId}</span>` : ''}
+                                    ${patron.facultyId ? `<span class="badge bg-light text-dark ms-1">${patron.facultyId}</span>` : ''}
+                                    ${patron.staffId ? `<span class="badge bg-light text-dark ms-1">${patron.staffId}</span>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-1">
+                                        <small class="text-muted">Loans:</small>
+                                        <span class="badge bg-info">${patron.activeLoans}</span>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Fines:</small>
+                                        ${patron.fines > 0 ? 
+                                            `<span class="badge bg-danger">₦${patron.fines}</span>` : 
+                                            `<span class="badge bg-success">None</span>`}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                patronSearchResults.innerHTML = html;
+                patronSearchResults.style.display = 'block';
+                
+                // Add click handlers to patron results
+                document.querySelectorAll('.patron-result').forEach(result => {
+                    result.addEventListener('click', function() {
+                        const patronId = parseInt(this.dataset.patronId);
+                        const patron = filteredResults.find(p => p.id === patronId);
+                        selectPatron(patron);
+                    });
+                });
+            } else {
+                patronSearchResults.innerHTML = '<div class="text-center p-3 text-muted">No patrons found</div>';
+                patronSearchResults.style.display = 'block';
+            }
+        }
+        
+        patronSearchInput.addEventListener('input', function() {
+            searchPatrons(this.value);
+        });
+        
+        searchPatronBtn.addEventListener('click', function() {
+            searchPatrons(patronSearchInput.value);
+        });
+        
+        // Clear patron button
+        document.getElementById('clearPatronBtn').addEventListener('click', function() {
+            clearPatronSelection();
+        });
+        
+        // Select patron function
+        function selectPatron(patron) {
+            selectedPatron = patron;
+            selectedPatronId = patron.id;
+            
+            // Update UI
+            document.getElementById('patronName').textContent = patron.name;
+            document.getElementById('patronId').textContent = patron.studentId ? `ID: ${patron.studentId}` : 
+                                                             patron.facultyId ? `ID: ${patron.facultyId}` : 
+                                                             patron.staffId ? `ID: ${patron.staffId}` : 'ID: N/A';
+            document.getElementById('patronType').textContent = `Type: ${patron.membership}`;
+            document.getElementById('activeLoansCount').textContent = patron.activeLoans;
+            document.getElementById('finesStatus').textContent = patron.fines > 0 ? `₦${patron.fines}` : 'None';
+            document.getElementById('finesStatus').className = patron.fines > 0 ? 'badge bg-danger' : 'badge bg-success';
+            
+            document.getElementById('selectedPatron').style.display = 'block';
+            document.getElementById('userIdInput').value = patron.id;
+            
+            // Update summary
+            document.getElementById('summaryPatronType').textContent = patron.membership;
+            
+            // Auto-set loan period based on patron type
+            let loanPeriod = 14; // Default for students
+            if (patron.membership === 'Faculty') loanPeriod = 30;
+            if (patron.membership === 'Staff') loanPeriod = 21;
+            if (patron.membership === 'Public') loanPeriod = 7;
+            
+            document.getElementById('loanPeriodSelect').value = loanPeriod;
+            updateDueDateBasedOnPeriod();
+            
+            // Hide search results
+            patronSearchResults.style.display = 'none';
+            patronSearchInput.value = '';
+            
+            // Update checkout button
+            updateCheckoutButton();
+        }
+        
+        // Clear patron selection
+        function clearPatronSelection() {
+            selectedPatron = null;
+            selectedPatronId = null;
+            
+            document.getElementById('selectedPatron').style.display = 'none';
+            document.getElementById('userIdInput').value = '';
+            document.getElementById('summaryPatronType').textContent = 'Not selected';
+            
+            updateCheckoutButton();
+        }
+        
+        // Add book to selection
+        function addBookToSelection(copyId) {
+            if (!selectedBooks.has(copyId)) {
+                // Find the book row
+                const row = document.querySelector(`.book-row[data-book-id="${copyId}"]`);
+                if (row) {
+                    const title = row.querySelector('h6').textContent;
+                    const author = row.querySelector('p').textContent;
+                    const copyNum = row.querySelector('.badge.bg-secondary').textContent;
+                    
+                    selectedBooks.set(copyId, {
+                        id: copyId,
+                        title: title,
+                        author: author,
+                        copyNum: copyNum
+                    });
+                }
+            }
+        }
+        
+        // Remove book from selection
+        function removeBookFromSelection(copyId) {
+            selectedBooks.delete(copyId);
+        }
+        
+        // Update selected books display
+        function updateSelectedBooksDisplay() {
+            const container = document.getElementById('selectedBooks');
+            
+            if (selectedBooks.size === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-cart fs-1 mb-2"></i>
+                        <p class="mb-0">No books selected</p>
+                    </div>
+                `;
+                document.getElementById('bookCount').textContent = '0';
+                document.getElementById('bookCopyIdInput').value = '';
+            } else {
+                let html = '';
+                const copyIds = [];
+                
+                selectedBooks.forEach((book, copyId) => {
+                    copyIds.push(copyId);
+                    html += `
+                        <div class="book-item" data-copy-id="${copyId}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1 me-2">
+                                    <h6 class="fw-bold mb-1">${book.title}</h6>
+                                    <p class="text-muted small mb-1">${book.author}</p>
+                                    <span class="badge bg-light text-dark small">${book.copyNum}</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-book">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                document.getElementById('bookCount').textContent = selectedBooks.size;
+                document.getElementById('bookCopyIdInput').value = copyIds.join(',');
+                
+                // Add remove button handlers
+                document.querySelectorAll('.remove-book').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const bookItem = this.closest('.book-item');
+                        const copyId = parseInt(bookItem.dataset.copyId);
+                        
+                        // Uncheck the corresponding checkbox
+                        const checkbox = document.querySelector(`.book-checkbox[value="${copyId}"]`);
+                        if (checkbox) {
+                            checkbox.checked = false;
+                            checkbox.dispatchEvent(new Event('change'));
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Update select all checkbox
+        function updateSelectAllCheckbox() {
+            const checkedCount = document.querySelectorAll('.book-checkbox:checked').length;
+            const totalCount = bookCheckboxes.length;
+            
+            selectAllCheckbox.checked = checkedCount === totalCount && totalCount > 0;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+        }
+        
+        // Update checkout button state
+        function updateCheckoutButton() {
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const hasBooks = selectedBooks.size > 0;
+            const hasPatron = selectedPatronId !== null;
+            
+            checkoutBtn.disabled = !(hasBooks && hasPatron);
+            
+            // Also check if patron has unpaid fines (in real implementation)
+            if (selectedPatron && selectedPatron.fines > 0) {
+                // Show warning but allow checkout
+                checkoutBtn.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Checkout (Patron Has Fines)';
+                checkoutBtn.classList.remove('btn-primary');
+                checkoutBtn.classList.add('btn-warning');
+            } else {
+                checkoutBtn.innerHTML = '<i class="bi bi-cart-check me-2"></i>Process Checkout';
+                checkoutBtn.classList.remove('btn-warning');
+                checkoutBtn.classList.add('btn-primary');
+            }
+        }
+        
+        // Clear all button
+        document.getElementById('clearAllBtn').addEventListener('click', function() {
+            // Clear all selections
+            bookCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const row = checkbox.closest('.book-row');
+                row.classList.remove('selected');
+            });
+            
+            selectedBooks.clear();
+            clearPatronSelection();
+            
+            updateSelectAllCheckbox();
+            updateSelectedBooksDisplay();
+            updateCheckoutButton();
+            
+            // Reset form
+            document.querySelector('input[name="loan_date"]').value = today;
+            document.getElementById('dueDateInput').value = defaultDueDateStr;
+            document.getElementById('loanPeriodSelect').value = '14';
+            document.querySelector('textarea[name="notes"]').value = '';
+            
+            // Show success message
+            showToast('All selections cleared', 'success');
+        });
+        
+        // Loan period change handler
+        document.getElementById('loanPeriodSelect').addEventListener('change', function() {
+            if (this.value === 'custom') {
+                // Allow manual date selection
+                document.getElementById('autoCalculateDate').checked = false;
+                document.getElementById('dueDateInput').disabled = false;
+            } else {
+                updateDueDateBasedOnPeriod();
+            }
+        });
+        
+        // Auto-calculate date checkbox
+        document.getElementById('autoCalculateDate').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('dueDateInput').disabled = true;
+                updateDueDateBasedOnPeriod();
+            } else {
+                document.getElementById('dueDateInput').disabled = false;
+            }
+        });
+        
+        // Update due date based on selected period
+        function updateDueDateBasedOnPeriod() {
+            if (document.getElementById('autoCalculateDate').checked) {
+                const loanDate = new Date(document.querySelector('input[name="loan_date"]').value);
+                const period = parseInt(document.getElementById('loanPeriodSelect').value);
+                
+                const dueDate = new Date(loanDate);
+                dueDate.setDate(dueDate.getDate() + period);
+                
+                const dueDateStr = dueDate.toISOString().split('T')[0];
+                document.getElementById('dueDateInput').value = dueDateStr;
+                
+                updateSummaryDueDate();
+            }
+        }
+        
+        // Loan date change handler
+        document.querySelector('input[name="loan_date"]').addEventListener('change', function() {
+            updateDueDateBasedOnPeriod();
+        });
+        
+        // Update summary due date display
+        function updateSummaryDueDate() {
+            const dueDateInput = document.getElementById('dueDateInput').value;
+            if (dueDateInput) {
+                const date = new Date(dueDateInput);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                document.getElementById('summaryDueDate').textContent = formattedDate;
+                
+                const period = parseInt(document.getElementById('loanPeriodSelect').value);
+                document.getElementById('summaryLoanPeriod').textContent = `${period} days`;
+            }
+        }
+        
+        // Due date change handler
+        document.getElementById('dueDateInput').addEventListener('change', function() {
+            updateSummaryDueDate();
+        });
+        
+        // Scan ISBN button
+        document.getElementById('scanIsbnBtn').addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('scanIsbnModal'));
+            modal.show();
+        });
+        
+        // Manual ISBN search
+        document.getElementById('searchByIsbnBtn').addEventListener('click', function() {
+            const isbn = document.getElementById('manualIsbnInput').value.trim();
+            if (isbn) {
+                // In real implementation, this would search for the book
+                console.log(`Searching for ISBN: ${isbn}`);
+                
+                // Simulate finding a book
+                const modal = bootstrap.Modal.getInstance(document.getElementById('scanIsbnModal'));
+                modal.hide();
+                
+                // Highlight book if found
+                const bookRow = document.querySelector(`.book-row[data-isbn="${isbn}"]`);
+                if (bookRow) {
+                    bookRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    bookRow.classList.add('selected');
+                    bookRow.style.animation = 'pulse 2s';
+                    
+                    // Check the checkbox
+                    const checkbox = bookRow.querySelector('.book-checkbox');
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
+                    
+                    showToast('Book found and selected', 'success');
+                } else {
+                    showToast('Book not found in available copies', 'warning');
+                }
+            }
+        });
+        
+        // Form submission
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!selectedPatronId) {
+                showToast('Please select a patron', 'warning');
+                return;
+            }
+            
+            if (selectedBooks.size === 0) {
+                showToast('Please select at least one book', 'warning');
+                return;
+            }
+            
+            // Check for unpaid fines
+            if (selectedPatron.fines > 0) {
+                if (!confirm(`This patron has unpaid fines of ₦${selectedPatron.fines}. Proceed with checkout?`)) {
+                    return;
+                }
+            }
+            
+            // Show processing indicator
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const originalText = checkoutBtn.innerHTML;
+            checkoutBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+            checkoutBtn.disabled = true;
+            
+            // In real implementation, this would submit the form via AJAX
+            // For now, we'll simulate processing
+            setTimeout(() => {
+                // Simulate successful checkout
+                const booksCount = selectedBooks.size;
+                const patronName = selectedPatron.name;
+                
+                // Show success message
+                const successToast = `
+                    <div class="toast align-items-center text-bg-success border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Checkout successful! ${booksCount} book(s) checked out to ${patronName}.
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                
+                showToast(successToast);
+                
+                // Reset form
+                document.getElementById('clearAllBtn').click();
+                
+                // Restore button
+                checkoutBtn.innerHTML = originalText;
+                checkoutBtn.disabled = false;
+                
+                // Redirect to receipt or stay on page
+                setTimeout(() => {
+                    if (confirm('Checkout completed! Print receipt?')) {
+                        // Print receipt
+                        printReceipt();
+                    }
+                }, 1000);
+                
+            }, 2000);
+        });
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            
+            const bgClass = type === 'success' ? 'text-bg-success' : 
+                           type === 'warning' ? 'text-bg-warning' : 
+                           type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+            
+            toastContainer.innerHTML = `
+                <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Print receipt function
+        function printReceipt() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Checkout Receipt - Ramat Library</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .receipt-title { font-size: 24px; font-weight: bold; color: #0a2472; }
+                        .library-name { font-size: 18px; color: #666; margin-bottom: 10px; }
+                        .date { color: #666; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-weight: bold; border-bottom: 2px solid #0a2472; padding-bottom: 5px; margin-bottom: 10px; }
+                        .book-list { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        .book-list th, .book-list td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        .book-list th { background-color: #f2f2f2; }
+                        .total { font-weight: bold; text-align: right; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="receipt-title">BOOK CHECKOUT RECEIPT</div>
+                        <div class="library-name">Ramat Library - University of Maiduguri</div>
+                        <div class="date">${new Date().toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Patron Information</div>
+                        ${selectedPatron ? `
+                            <p><strong>Name:</strong> ${selectedPatron.name}</p>
+                            <p><strong>Membership:</strong> ${selectedPatron.membership}</p>
+                            <p><strong>ID:</strong> ${selectedPatron.studentId || selectedPatron.facultyId || selectedPatron.staffId || 'N/A'}</p>
+                            <p><strong>Email:</strong> ${selectedPatron.email}</p>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Books Checked Out</div>
+                        <table class="book-list">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Copy ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Array.from(selectedBooks.entries()).map(([id, book], index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${book.title}</td>
+                                        <td>${book.author}</td>
+                                        <td>${book.copyNum}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="total">Total Books: ${selectedBooks.size}</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Loan Details</div>
+                        <p><strong>Loan Date:</strong> ${document.querySelector('input[name="loan_date"]').value}</p>
+                        <p><strong>Due Date:</strong> ${document.getElementById('dueDateInput').value}</p>
+                        <p><strong>Loan Period:</strong> ${document.getElementById('loanPeriodSelect').value} days</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Thank you for using Ramat Library!</p>
+                        <p>Please return books by the due date to avoid fines.</p>
+                        <p>Contact: ramatlibrary@unimaid.edu.ng | +234 80166 253 232</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + F to focus book search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('bookSearch').focus();
+            }
+            
+            // Ctrl + P to focus patron search
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                document.getElementById('patronSearchInput').focus();
+            }
+            
+            // Ctrl + Enter to submit form
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                const checkoutBtn = document.getElementById('checkoutBtn');
+                if (!checkoutBtn.disabled) {
+                    checkoutBtn.click();
+                }
+            }
+            
+            // Escape to clear selections
+            if (e.key === 'Escape') {
+                document.getElementById('clearAllBtn').click();
+            }
+        });
+    });
+</script>
+{% endblock %}

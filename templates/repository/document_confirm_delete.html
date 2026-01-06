@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Document - Ramat Library Repository{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_list' %}">Repository</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_detail' pk=document.pk %}">{{ document.title|truncatechars:30 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Delete</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-lg">
+            <!-- Warning Header -->
+            <div class="card-header bg-gradient-danger text-white py-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div style="width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-exclamation-triangle fs-2"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="h2 fw-bold mb-1">Delete Document</h1>
+                        <p class="mb-0 opacity-75">This action cannot be undone</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-5">
+                <!-- Document Preview -->
+                <div class="document-preview mb-5">
+                    <div class="card border">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <div class="bg-light rounded-3 p-3">
+                                        <i class="bi bi-file-earmark-text fs-2 text-danger"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-2">{{ document.title }}</h5>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-person me-1"></i>
+                                                {{ document.authors|truncatechars:40 }}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                Uploaded {{ document.upload_date|date:"M d, Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% if document.collection %}
+                                    <div class="mt-2">
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-folder me-1"></i>{{ document.collection.name }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="alert alert-danger border-0 mb-5">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                        <div>
+                            <h5 class="alert-heading fw-bold">Warning: Permanent Deletion</h5>
+                            <p class="mb-2">You are about to permanently delete this document from the repository. This action will:</p>
+                            <ul class="mb-0">
+                                <li>Remove the document file from storage</li>
+                                <li>Delete all metadata associated with the document</li>
+                                <li>Remove the document from search results and collections</li>
+                                <li>Delete download statistics and usage data</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Impact Analysis -->
+                <div class="impact-analysis mb-5">
+                    <h5 class="fw-bold mb-3">Impact Analysis</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                                                <i class="bi bi-download text-danger"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ document.download_count|default:"0" }} Downloads</h6>
+                                            <small class="text-muted">Will be lost</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                                <i class="bi bi-eye text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ document.view_count|default:"1" }} Views</h6>
+                                            <small class="text-muted">Will be lost</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation Form -->
+                <form method="post" id="delete-form">
+                    {% csrf_token %}
+                    
+                    <!-- Confirmation Checkbox -->
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="confirm-delete" required>
+                        <label class="form-check-label fw-bold" for="confirm-delete">
+                            I understand that this action cannot be undone and I have the authority to delete this document
+                        </label>
+                    </div>
+
+                    <!-- Reason for Deletion -->
+                    <div class="mb-4">
+                        <label for="deletion-reason" class="form-label fw-bold">
+                            Reason for deletion (optional but recommended)
+                        </label>
+                        <textarea class="form-control" id="deletion-reason" name="deletion_reason" 
+                                  rows="3" placeholder="e.g., duplicate, copyright issue, incorrect upload..."></textarea>
+                        <small class="text-muted">This information will be logged for audit purposes</small>
+                    </div>
+
+                    <!-- Final Warning -->
+                    <div class="alert alert-warning border-0 mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-exclamation fs-4 me-3"></i>
+                            <div>
+                                <strong>Security Check:</strong> Please verify this is the correct document before proceeding.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                           class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                        
+                        <button type="submit" class="btn btn-danger btn-lg" id="delete-btn" disabled>
+                            <i class="bi bi-trash me-2"></i>Permanently Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Safety Information -->
+            <div class="card-footer bg-light">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex">
+                            <i class="bi bi-archive text-primary me-3 fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Consider Archiving Instead</h6>
+                                <p class="small text-muted mb-0">
+                                    If unsure, consider changing the access level to "Private" instead of deleting.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex">
+                            <i class="bi bi-clock-history text-primary me-3 fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">No Recovery Available</h6>
+                                <p class="small text-muted mb-0">
+                                    Deleted documents cannot be recovered through the system. Backups may exist.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alternative Actions -->
+        <div class="mt-4">
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Alternative Actions</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'repository:edit_document' pk=document.pk %}" 
+                               class="btn btn-outline-primary w-100">
+                                <i class="bi bi-pencil me-2"></i>Edit Document Instead
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'repository:document_list' %}" 
+                               class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-list me-2"></i>Return to Repository
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Support -->
+        <div class="mt-3 text-center">
+            <small class="text-muted">
+                Need help? <a href="{% url 'accounts:contact' %}" class="text-decoration-none">Contact Repository Support</a>
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Warning Header */
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    
+    /* Document Preview */
+    .document-preview .card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .document-preview .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.1);
+    }
+    
+    /* Impact Analysis Cards */
+    .impact-analysis .card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .impact-analysis .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Confirmation Checkbox */
+    .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .form-check-input:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    /* Delete Button */
+    #delete-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    #delete-btn:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+    
+    /* Alternative Actions */
+    .alternative-actions .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .alternative-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Animations */
+    @keyframes pulseWarning {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    
+    .pulse-warning {
+        animation: pulseWarning 2s infinite;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+    
+    /* Focus States */
+    .form-control:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const confirmCheckbox = document.getElementById('confirm-delete');
+        const deleteBtn = document.getElementById('delete-btn');
+        const deleteForm = document.getElementById('delete-form');
+        const deletionReason = document.getElementById('deletion-reason');
+        
+        // Update delete button state based on checkbox
+        confirmCheckbox.addEventListener('change', function() {
+            deleteBtn.disabled = !this.checked;
+            
+            // Add visual feedback
+            if (this.checked) {
+                deleteBtn.classList.add('pulse-warning');
+            } else {
+                deleteBtn.classList.remove('pulse-warning');
+            }
+        });
+        
+        // Form submission
+        deleteForm.addEventListener('submit', function(e) {
+            // Final confirmation
+            if (!confirmCheckbox.checked) {
+                e.preventDefault();
+                showAlert('Please confirm that you understand this action cannot be undone.', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Deleting...
+            `;
+            
+            // Log deletion reason
+            const reason = deletionReason.value.trim();
+            if (reason) {
+                console.log(`Deletion reason: ${reason}`);
+            }
+            
+            // In a real implementation, you might want to send an analytics event
+            console.log(`Deleting document: ${document.title}`);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Escape to cancel
+            if (e.key === 'Escape') {
+                window.location.href = "{% url 'repository:document_detail' pk=document.pk %}";
+            }
+            
+            // Ctrl+Enter to submit if confirmed
+            if (e.key === 'Enter' && e.ctrlKey && confirmCheckbox.checked) {
+                deleteBtn.click();
+                e.preventDefault();
+            }
+        });
+        
+        // Show impact statistics with animation
+        const impactStats = document.querySelectorAll('.fw-bold.mb-0');
+        impactStats.forEach(stat => {
+            const text = stat.textContent;
+            const number = parseInt(text);
+            
+            if (!isNaN(number) && number > 0) {
+                let current = 0;
+                const increment = number / 20;
+                const updateCounter = () => {
+                    if (current < number) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = number.toLocaleString();
+                    }
+                };
+                
+                // Start counter when element is in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Add confirmation dialog on page leave if form is interacted with
+        let formModified = false;
+        
+        confirmCheckbox.addEventListener('change', () => {
+            formModified = true;
+        });
+        
+        deletionReason.addEventListener('input', () => {
+            formModified = true;
+        });
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (formModified) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+        
+        // Preview document information on hover
+        const docPreview = document.querySelector('.document-preview .card');
+        if (docPreview) {
+            docPreview.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(220, 53, 69, 0.15)';
+            });
+            
+            docPreview.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 5px 15px rgba(220, 53, 69, 0.1)';
+            });
+        }
+        
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert-dismissible:not(.alert-warning):not(.alert-danger)');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            alertDiv.style.zIndex = '1060';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.maxWidth = '500px';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill'} me-2"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Add confirmation sound effect (optional)
+        const playSound = (sound) => {
+            // In a real implementation, you might want to play a sound effect
+            // For now, we'll just log it
+            console.log(`Playing sound: ${sound}`);
+        };
+        
+        // Play warning sound when checkbox is checked
+        confirmCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                playSound('warning');
+            }
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Add visual timer for confirmation
+        let timeOnPage = 0;
+        const timerInterval = setInterval(() => {
+            timeOnPage++;
+            
+            // Update button text to show user has been considering for X seconds
+            if (timeOnPage >= 10 && !confirmCheckbox.checked) {
+                const cancelBtn = document.querySelector('.btn-outline-secondary');
+                if (cancelBtn) {
+                    cancelBtn.innerHTML = `<i class="bi bi-arrow-left me-2"></i>Cancel (${timeOnPage}s)`;
+                }
+            }
+        }, 1000);
+        
+        // Clean up interval when leaving page
+        window.addEventListener('beforeunload', () => {
+            clearInterval(timerInterval);
+        });
+    });
+</script>
+{% endblock %}

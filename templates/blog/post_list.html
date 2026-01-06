@@ -1,0 +1,331 @@
+<!-- blog/templates/blog/post_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}News & Blog - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'blog:post_list' %}">Blog</a></li>
+<li class="breadcrumb-item active" aria-current="page">All Posts</li>
+{% endblock %}
+
+{% block page_title %}Library News & Blog{% endblock %}
+{% block page_subtitle %}Latest updates, announcements, and articles from Ramat Library{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Blog Posts Column -->
+    <div class="col-lg-8">
+        <!-- Filter Tabs -->
+        <div class="mb-4">
+            <ul class="nav nav-tabs" id="blogTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-posts" type="button" role="tab">
+                        <i class="bi bi-grid me-2"></i>All Posts
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="published-tab" data-bs-toggle="tab" data-bs-target="#published-posts" type="button" role="tab">
+                        <i class="bi bi-check-circle me-2"></i>Published
+                    </button>
+                </li>
+                {% if user.is_staff %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft-posts" type="button" role="tab">
+                        <i class="bi bi-pencil me-2"></i>Drafts
+                    </button>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="blogTabsContent">
+            <!-- All Posts Tab -->
+            <div class="tab-pane fade show active" id="all-posts" role="tabpanel">
+                {% if posts %}
+                    {% for post in posts %}
+                    <div class="card mb-4 shadow-hover">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <div class="position-relative h-100" style="background: linear-gradient(135deg, #0a2472, #001f3f); min-height: 200px;">
+                                    <div class="position-absolute top-0 end-0 m-3">
+                                        <span class="badge {% if post.status == 'published' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ post.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="position-absolute bottom-0 start-0 w-100 p-3 text-white">
+                                        <small class="opacity-75">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {% if post.published_date %}
+                                                {{ post.published_date|date:"M d, Y" }}
+                                            {% else %}
+                                                Draft
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="card-title fw-bold mb-3">
+                                        <a href="{% url 'blog:post_detail' post.pk %}" class="text-decoration-none text-dark">
+                                            {{ post.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="card-text text-muted mb-4">
+                                        {{ post.content|striptags|truncatechars:200 }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-person me-1"></i>
+                                                {{ post.author.get_full_name|default:post.author.username }}
+                                            </small>
+                                        </div>
+                                        <a href="{% url 'blog:post_detail' post.pk %}" class="btn btn-sm btn-primary">
+                                            Read More <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-newspaper display-1 text-muted mb-4"></i>
+                        <h4 class="text-muted">No Blog Posts Yet</h4>
+                        <p class="text-muted">Check back later for updates and announcements.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Published Posts Tab -->
+            <div class="tab-pane fade" id="published-posts" role="tabpanel">
+                {% for post in posts %}
+                    {% if post.status == 'published' %}
+                    <div class="card mb-4 shadow-hover">
+                        <div class="card-body">
+                            <h4 class="card-title fw-bold mb-3">
+                                <a href="{% url 'blog:post_detail' post.pk %}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h4>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="d-flex align-items-center me-4">
+                                    <i class="bi bi-person-circle me-2 text-primary"></i>
+                                    <small>{{ post.author.get_full_name|default:post.author.username }}</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar me-2 text-primary"></i>
+                                    <small>{{ post.published_date|date:"F d, Y" }}</small>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted mb-4">
+                                {{ post.content|striptags|truncatechars:150 }}
+                            </p>
+                            <a href="{% url 'blog:post_detail' post.pk %}" class="btn btn-outline-primary">
+                                Read Article
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-check display-1 text-muted mb-4"></i>
+                        <h4 class="text-muted">No Published Posts</h4>
+                        <p class="text-muted">Published articles will appear here.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Drafts Tab (Staff Only) -->
+            {% if user.is_staff %}
+            <div class="tab-pane fade" id="draft-posts" role="tabpanel">
+                {% for post in user.blog_posts.all %}
+                    {% if post.status == 'draft' %}
+                    <div class="card mb-4 shadow-hover border-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h4 class="card-title fw-bold mb-0">
+                                    <a href="{% url 'blog:post_detail' post.pk %}" class="text-decoration-none">
+                                        {{ post.title }}
+                                    </a>
+                                </h4>
+                                <span class="badge bg-warning">Draft</span>
+                            </div>
+                            <p class="card-text text-muted mb-4">
+                                {{ post.content|striptags|truncatechars:150 }}
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'blog:edit_post' post.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                <a href="{% url 'blog:post_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye me-1"></i>Preview
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-pencil display-1 text-muted mb-4"></i>
+                        <h4 class="text-muted">No Draft Posts</h4>
+                        <p class="text-muted">Your draft posts will appear here.</p>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Blog pagination" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Create Post Button (Staff Only) -->
+        {% if user.is_staff %}
+        <div class="card mb-4 shadow-hover">
+            <div class="card-body text-center">
+                <i class="bi bi-pencil-square display-4 text-primary mb-3"></i>
+                <h5 class="card-title fw-bold mb-3">Create New Post</h5>
+                <p class="card-text text-muted mb-4">Share library news, announcements, or articles with our community.</p>
+                <a href="{% url 'blog:create_post' %}" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-circle me-2"></i>Write New Post
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Posts -->
+        <div class="card mb-4 shadow-hover">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Posts</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for post in posts|slice:":5" %}
+                <a href="{% url 'blog:post_detail' post.pk %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1 fw-bold">{{ post.title|truncatechars:40 }}</h6>
+                        <small class="text-muted">{{ post.published_date|date:"M d" }}</small>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-person me-1"></i>{{ post.author.get_full_name|default:post.author.username }}
+                    </small>
+                </a>
+                {% empty %}
+                <div class="list-group-item text-center text-muted py-3">
+                    No recent posts
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Categories (Tags) -->
+        <div class="card mb-4 shadow-hover">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-tags me-2"></i>Categories</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-light text-dark p-2">Library News</span>
+                    <span class="badge bg-light text-dark p-2">Research</span>
+                    <span class="badge bg-light text-dark p-2">Events</span>
+                    <span class="badge bg-light text-dark p-2">Collections</span>
+                    <span class="badge bg-light text-dark p-2">Services</span>
+                    <span class="badge bg-light text-dark p-2">Digital Library</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archive -->
+        <div class="card shadow-hover">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-archive me-2"></i>Archive</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    January 2024
+                    <span class="badge bg-primary rounded-pill">3</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    December 2023
+                    <span class="badge bg-primary rounded-pill">5</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    November 2023
+                    <span class="badge bg-primary rounded-pill">2</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    October 2023
+                    <span class="badge bg-primary rounded-pill">4</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tab functionality
+        const triggerTabList = [].slice.call(document.querySelectorAll('#blogTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            const tabTrigger = new bootstrap.Tab(triggerEl)
+            
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+        
+        // Store active tab in session storage
+        $('#blogTabs button').on('shown.bs.tab', function (e) {
+            localStorage.setItem('activeBlogTab', $(e.target).attr('id'));
+        });
+        
+        // Restore active tab on page load
+        var activeTab = localStorage.getItem('activeBlogTab');
+        if (activeTab) {
+            $('#' + activeTab).tab('show');
+        }
+    });
+</script>
+{% endblock %}

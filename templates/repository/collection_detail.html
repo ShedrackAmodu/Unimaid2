@@ -1,0 +1,1045 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ collection.name }} - Ramat Library Collections{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_list' %}">Repository</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:collection_list' %}">Collections</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ collection.name|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Collection Header -->
+<div class="collection-header mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <div class="me-4">
+                    <div class="collection-icon-lg">
+                        <div class="bg-gradient-primary rounded-4 p-4 shadow-lg">
+                            <i class="bi bi-folder2-open text-white fs-1"></i>
+                        </div>
+                        <div class="collection-badge">
+                            <span class="badge bg-white text-primary shadow-sm">
+                                {{ documents.paginator.count }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="display-4 fw-bold mb-3">{{ collection.name }}</h1>
+                    {% if collection.curator %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-sm me-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                                <i class="bi bi-person text-primary"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Curated by</h6>
+                            <p class="text-muted mb-0">
+                                {{ collection.curator.get_full_name|default:collection.curator.username }}
+                                {% if collection.curator.email %}
+                                <a href="mailto:{{ collection.curator.email }}" class="text-decoration-none ms-2">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+                <a href="{% url 'repository:collection_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>All Collections
+                </a>
+                {% if user.is_staff %}
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-gear me-2"></i>Manage
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-pencil me-2"></i>Edit Collection
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-plus-circle me-2"></i>Add Documents
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#">
+                                <i class="bi bi-trash me-2"></i>Delete Collection
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Collection Description -->
+    {% if collection.description %}
+    <div class="card border-0 bg-light mt-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-info-circle me-2"></i>About This Collection
+            </h5>
+            <div class="collection-description">
+                {{ collection.description|linebreaks }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Collection Statistics -->
+<div class="row mb-5">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 text-center py-4">
+            <div class="card-body">
+                <i class="bi bi-file-earmark-text fs-1 text-primary mb-3"></i>
+                <h3 class="fw-bold mb-2">{{ documents.paginator.count }}</h3>
+                <p class="text-muted mb-0">Documents</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 text-center py-4">
+            <div class="card-body">
+                <i class="bi bi-download fs-1 text-success mb-3"></i>
+                <h3 class="fw-bold mb-2">{{ total_downloads|default:"0" }}</h3>
+                <p class="text-muted mb-0">Total Downloads</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 text-center py-4">
+            <div class="card-body">
+                <i class="bi bi-eye fs-1 text-warning mb-3"></i>
+                <h3 class="fw-bold mb-2">{{ total_views|default:"0" }}</h3>
+                <p class="text-muted mb-0">Total Views</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 text-center py-4">
+            <div class="card-body">
+                <i class="bi bi-calendar fs-1 text-info mb-3"></i>
+                <h3 class="fw-bold mb-2">{{ last_updated|date:"M Y"|default:"N/A" }}</h3>
+                <p class="text-muted mb-0">Last Updated</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <form method="get" class="row g-2 align-items-center">
+                    <div class="col-md-5 mb-2 mb-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0">
+                                <i class="bi bi-search text-primary"></i>
+                            </span>
+                            <input type="text" 
+                                   name="q" 
+                                   class="form-control border-0" 
+                                   placeholder="Search in this collection..."
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <select name="sort" class="form-select" onchange="this.form.submit()">
+                            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+                            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+                            <option value="title" {% if sort == 'title' %}selected{% endif %}>Title A-Z</option>
+                            <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <select name="access" class="form-select" onchange="this.form.submit()">
+                            <option value="all" {% if access_filter == 'all' %}selected{% endif %}>All Access Levels</option>
+                            <option value="open" {% if access_filter == 'open' %}selected{% endif %}>Open Access Only</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="d-grid">
+            <button type="button" class="btn btn-outline-primary" id="export-btn">
+                <i class="bi bi-download me-2"></i>Export List
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if search_query %}
+<div class="alert alert-info border-0 mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    Search results for: <strong>"{{ search_query }}"</strong> in this collection
+    <a href="{% url 'repository:collection_detail' pk=collection.pk %}" class="btn btn-sm btn-outline-info ms-3">
+        Clear Search
+    </a>
+</div>
+{% endif %}
+
+<!-- Documents Grid/List -->
+{% if documents %}
+<div class="row mb-5">
+    <div class="col-12">
+        <!-- View Toggle -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">Documents</h3>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="grid-view-btn">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="list-view-btn">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Documents Container -->
+        <div class="documents-container" id="documents-container">
+            <!-- Grid View -->
+            <div class="row g-4" id="grid-view">
+                {% for document in documents %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card document-card h-100 border-0 shadow-hover">
+                        <div class="card-body p-4">
+                            <!-- Document Type Badge -->
+                            <div class="mb-3">
+                                {% if document.access_level == 'open' %}
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="bi bi-unlock me-1"></i>Open Access
+                                </span>
+                                {% elif document.access_level == 'restricted' %}
+                                <span class="badge bg-warning px-3 py-2">
+                                    <i class="bi bi-lock me-1"></i>Restricted
+                                </span>
+                                {% endif %}
+                                
+                                <span class="badge bg-light text-dark border ms-2">
+                                    {{ document.upload_date|date:"Y" }}
+                                </span>
+                            </div>
+
+                            <!-- Document Title -->
+                            <h5 class="fw-bold mb-3">
+                                <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ document.title|truncatechars:80 }}
+                                </a>
+                            </h5>
+
+                            <!-- Document Authors -->
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>
+                                    {{ document.authors|truncatechars:50 }}
+                                </small>
+                            </div>
+
+                            <!-- Abstract Preview -->
+                            {% if document.abstract %}
+                            <p class="text-muted small mb-4">
+                                {{ document.abstract|truncatechars:120 }}
+                            </p>
+                            {% endif %}
+
+                            <!-- Document Metadata -->
+                            <div class="border-top pt-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ document.upload_date|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        {% if document.doi %}
+                                        <small class="text-primary">
+                                            <i class="bi bi-tag me-1"></i>DOI
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-4 d-flex justify-content-between">
+                                <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>Details
+                                </a>
+                                <a href="{% url 'repository:download_document' pk=document.pk %}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-download me-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- List View (Hidden by default) -->
+            <div class="list-view d-none" id="list-view">
+                <div class="card border-0">
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for document in documents %}
+                            <div class="list-group-item border-0 px-0 py-4">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-1 text-center">
+                                        <div class="bg-light rounded-3 p-3">
+                                            <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <h6 class="fw-bold mb-2">
+                                            <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                                               class="text-decoration-none">
+                                                {{ document.title|truncatechars:80 }}
+                                            </a>
+                                        </h6>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-person me-1"></i>{{ document.authors|truncatechars:40 }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar me-1"></i>{{ document.upload_date|date:"Y" }}
+                                            </small>
+                                        </div>
+                                        {% if document.abstract %}
+                                        <p class="text-muted small mb-0">
+                                            {{ document.abstract|truncatechars:100 }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% if document.access_level == 'open' %}
+                                            <span class="badge bg-success">Open Access</span>
+                                            {% else %}
+                                            <span class="badge bg-warning">Restricted</span>
+                                            {% endif %}
+                                            {% if document.doi %}
+                                            <span class="badge bg-light text-dark border">DOI</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'repository:download_document' pk=document.pk %}" 
+                                               class="btn btn-primary">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if documents.paginator.num_pages > 1 %}
+        <nav aria-label="Document pagination" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if documents.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if access_filter %}&access={{ access_filter }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ documents.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if access_filter %}&access={{ access_filter }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in documents.paginator.page_range %}
+                    {% if documents.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > documents.number|add:'-3' and num < documents.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if access_filter %}&access={{ access_filter }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if documents.has_next %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ documents.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if access_filter %}&access={{ access_filter }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ documents.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}{% if access_filter %}&access={{ access_filter }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <img src="{% static 'images/ramat_ai2.png' %}" alt="No Documents" class="img-fluid mb-4" style="max-height: 150px;">
+    <h3 class="text-muted mb-3">
+        {% if search_query %}
+        No documents found
+        {% else %}
+        No documents in this collection
+        {% endif %}
+    </h3>
+    <p class="text-muted mb-4">
+        {% if search_query %}
+        No documents match your search criteria in this collection.
+        {% else %}
+        This collection doesn't have any documents yet.
+        {% endif %}
+    </p>
+    {% if user.is_staff %}
+    <a href="{% url 'repository:upload_document' %}" class="btn btn-primary">
+        <i class="bi bi-upload me-2"></i>Upload First Document
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Related Collections -->
+{% if related_collections %}
+<div class="mt-5 pt-5 border-top">
+    <h3 class="fw-bold mb-4">Related Collections</h3>
+    <div class="row g-4">
+        {% for related in related_collections %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="me-3">
+                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-folder text-primary"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ related.name }}</h5>
+                            <p class="text-muted small mb-0">
+                                {{ related.documents.count }} document{{ related.documents.count|pluralize }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if related.description %}
+                    <p class="text-muted small mb-3">{{ related.description|truncatechars:100 }}</p>
+                    {% endif %}
+                    <a href="{% url 'repository:collection_detail' pk=related.pk %}" 
+                       class="btn btn-sm btn-outline-primary">
+                        View Collection
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Collection Usage -->
+<div class="mt-5 pt-5 border-top">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4">Collection Usage & Citation</h3>
+            <div class="card border-0 bg-light">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">How to Cite This Collection</h6>
+                    <div class="citation-box bg-white p-4 rounded-3 mb-3">
+                        <code>
+                            {{ collection.name }}. Curated by {{ collection.curator.get_full_name|default:collection.curator.username }}. 
+                            Ramat Library Institutional Repository, University of Maiduguri. 
+                            Accessed: {{ "now"|date:"Y-m-d" }}. 
+                            URL: {{ request.build_absolute_uri }}
+                        </code>
+                    </div>
+                    <button class="btn btn-outline-primary copy-citation">
+                        <i class="bi bi-clipboard me-2"></i>Copy Citation
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Collection Actions</h6>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary" id="subscribe-btn">
+                            <i class="bi bi-bell me-2"></i>Subscribe to Updates
+                        </button>
+                        <a href="{% url 'accounts:contact' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-envelope me-2"></i>Contact Curator
+                        </a>
+                        <button type="button" class="btn btn-outline-info" id="share-btn">
+                            <i class="bi bi-share me-2"></i>Share Collection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Top -->
+<div class="text-center mt-5">
+    <a href="#" class="btn btn-outline-secondary" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="bi bi-arrow-up me-2"></i>Back to Top
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Collection Header */
+    .collection-header {
+        position: relative;
+    }
+    
+    .collection-icon-lg {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .collection-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+    }
+    
+    .collection-badge .badge {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Collection Description */
+    .collection-description {
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+    
+    /* Statistics Cards */
+    .card.border-0 {
+        transition: all 0.3s ease;
+    }
+    
+    .card.border-0:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Document Cards */
+    .document-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 31, 63, 0.1);
+    }
+    
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 31, 63, 0.15);
+        border-color: var(--accent-blue);
+    }
+    
+    /* List View */
+    .list-group-item {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(0, 31, 63, 0.02);
+        transform: translateX(5px);
+    }
+    
+    /* Citation Box */
+    .citation-box {
+        border-left: 4px solid var(--primary-blue);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* View Toggle */
+    .btn-group .btn.active {
+        background-color: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .collection-icon-lg {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .display-4 {
+            font-size: 2.5rem;
+        }
+        
+        .documents-container .row {
+            margin: 0 -0.5rem;
+        }
+        
+        .documents-container .col-lg-4,
+        .documents-container .col-md-6 {
+            padding: 0 0.5rem;
+        }
+        
+        .list-view .col-lg-1,
+        .list-view .col-lg-2,
+        .list-view .col-lg-3,
+        .list-view .col-lg-6 {
+            margin-bottom: 1rem;
+        }
+        
+        .list-view .text-end {
+            text-align: left !important;
+        }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .document-card,
+    .list-group-item {
+        animation: fadeIn 0.5s ease forwards;
+        animation-delay: calc(var(--item-order) * 0.05s);
+        opacity: 0;
+    }
+    
+    /* Export Button */
+    #export-btn {
+        transition: all 0.3s ease;
+    }
+    
+    #export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set animation delays for document items
+        const documentCards = document.querySelectorAll('.document-card');
+        documentCards.forEach((card, index) => {
+            card.style.setProperty('--item-order', index);
+            card.style.animationDelay = `${index * 0.05}s`;
+        });
+        
+        const listItems = document.querySelectorAll('.list-group-item');
+        listItems.forEach((item, index) => {
+            item.style.setProperty('--item-order', index);
+            item.style.animationDelay = `${index * 0.05}s`;
+        });
+        
+        // View Toggle
+        const gridViewBtn = document.getElementById('grid-view-btn');
+        const listViewBtn = document.getElementById('list-view-btn');
+        const gridView = document.getElementById('grid-view');
+        const listView = document.getElementById('list-view');
+        
+        gridViewBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            listViewBtn.classList.remove('active');
+            gridView.classList.remove('d-none');
+            listView.classList.add('d-none');
+            
+            // Update URL parameter (optional)
+            const url = new URL(window.location);
+            url.searchParams.set('view', 'grid');
+            window.history.replaceState({}, '', url);
+        });
+        
+        listViewBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            gridViewBtn.classList.remove('active');
+            gridView.classList.add('d-none');
+            listView.classList.remove('d-none');
+            
+            // Update URL parameter (optional)
+            const url = new URL(window.location);
+            url.searchParams.set('view', 'list');
+            window.history.replaceState({}, '', url);
+        });
+        
+        // Check URL for view parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === 'list') {
+            listViewBtn.click();
+        }
+        
+        // Export List functionality
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.addEventListener('click', function() {
+            // Show export options modal (simplified version)
+            const exportModal = `
+                <div class="modal fade" id="exportModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Export Collection</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Export this collection's document list as:</p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary export-format" data-format="csv">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV
+                                    </button>
+                                    <button class="btn btn-outline-primary export-format" data-format="bibtex">
+                                        <i class="bi bi-file-text me-2"></i>BibTeX
+                                    </button>
+                                    <button class="btn btn-outline-primary export-format" data-format="ris">
+                                        <i class="bi bi-file-text me-2"></i>RIS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to page
+            if (!document.getElementById('exportModal')) {
+                document.body.insertAdjacentHTML('beforeend', exportModal);
+                const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+                modal.show();
+                
+                // Handle export format selection
+                document.querySelectorAll('.export-format').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const format = this.getAttribute('data-format');
+                        exportCollection(format);
+                        modal.hide();
+                    });
+                });
+            }
+        });
+        
+        function exportCollection(format) {
+            // Show loading state
+            exportBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Exporting...
+            `;
+            exportBtn.disabled = true;
+            
+            // Simulate export process
+            setTimeout(() => {
+                // In real implementation, this would make an API call
+                console.log(`Exporting collection as ${format}`);
+                
+                // Show success message
+                showAlert(`Collection exported as ${format.toUpperCase()}`, 'success');
+                
+                // Reset button
+                exportBtn.innerHTML = '<i class="bi bi-download me-2"></i>Export List';
+                exportBtn.disabled = false;
+            }, 1500);
+        }
+        
+        // Copy Citation
+        const copyCitationBtn = document.querySelector('.copy-citation');
+        if (copyCitationBtn) {
+            copyCitationBtn.addEventListener('click', function() {
+                const citation = document.querySelector('.citation-box code').textContent;
+                navigator.clipboard.writeText(citation).then(() => {
+                    // Show success feedback
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="bi bi-check me-2"></i>Copied!';
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-primary');
+                    }, 2000);
+                });
+            });
+        }
+        
+        // Subscribe button
+        const subscribeBtn = document.getElementById('subscribe-btn');
+        if (subscribeBtn) {
+            subscribeBtn.addEventListener('click', function() {
+                const isSubscribed = this.classList.contains('btn-primary');
+                
+                if (isSubscribed) {
+                    this.innerHTML = '<i class="bi bi-bell me-2"></i>Subscribe to Updates';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-primary');
+                    showAlert('Unsubscribed from collection updates', 'info');
+                } else {
+                    this.innerHTML = '<i class="bi bi-bell-fill me-2"></i>Subscribed';
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-primary');
+                    showAlert('Subscribed to collection updates', 'success');
+                }
+            });
+        }
+        
+        // Share button
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn && navigator.share) {
+            shareBtn.addEventListener('click', async function() {
+                try {
+                    await navigator.share({
+                        title: document.title,
+                        text: 'Check out this collection: ' + document.querySelector('h1').textContent,
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Error sharing:', err);
+                }
+            });
+        } else if (shareBtn) {
+            // Fallback for browsers that don't support Web Share API
+            shareBtn.addEventListener('click', function() {
+                const shareModal = `
+                    <div class="modal fade" id="shareModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Share Collection</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="share-url" 
+                                               value="${window.location.href}" readonly>
+                                        <button class="btn btn-outline-secondary copy-share-url" type="button">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(document.title)}&url=${encodeURIComponent(window.location.href)}" 
+                                           target="_blank" class="btn btn-outline-info">
+                                            <i class="bi bi-twitter"></i> Twitter
+                                        </a>
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" 
+                                           target="_blank" class="btn btn-outline-primary">
+                                            <i class="bi bi-facebook"></i> Facebook
+                                        </a>
+                                        <a href="mailto:?subject=${encodeURIComponent('Check this collection')}&body=${encodeURIComponent(window.location.href)}" 
+                                           class="btn btn-outline-danger">
+                                            <i class="bi bi-envelope"></i> Email
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (!document.getElementById('shareModal')) {
+                    document.body.insertAdjacentHTML('beforeend', shareModal);
+                    const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+                    modal.show();
+                    
+                    // Copy URL functionality
+                    document.querySelector('.copy-share-url')?.addEventListener('click', function() {
+                        const urlInput = document.getElementById('share-url');
+                        urlInput.select();
+                        navigator.clipboard.writeText(urlInput.value).then(() => {
+                            this.innerHTML = '<i class="bi bi-check"></i>';
+                            setTimeout(() => {
+                                this.innerHTML = '<i class="bi bi-clipboard"></i>';
+                            }, 2000);
+                        });
+                    });
+                }
+            });
+        }
+        
+        // Filter form enhancements
+        const sortSelect = document.querySelector('select[name="sort"]');
+        const accessSelect = document.querySelector('select[name="access"]');
+        
+        [sortSelect, accessSelect].forEach(select => {
+            if (select) {
+                select.addEventListener('change', function() {
+                    // Add loading indicator
+                    const submitBtn = this.form.querySelector('button[type="submit"]');
+                    const originalContent = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    submitBtn.disabled = true;
+                    
+                    // Submit form after a short delay for visual feedback
+                    setTimeout(() => {
+                        this.form.submit();
+                    }, 300);
+                });
+            }
+        });
+        
+        // Statistics counter animation
+        const statNumbers = document.querySelectorAll('.fw-bold.mb-2');
+        statNumbers.forEach(stat => {
+            const originalText = stat.textContent.trim();
+            const number = parseInt(originalText.replace(/,/g, ''));
+            
+            if (!isNaN(number) && number > 0) {
+                let current = 0;
+                const increment = number / 30;
+                const updateCounter = () => {
+                    if (current < number) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = number.toLocaleString();
+                    }
+                };
+                
+                // Start when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Document card hover effects
+        documentCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const badge = this.querySelector('.badge.bg-success, .badge.bg-warning');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                    badge.style.transition = 'transform 0.3s ease';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const badge = this.querySelector('.badge.bg-success, .badge.bg-warning');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert-dismissible.position-fixed');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            alertDiv.style.zIndex = '1060';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.maxWidth = '500px';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-info-circle-fill'} me-2"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Toggle view with V key
+            if (e.key === 'v' && e.ctrlKey) {
+                e.preventDefault();
+                if (gridViewBtn.classList.contains('active')) {
+                    listViewBtn.click();
+                } else {
+                    gridViewBtn.click();
+                }
+            }
+            
+            // Focus search on /
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                const searchInput = document.querySelector('input[name="q"]');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

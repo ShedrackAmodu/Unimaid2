@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reserve Book - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/catalog/">Catalog</a></li>
+<li class="breadcrumb-item"><a href="/catalog/book/{{ book.id }}/">{{ book.title|truncatechars:30 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Reserve</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-clock-history fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Reserve Book</h1>
+                <p class="lead text-muted">Place a reservation for {{ book.title }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <!-- Book Information -->
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid rounded shadow" style="max-height: 300px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center shadow" style="height: 300px;">
+                            <i class="bi bi-book text-muted" style="font-size: 8rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h2 class="fw-bold mb-3">{{ book.title }}</h2>
+                        <p class="text-muted mb-4">{{ book.author }}</p>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-badge text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <small class="text-muted">Author</small>
+                                        <p class="fw-bold mb-0">{{ book.author }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <small class="text-muted">Published</small>
+                                        <p class="fw-bold mb-0">{{ book.publication_year }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-tag text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <small class="text-muted">Genre</small>
+                                        <p class="fw-bold mb-0">{{ book.genre|default:"General" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-upc-scan text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <small class="text-muted">ISBN</small>
+                                        <p class="fw-bold mb-0">{{ book.isbn|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Availability Status -->
+                        <div class="alert {% if book.is_available %}alert-success{% else %}alert-warning{% endif %}">
+                            <div class="d-flex align-items-center">
+                                <i class="bi {% if book.is_available %}bi-check-circle{% else %}bi-clock{% %} me-3 fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">
+                                        {% if book.is_available %}
+                                        Currently Available
+                                        {% else %}
+                                        Currently Unavailable
+                                        {% endif %}
+                                    </h6>
+                                    <p class="mb-0">
+                                        {% if book.is_available %}
+                                        You can borrow this book immediately. Would you like to <a href="/circulation/checkout/?book_id={{ book.id }}" class="alert-link">check it out</a> instead?
+                                        {% else %}
+                                        All copies are currently checked out. You can reserve this book to be notified when it becomes available.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reservation Form -->
+                <div class="reservation-form">
+                    <h4 class="fw-bold mb-4">Reservation Details</h4>
+                    
+                    <form method="post" id="reservationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Patron Information -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Patron Information</h6>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</p>
+                                            <p class="mb-2"><strong>Membership:</strong> {{ user.membership_type|title }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><strong>Email:</strong> {{ user.email }}</p>
+                                            <p class="mb-0"><strong>ID:</strong> {{ user.student_id|default:user.faculty_id|default:user.staff_id|default:"N/A" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reservation Options -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Reservation Options</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Reservation Duration</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="reservationDays" value="7" min="1" max="14">
+                                        <span class="input-group-text">days</span>
+                                    </div>
+                                    <small class="text-muted">Reservation will expire after this period</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Priority</label>
+                                    <select class="form-select" id="priorityLevel">
+                                        <option value="normal" selected>Normal Priority</option>
+                                        <option value="high">High Priority (Academic Need)</option>
+                                        <option value="low">Low Priority (Leisure Reading)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Preferences -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Notification Preferences</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                        <label class="form-check-label" for="emailNotifications">
+                                            Email notifications
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="smsNotifications">
+                                        <label class="form-check-label" for="smsNotifications">
+                                            SMS notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="autoCheckout" checked>
+                                        <label class="form-check-label" for="autoCheckout">
+                                            Auto-checkout when available
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="multipleCopies">
+                                        <label class="form-check-label" for="multipleCopies">
+                                            Accept any available copy
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Special Instructions -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Special Instructions (Optional)</label>
+                            <textarea class="form-control" id="specialInstructions" rows="3" placeholder="Any special requests or instructions..."></textarea>
+                        </div>
+                        
+                        <!-- Queue Position -->
+                        <div class="mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Queue Information</h6>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <p class="mb-2">This book currently has <strong class="text-primary">3</strong> active reservations.</p>
+                                            <p class="mb-0">Estimated wait time: <strong class="text-warning">2-3 weeks</strong></p>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="queue-badge">
+                                                <span class="badge bg-primary py-3 px-4 fs-5">Position #4</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Terms & Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">reservation terms and conditions</a>.
+                                    I understand that I must pick up the book within 24 hours of notification, or my reservation will be cancelled.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-clock-history me-2"></i>Confirm Reservation
+                            </button>
+                            <a href="/catalog/book/{{ book.id }}/" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel & Return to Book
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Alternative Options -->
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="fw-bold mb-3">Alternative Options</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-search text-primary fs-1 mb-3"></i>
+                                    <h6 class="fw-bold mb-3">Find Similar Books</h6>
+                                    <p class="text-muted small mb-3">Search for similar titles that might be available</p>
+                                    <a href="/catalog/?genre={{ book.genre }}" class="btn btn-sm btn-outline-primary w-100">
+                                        Browse Similar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text text-success fs-1 mb-3"></i>
+                                    <h6 class="fw-bold mb-3">Digital Version</h6>
+                                    <p class="text-muted small mb-3">Check if an e-book version is available</p>
+                                    <button class="btn btn-sm btn-outline-success w-100" id="checkEbookBtn">
+                                        Check E-book
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-calendar-check text-warning fs-1 mb-3"></i>
+                                    <h6 class="fw-bold mb-3">Set Reminder</h6>
+                                    <p class="text-muted small mb-3">Get notified when book is returned</p>
+                                    <button class="btn btn-sm btn-outline-warning w-100" id="setReminderBtn">
+                                        Set Reminder
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms & Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reservation Terms & Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">1. Reservation Policy</h6>
+                    <ul>
+                        <li>Reservations are valid for 7 days (or as specified during reservation)</li>
+                        <li>You will be notified by email/SMS when the book becomes available</li>
+                        <li>You must pick up the book within 24 hours of notification</li>
+                        <li>Failure to pick up will result in cancellation of reservation</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">2. Priority & Queue</h6>
+                    <ul>
+                        <li>Reservations are processed in the order received</li>
+                        <li>Faculty and staff may receive priority for academic materials</li>
+                        <li>Multiple reservations for the same book will form a queue</li>
+                        <li>Your position in the queue will be displayed in your dashboard</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">3. Cancellation Policy</h6>
+                    <ul>
+                        <li>You may cancel your reservation at any time</li>
+                        <li>Cancellations free up the book for the next person in queue</li>
+                        <li>Frequent no-shows may result in temporary reservation privileges being suspended</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">4. Loan Period</h6>
+                    <ul>
+                        <li>Standard loan periods apply once you check out the reserved book</li>
+                        <li>Reservation period does not affect your checkout loan period</li>
+                        <li>All library rules and fines policies apply to reserved books</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reservation Confirmed!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Reservation Successful</h4>
+                <p class="mb-4">Your reservation for <strong>"{{ book.title }}"</strong> has been confirmed.</p>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Reservation ID</small>
+                                <p class="fw-bold mb-0" id="reservationId">RES-{{ "00000" }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Expires</small>
+                                <p class="fw-bold mb-0" id="expiryDate">7 days</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-muted small">
+                    You will be notified when the book becomes available. 
+                    You can manage your reservations from your dashboard.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='/circulation/patron_dashboard/'">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="printReservation()">
+                    <i class="bi bi-printer me-2"></i>Print Confirmation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .queue-badge {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .alert-link {
+        text-decoration: underline;
+        font-weight: 600;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .card.bg-light {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.03), rgba(var(--accent-rgb), 0.03));
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check ebook button
+        document.getElementById('checkEbookBtn').addEventListener('click', function() {
+            // Simulate checking for e-book
+            this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Checking...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                // Show result
+                const hasEbook = Math.random() > 0.5;
+                if (hasEbook) {
+                    showToast('E-book version available! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/repository/ebook/{{ book.id }}/';
+                    }, 1500);
+                } else {
+                    showToast('No e-book version available.', 'warning');
+                    this.innerHTML = 'Check E-book';
+                    this.disabled = false;
+                }
+            }, 2000);
+        });
+        
+        // Set reminder button
+        document.getElementById('setReminderBtn').addEventListener('click', function() {
+            showToast('Reminder set! You will be notified when this book is available.', 'info');
+        });
+        
+        // Reservation form submission
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!document.getElementById('agreeTerms').checked) {
+                showToast('You must agree to the terms and conditions.', 'warning');
+                return;
+            }
+            
+            // Show processing
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+            submitBtn.disabled = true;
+            
+            // Generate reservation details
+            const reservationDays = document.getElementById('reservationDays').value;
+            const priority = document.getElementById('priorityLevel').value;
+            const instructions = document.getElementById('specialInstructions').value;
+            
+            // In real implementation, this would be an AJAX call
+            setTimeout(() => {
+                // Generate mock reservation ID
+                const reservationId = 'RES-' + Date.now().toString().slice(-6);
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + parseInt(reservationDays));
+                
+                // Update success modal
+                document.getElementById('reservationId').textContent = reservationId;
+                document.getElementById('expiryDate').textContent = expiryDate.toLocaleDateString();
+                
+                // Show success modal
+                const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                modal.show();
+                
+                // Restore button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+        
+        // Print reservation function
+        window.printReservation = function() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Reservation Confirmation - Ramat Library</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .receipt-title { font-size: 24px; font-weight: bold; color: #0a2472; }
+                        .library-name { font-size: 18px; color: #666; margin-bottom: 10px; }
+                        .date { color: #666; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-weight: bold; border-bottom: 2px solid #0a2472; padding-bottom: 5px; margin-bottom: 10px; }
+                        .book-info { display: flex; margin-bottom: 20px; }
+                        .book-details { margin-left: 20px; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; }
+                        .badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; background: #0a2472; color: white; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="receipt-title">RESERVATION CONFIRMATION</div>
+                        <div class="library-name">Ramat Library - University of Maiduguri</div>
+                        <div class="date">${new Date().toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Reservation Details</div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <div>
+                                <p><strong>Reservation ID:</strong> <span class="badge">${document.getElementById('reservationId').textContent}</span></p>
+                                <p><strong>Status:</strong> <span style="color: green;">Confirmed</span></p>
+                            </div>
+                            <div>
+                                <p><strong>Expiry Date:</strong> ${document.getElementById('expiryDate').textContent}</p>
+                                <p><strong>Queue Position:</strong> #4</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Book Information</div>
+                        <div class="book-info">
+                            <div style="width: 100px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #999;">Book Cover</span>
+                            </div>
+                            <div class="book-details">
+                                <h4 style="margin-top: 0;">{{ book.title }}</h4>
+                                <p><strong>Author:</strong> {{ book.author }}</p>
+                                <p><strong>ISBN:</strong> {{ book.isbn|default:"N/A" }}</p>
+                                <p><strong>Genre:</strong> {{ book.genre|default:"General" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Patron Information</div>
+                        <p><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</p>
+                        <p><strong>Membership Type:</strong> {{ user.membership_type|title }}</p>
+                        <p><strong>ID Number:</strong> {{ user.student_id|default:user.faculty_id|default:user.staff_id|default:"N/A" }}</p>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Important Notes</div>
+                        <ul>
+                            <li>You will be notified by email when the book becomes available</li>
+                            <li>You must pick up the book within 24 hours of notification</li>
+                            <li>Your position in the queue is #4</li>
+                            <li>Estimated wait time: 2-3 weeks</li>
+                            <li>You can cancel this reservation from your dashboard at any time</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Thank you for using Ramat Library!</p>
+                        <p>For inquiries, contact: ramatlibrary@unimaid.edu.ng | +234 80166 253 232</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            
+            const bgClass = type === 'success' ? 'text-bg-success' : 
+                           type === 'warning' ? 'text-bg-warning' : 
+                           type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+            
+            toastContainer.innerHTML = `
+                <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Initialize form validation
+        const reservationDays = document.getElementById('reservationDays');
+        reservationDays.addEventListener('change', function() {
+            if (this.value < 1) this.value = 1;
+            if (this.value > 14) this.value = 14;
+        });
+        
+        // Update queue position based on priority
+        const priorityLevel = document.getElementById('priorityLevel');
+        priorityLevel.addEventListener('change', function() {
+            const queueBadge = document.querySelector('.queue-badge .badge');
+            if (this.value === 'high') {
+                queueBadge.textContent = 'Position #2';
+                queueBadge.className = 'badge bg-warning py-3 px-4 fs-5';
+                document.querySelector('.queue-badge p strong').textContent = '1-2 weeks';
+            } else if (this.value === 'low') {
+                queueBadge.textContent = 'Position #5';
+                queueBadge.className = 'badge bg-secondary py-3 px-4 fs-5';
+                document.querySelector('.queue-badge p strong').textContent = '3-4 weeks';
+            } else {
+                queueBadge.textContent = 'Position #4';
+                queueBadge.className = 'badge bg-primary py-3 px-4 fs-5';
+                document.querySelector('.queue-badge p strong').textContent = '2-3 weeks';
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + Enter to submit form
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                document.querySelector('#reservationForm button[type="submit"]').click();
+            }
+            
+            // Escape to go back
+            if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+    });
+</script>
+{% endblock %}

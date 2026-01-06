@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Institutional Repository - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Institutional Repository</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <h1 class="display-4 fw-bold mb-3">Institutional Repository</h1>
+        <p class="lead text-muted">
+            University of Maiduguri's digital archive for research outputs, theses, dissertations, 
+            and scholarly publications.
+        </p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+        {% if user.is_staff %}
+        <a href="{% url 'repository:upload_document' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-upload me-2"></i>Upload Document
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="card shadow-lg mb-5 border-0">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-3 mb-lg-0">
+                <form method="get" class="d-flex">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               name="q" 
+                               class="form-control border-0" 
+                               placeholder="Search documents, authors, abstracts..."
+                               value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-6">
+                <form method="get" class="d-flex align-items-center">
+                    <label class="me-3 fw-bold text-muted">Filter by Collection:</label>
+                    <select name="collection" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Collections</option>
+                        {% for collection in collections %}
+                        <option value="{{ collection.id }}" 
+                                {% if selected_collection == collection.id|stringformat:"i" %}selected{% endif %}>
+                            {{ collection.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        {% if search_query %}
+        <div class="mt-4">
+            <div class="alert alert-info border-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Search results for: <strong>"{{ search_query }}"</strong>
+                <a href="{% url 'repository:document_list' %}" class="btn btn-sm btn-outline-info ms-3">
+                    Clear Search
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="row mb-5">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 bg-primary text-white text-center py-4">
+            <div class="card-body">
+                <h2 class="display-4 fw-bold mb-0">{{ documents.paginator.count }}</h2>
+                <p class="mb-0">Total Documents</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 bg-success text-white text-center py-4">
+            <div class="card-body">
+                <h2 class="display-4 fw-bold mb-0">
+                    {{ documents.paginator.count|default:"0" }}
+                </h2>
+                <p class="mb-0">Open Access</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 bg-warning text-dark text-center py-4">
+            <div class="card-body">
+                <h2 class="display-4 fw-bold mb-0">{{ collections.count }}</h2>
+                <p class="mb-0">Collections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 bg-info text-white text-center py-4">
+            <div class="card-body">
+                <h2 class="display-4 fw-bold mb-0">
+                    {{ documents.paginator.count|default:"0" }}
+                </h2>
+                <p class="mb-0">Recent Uploads</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Documents Grid -->
+{% if documents %}
+<div class="row g-4 mb-5">
+    {% for document in documents %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card document-card h-100 border-0 shadow-hover">
+            <div class="card-body p-4">
+                <!-- Document Type Badge -->
+                <div class="mb-3">
+                    {% if document.access_level == 'open' %}
+                    <span class="badge bg-success px-3 py-2">
+                        <i class="bi bi-unlock me-1"></i>Open Access
+                    </span>
+                    {% elif document.access_level == 'restricted' %}
+                    <span class="badge bg-warning px-3 py-2">
+                        <i class="bi bi-lock me-1"></i>Restricted
+                    </span>
+                    {% elif document.access_level == 'embargo' %}
+                    <span class="badge bg-secondary px-3 py-2">
+                        <i class="bi bi-clock me-1"></i>Embargoed
+                    </span>
+                    {% else %}
+                    <span class="badge bg-dark px-3 py-2">
+                        <i class="bi bi-person me-1"></i>Private
+                    </span>
+                    {% endif %}
+                    
+                    {% if document.collection %}
+                    <span class="badge bg-primary px-3 py-2 ms-2">
+                        {{ document.collection.name|truncatechars:15 }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Document Title -->
+                <h5 class="fw-bold mb-3">
+                    <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                       class="text-decoration-none text-dark">
+                        {{ document.title|truncatechars:100 }}
+                    </a>
+                </h5>
+
+                <!-- Document Authors -->
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="bi bi-person me-1"></i>
+                        {{ document.authors|truncatechars:60 }}
+                    </small>
+                </div>
+
+                <!-- Abstract Preview -->
+                {% if document.abstract %}
+                <p class="text-muted small mb-4">
+                    {{ document.abstract|truncatechars:150 }}
+                </p>
+                {% endif %}
+
+                <!-- Document Metadata -->
+                <div class="border-top pt-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ document.upload_date|date:"Y" }}
+                            </small>
+                        </div>
+                        <div class="col-6 text-end">
+                            {% if document.doi %}
+                            <small class="text-primary">
+                                <i class="bi bi-tag me-1"></i>DOI
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'repository:document_detail' pk=document.pk %}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>View Details
+                    </a>
+                    <a href="{% url 'repository:download_document' pk=document.pk %}" 
+                       class="btn btn-primary btn-sm">
+                        <i class="bi bi-download me-1"></i>Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if documents.paginator.num_pages > 1 %}
+<nav aria-label="Document pagination">
+    <ul class="pagination justify-content-center">
+        {% if documents.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_collection %}&collection={{ selected_collection }}{% endif %}">
+                <i class="bi bi-chevron-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ documents.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_collection %}&collection={{ selected_collection }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in documents.paginator.page_range %}
+            {% if documents.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > documents.number|add:'-3' and num < documents.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_collection %}&collection={{ selected_collection }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if documents.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ documents.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_collection %}&collection={{ selected_collection }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ documents.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_collection %}&collection={{ selected_collection }}{% endif %}">
+                <i class="bi bi-chevron-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <img src="{% static 'images/ramat_ai2.png' %}" alt="No Documents" class="img-fluid mb-4" style="max-height: 150px;">
+    <h3 class="text-muted mb-3">No Documents Found</h3>
+    <p class="text-muted mb-4">
+        {% if search_query %}
+        No documents match your search criteria. Try different keywords.
+        {% else %}
+        The repository is currently empty or no documents match your filter criteria.
+        {% endif %}
+    </p>
+    {% if user.is_staff %}
+    <a href="{% url 'repository:upload_document' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-upload me-2"></i>Upload First Document
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Featured Collections -->
+<div class="mt-5 pt-5 border-top">
+    <h2 class="fw-bold mb-4">Browse Collections</h2>
+    <div class="row g-4">
+        {% for collection in collections|slice:":6" %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card collection-card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="me-3">
+                            <div class="bg-primary rounded-circle p-3">
+                                <i class="bi bi-folder text-white fs-4"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ collection.name }}</h5>
+                            <p class="text-muted small mb-0">
+                                {{ collection.documents.count }} document{{ collection.documents.count|pluralize }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if collection.description %}
+                    <p class="text-muted mb-3">{{ collection.description|truncatechars:100 }}</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'repository:collection_detail' pk=collection.pk %}" 
+                           class="btn btn-outline-primary btn-sm">
+                            View Collection <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-4">
+                <p class="text-muted">No collections available yet.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if collections.count > 6 %}
+    <div class="text-center mt-4">
+        <a href="{% url 'repository:collection_list' %}" class="btn btn-outline-primary">
+            View All Collections <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Repository Information -->
+<div class="mt-5 pt-5 border-top">
+    <div class="row">
+        <div class="col-lg-6">
+            <h3 class="fw-bold mb-4">About the Repository</h3>
+            <p class="text-muted">
+                The Ramat Library Institutional Repository preserves and provides access to the 
+                scholarly output of the University of Maiduguri community. It includes theses, 
+                dissertations, research articles, conference papers, and other academic works.
+            </p>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Open Access</h6>
+                            <p class="text-muted small mb-0">Free access to scholarly content</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Preservation</h6>
+                            <p class="text-muted small mb-0">Long-term preservation of research</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card bg-light border-0">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Contribute Your Work</h5>
+                    <p class="text-muted mb-4">
+                        Faculty, researchers, and students can contribute their scholarly works 
+                        to the repository. Contact us for submission guidelines.
+                    </p>
+                    <div class="d-grid gap-2">
+                        {% if user.is_staff %}
+                        <a href="{% url 'repository:upload_document' %}" class="btn btn-primary">
+                            <i class="bi bi-upload me-2"></i>Upload Document
+                        </a>
+                        {% else %}
+                        <a href="{% url 'accounts:contact' %}" class="btn btn-primary">
+                            <i class="bi bi-envelope me-2"></i>Contact Repository Manager
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Document Card Styles */
+    .document-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 31, 63, 0.1);
+    }
+    
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 31, 63, 0.15);
+        border-color: var(--accent-blue);
+    }
+    
+    .document-card .badge {
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+    
+    /* Collection Card Styles */
+    .collection-card {
+        transition: all 0.3s ease;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Pagination Styles */
+    .page-link {
+        color: var(--primary-blue);
+        border: 1px solid rgba(0, 31, 63, 0.1);
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .page-link:hover {
+        background-color: var(--light-blue);
+        color: var(--primary-blue);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .card {
+            margin-bottom: 1rem;
+        }
+        
+        .input-group-lg {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize document cards hover effect
+        const docCards = document.querySelectorAll('.document-card');
+        docCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+        });
+        
+        // Initialize collection cards hover effect
+        const collectionCards = document.querySelectorAll('.collection-card');
+        collectionCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('i').style.transform = 'scale(1.2)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('i').style.transform = 'scale(1)';
+            });
+        });
+        
+        // Search input focus effect
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', function() {
+                this.parentElement.style.boxShadow = '0 0 0 3px rgba(58, 134, 255, 0.1)';
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                this.parentElement.style.boxShadow = 'none';
+            });
+        }
+        
+        // Statistics counter animation
+        const statNumbers = document.querySelectorAll('.display-4');
+        statNumbers.forEach(stat => {
+            const originalText = stat.textContent.trim();
+            if (!isNaN(parseInt(originalText))) {
+                const target = parseInt(originalText);
+                let current = 0;
+                const increment = target / 30;
+                const counter = () => {
+                    if (current < target) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(counter);
+                    } else {
+                        stat.textContent = target.toLocaleString();
+                    }
+                };
+                
+                // Start when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            counter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Filter select enhancement
+        const filterSelect = document.querySelector('select[name="collection"]');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', function() {
+                // Add loading animation
+                this.style.pointerEvents = 'none';
+                const originalColor = this.style.color;
+                this.style.color = 'var(--primary-blue)';
+                
+                setTimeout(() => {
+                    this.style.pointerEvents = 'auto';
+                    this.style.color = originalColor;
+                }, 500);
+            });
+        }
+    });
+</script>
+{% endblock %}

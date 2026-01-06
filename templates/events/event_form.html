@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Event - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'events:event_list' %}" class="text-decoration-none">Events</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ action }} Event</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-calendar-plus me-2"></i>{{ action }} Event
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" id="eventForm">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <h6 class="fw-bold mb-2">Please correct the following errors:</h6>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Basic Information -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-info-circle me-2"></i>Basic Information
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                Event Title *
+                            </label>
+                            {{ form.title }}
+                            <div class="form-text">Clear, descriptive title for your event</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                Description *
+                            </label>
+                            {{ form.description }}
+                            <div class="form-text">Detailed information about the event</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Date & Time -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-clock me-2"></i>Date & Time
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">
+                                    Date *
+                                </label>
+                                {{ form.date }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.time.id_for_label }}" class="form-label fw-bold">
+                                    Time *
+                                </label>
+                                {{ form.time }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-geo-alt me-2"></i>Location
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.location.id_for_label }}" class="form-label fw-bold">
+                                Location *
+                            </label>
+                            {{ form.location }}
+                            <div class="form-text">e.g., "Main Library Auditorium" or "Room 101"</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Registration Settings -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-people me-2"></i>Registration Settings
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.max_attendees.id_for_label }}" class="form-label fw-bold">
+                                    Maximum Attendees
+                                </label>
+                                {{ form.max_attendees }}
+                                <div class="form-text">Leave empty for unlimited attendees</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.registration_deadline.id_for_label }}" 
+                                       class="form-label fw-bold">
+                                    Registration Deadline
+                                </label>
+                                {{ form.registration_deadline }}
+                                <div class="form-text">When registration closes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Options -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-gear me-2"></i>Additional Options
+                        </h5>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendNotifications">
+                            <label class="form-check-label" for="sendNotifications">
+                                Send notifications to registered users
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="featureEvent">
+                            <label class="form-check-label" for="featureEvent">
+                                Feature this event on homepage
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowWaitlist">
+                            <label class="form-check-label" for="allowWaitlist">
+                                Allow waitlist when event is full
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex gap-3 mt-5">
+                        <button type="submit" class="btn btn-primary px-4 py-2 flex-grow-1">
+                            <i class="bi bi-check-circle me-2"></i>
+                            {{ action }} Event
+                        </button>
+                        
+                        <a href="{% if event %}{% url 'events:event_detail' event.pk %}{% else %}{% url 'events:event_list' %}{% endif %}" 
+                           class="btn btn-outline-secondary px-4 py-2">
+                            <i class="bi bi-x-circle me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Form Guidelines -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Event Creation Guidelines
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Clear Titles</h6>
+                                <p class="small text-muted mb-0">Use descriptive titles that clearly indicate the event purpose</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Detailed Descriptions</h6>
+                                <p class="small text-muted mb-0">Include all relevant information attendees need to know</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Realistic Capacity</h6>
+                                <p class="small text-muted mb-0">Set appropriate limits based on venue capacity</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Plan Ahead</h6>
+                                <p class="small text-muted mb-0">Create events at least one week in advance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25);
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    input[type="date"], input[type="time"], input[type="datetime-local"] {
+        padding: 0.75rem 1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const eventForm = document.getElementById('eventForm');
+        const requiredFields = ['title', 'description', 'date', 'time', 'location'];
+        
+        eventForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            const errorMessages = [];
+            
+            // Check required fields
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field && !field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    errorMessages.push(`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`);
+                } else if (field) {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Date validation
+            const dateField = document.getElementById('id_date');
+            if (dateField && dateField.value) {
+                const selectedDate = new Date(dateField.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    isValid = false;
+                    dateField.classList.add('is-invalid');
+                    errorMessages.push('Event date cannot be in the past');
+                }
+            }
+            
+            // Time validation
+            const timeField = document.getElementById('id_time');
+            if (timeField && timeField.value) {
+                const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+                if (!timeRegex.test(timeField.value)) {
+                    isValid = false;
+                    timeField.classList.add('is-invalid');
+                    errorMessages.push('Please enter a valid time in HH:MM format');
+                }
+            }
+            
+            // Capacity validation
+            const capacityField = document.getElementById('id_max_attendees');
+            if (capacityField && capacityField.value) {
+                const capacity = parseInt(capacityField.value);
+                if (capacity < 1) {
+                    isValid = false;
+                    capacityField.classList.add('is-invalid');
+                    errorMessages.push('Maximum attendees must be at least 1');
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Show error summary
+                let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                errorHtml += '<h6 class="fw-bold mb-2">Please fix the following errors:</h6><ul class="mb-0">';
+                errorMessages.forEach(msg => {
+                    errorHtml += `<li>${msg}</li>`;
+                });
+                errorHtml += '</ul>';
+                errorHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                
+                // Remove existing error alerts
+                const existingAlert = document.querySelector('.alert.alert-danger');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+                
+                // Insert new alert
+                eventForm.insertAdjacentHTML('afterbegin', errorHtml);
+                
+                // Scroll to first error
+                const firstInvalid = eventForm.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+        });
+        
+        // Real-time character counter for description
+        const descriptionField = document.getElementById('id_description');
+        if (descriptionField) {
+            const charCount = document.createElement('div');
+            charCount.className = 'form-text text-end';
+            charCount.id = 'charCount';
+            descriptionField.parentNode.appendChild(charCount);
+            
+            const updateCharCount = () => {
+                const length = descriptionField.value.length;
+                charCount.textContent = `${length} characters`;
+                
+                if (length < 50) {
+                    charCount.className = 'form-text text-end text-danger';
+                } else if (length < 100) {
+                    charCount.className = 'form-text text-end text-warning';
+                } else {
+                    charCount.className = 'form-text text-end text-success';
+                }
+            };
+            
+            descriptionField.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial count
+        }
+        
+        // Auto-format date and time inputs
+        const dateField = document.getElementById('id_date');
+        if (dateField) {
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            dateField.min = today;
+            
+            // Set default date to today if creating new event
+            {% if not event %}
+            dateField.value = today;
+            {% endif %}
+        }
+        
+        const timeField = document.getElementById('id_time');
+        if (timeField && !timeField.value) {
+            // Set default time to 10:00 AM
+            timeField.value = '10:00';
+        }
+        
+        // Auto-calculate end time (optional feature)
+        const durationSelect = document.createElement('select');
+        durationSelect.className = 'form-select mt-2';
+        durationSelect.innerHTML = `
+            <option value="">Select duration (optional)</option>
+            <option value="1">1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4">4 hours</option>
+            <option value="8">Full day (8 hours)</option>
+        `;
+        
+        durationSelect.addEventListener('change', function() {
+            if (timeField.value && this.value) {
+                const [hours, minutes] = timeField.value.split(':').map(Number);
+                const endTime = new Date();
+                endTime.setHours(hours + parseInt(this.value), minutes);
+                
+                // Display end time (you could add this to your model later)
+                const endTimeDisplay = document.getElementById('endTimeDisplay') || 
+                    document.createElement('div');
+                endTimeDisplay.id = 'endTimeDisplay';
+                endTimeDisplay.className = 'form-text mt-1';
+                endTimeDisplay.textContent = `End time: ${endTime.getHours().toString().padStart(2, '0')}:${endTime.getMinutes().toString().padStart(2, '0')}`;
+                
+                timeField.parentNode.appendChild(endTimeDisplay);
+            }
+        });
+        
+        timeField.parentNode.appendChild(durationSelect);
+        
+        // Form auto-save draft (using localStorage)
+        const saveDraft = () => {
+            const formData = {};
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field) {
+                    formData[fieldName] = field.value;
+                }
+            });
+            localStorage.setItem('eventDraft', JSON.stringify(formData));
+        };
+        
+        // Load draft if exists
+        const draft = localStorage.getItem('eventDraft');
+        if (draft && !{{ event|yesno:"true,false" }}) {
+            const formData = JSON.parse(draft);
+            Object.keys(formData).forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field && !field.value) {
+                    field.value = formData[fieldName];
+                }
+            });
+        }
+        
+        // Auto-save on input
+        eventForm.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', saveDraft);
+        });
+        
+        // Clear draft on successful submit
+        eventForm.addEventListener('submit', () => {
+            localStorage.removeItem('eventDraft');
+        });
+    });
+</script>
+{% endblock %}

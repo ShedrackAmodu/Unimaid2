@@ -1,0 +1,1501 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Return Book - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Return Book</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-arrow-return-left fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Return Book</h1>
+                <p class="lead text-muted">Process book returns and manage fines</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column: Scan/Find Book -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-search me-2"></i>Find Active Loans
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-primary me-2" id="scanBookBtn">
+                            <i class="bi bi-upc-scan me-1"></i>Scan Barcode
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="bulkReturnBtn">
+                            <i class="bi bi-collection me-1"></i>Bulk Return
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                {% if active_loans %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="loansTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="60">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllLoans">
+                                    </div>
+                                </th>
+                                <th>Patron</th>
+                                <th>Book Details</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Fine</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for loan in active_loans %}
+                            <tr class="loan-row" data-loan-id="{{ loan.id }}" data-due-date="{{ loan.due_date|date:'Y-m-d' }}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input loan-checkbox" type="checkbox" value="{{ loan.id }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
+                                            <small class="text-muted">{{ loan.user.membership_type|title }}</small>
+                                            <div class="mt-1">
+                                                <span class="badge bg-light text-dark small">{{ loan.user.student_id|default:loan.user.faculty_id|default:"N/A" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            {% if loan.book_copy.book.cover_image %}
+                                            <img src="{{ loan.book_copy.book.cover_image.url }}" alt="{{ loan.book_copy.book.title }}" class="img-fluid rounded" style="width: 60px; height: 80px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 80px;">
+                                                <i class="bi bi-book text-muted fs-4"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ loan.book_copy.book.title }}</h6>
+                                            <p class="text-muted small mb-1">{{ loan.book_copy.book.author }}</p>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                <span class="badge bg-light text-dark small">Copy #{{ loan.book_copy.id }}</span>
+                                                <span class="badge bg-light text-dark small">{{ loan.book_copy.book.isbn|default:"N/A" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-center">
+                                        <div class="fw-bold {% if loan.due_date < now %}text-danger{% endif %}">
+                                            {{ loan.due_date|date:"M d" }}
+                                        </div>
+                                        <small class="text-muted">{{ loan.due_date|date:"Y" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% with days_overdue=loan.due_date|timesince:now|slice:":2" %}
+                                    {% if loan.due_date < now %}
+                                    <span class="badge bg-danger">Overdue {{ days_overdue }} days</span>
+                                    {% else %}
+                                    {% with days_left=loan.due_date|timeuntil:now|slice:":2" %}
+                                    <span class="badge bg-success">Due in {{ days_left }} days</span>
+                                    {% endwith %}
+                                    {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    {% if loan.due_date < now %}
+                                    {% with days_overdue=loan.due_date|timesince:now|slice:":2" %}
+                                    <span class="fw-bold text-danger">₦{{ days_overdue|add:"0"|floatformat:2 }}</span>
+                                    {% endwith %}
+                                    {% else %}
+                                    <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-success return-single-btn" data-loan-id="{{ loan.id }}">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary view-details-btn" data-loan-id="{{ loan.id }}">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox fs-1 mb-3"></i>
+                                        <p class="mb-2">No active loans found</p>
+                                        <small>All books have been returned</small>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if active_loans.has_other_pages %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if active_loans.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ active_loans.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in active_loans.paginator.page_range %}
+                            <li class="page-item {% if active_loans.number == i %}active{% endif %}">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if active_loans.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ active_loans.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-arrow-return-left text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">No Active Loans</h4>
+                    <p class="text-muted mb-4">There are no books currently checked out.</p>
+                    <a href="/circulation/checkout/" class="btn btn-primary">
+                        <i class="bi bi-cart-check me-2"></i>Process Checkouts
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-clock-history fs-1 text-primary"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">{{ active_loans.count }}</h3>
+                        <p class="text-muted mb-0">Active Loans</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">{{ active_loans|length|add:"-5"|default:0 }}</h3>
+                        <p class="text-muted mb-0">Overdue Loans</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-cash-coin fs-1 text-warning"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">₦{{ "1250.00" }}</h3>
+                        <p class="text-muted mb-0">Pending Fines</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Return Processing -->
+    <div class="col-lg-4">
+        <div class="sticky-top" style="top: 100px;">
+            <!-- Return Processing Card -->
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-white border-0 py-4">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-arrow-return-right me-2"></i>Process Returns
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Manual Barcode Input -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Quick Return by Barcode</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="barcodeInput" placeholder="Scan or enter barcode...">
+                            <button class="btn btn-primary" type="button" id="processBarcodeBtn">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Enter book copy ID, ISBN, or loan ID</small>
+                    </div>
+                    
+                    <!-- Selected Loans -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Selected Loans</label>
+                        <div id="selectedLoans" class="border rounded p-3" style="min-height: 150px; max-height: 300px; overflow-y: auto;">
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-cart fs-1 mb-2"></i>
+                                <p class="mb-0">No loans selected</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Return Summary -->
+                    <div class="mb-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold mb-3">Return Summary</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Books to Return:</span>
+                                    <span id="bookCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Regular Returns:</span>
+                                    <span id="regularCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Overdue Books:</span>
+                                    <span id="overdueCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Total Fines:</span>
+                                    <span id="totalFines" class="fw-bold">₦0.00</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total Items:</span>
+                                    <span id="totalItems">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fine Options -->
+                    <div class="mb-4" id="fineSection" style="display: none;">
+                        <label class="form-label fw-bold">Fine Handling</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="fineOption" id="applyFines" checked>
+                            <label class="form-check-label" for="applyFines">
+                                Apply overdue fines
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="fineOption" id="waiveFines">
+                            <label class="form-check-label" for="waiveFines">
+                                Waive fines (with reason)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="fineOption" id="partialPayment">
+                            <label class="form-check-label" for="partialPayment">
+                                Partial payment
+                            </label>
+                        </div>
+                        
+                        <div class="mt-3" id="waiveReasonSection" style="display: none;">
+                            <textarea class="form-control" id="waiveReason" rows="2" placeholder="Reason for waiving fines..."></textarea>
+                        </div>
+                        
+                        <div class="mt-3" id="partialPaymentSection" style="display: none;">
+                            <input type="number" class="form-control" id="partialAmount" placeholder="Amount to pay (₦)">
+                        </div>
+                    </div>
+                    
+                    <!-- Book Condition -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Book Condition</label>
+                        <select class="form-select" id="bookCondition">
+                            <option value="good" selected>Good - No damage</option>
+                            <option value="minor">Minor wear - Acceptable</option>
+                            <option value="damaged">Damaged - Needs repair</option>
+                            <option value="lost">Lost - Replacement needed</option>
+                        </select>
+                        <textarea class="form-control mt-2" id="damageNotes" rows="2" placeholder="Damage notes (if any)..." style="display: none;"></textarea>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Return Notes</label>
+                        <textarea class="form-control" id="returnNotes" rows="3" placeholder="Any special notes about this return..."></textarea>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success btn-lg" id="processReturnBtn" disabled>
+                            <i class="bi bi-check-circle me-2"></i>Process Returns
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="clearSelectionBtn">
+                            <i class="bi bi-x-circle me-2"></i>Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Returns -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Today's Returns</h6>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-2">
+                            <div>
+                                <small class="text-muted">Processed</small>
+                                <h6 class="mb-0 fw-bold">12</h6>
+                            </div>
+                            <span class="badge bg-success">On time</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-2">
+                            <div>
+                                <small class="text-muted">Overdue</small>
+                                <h6 class="mb-0 fw-bold">3</h6>
+                            </div>
+                            <span class="badge bg-danger">₦450</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-2">
+                            <div>
+                                <small class="text-muted">Damaged</small>
+                                <h6 class="mb-0 fw-bold">1</h6>
+                            </div>
+                            <span class="badge bg-warning">Reported</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Scan Barcode -->
+<div class="modal fade" id="scanBarcodeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Scan Barcode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-upc-scan text-primary" style="font-size: 4rem;"></i>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-center mb-3">Position barcode within the camera view</p>
+                    <div class="border rounded p-4 text-center bg-light">
+                        <div id="barcodeScannerView" style="width: 100%; height: 200px; background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 50%, #f0f0f0 50%, #f0f0f0 75%, transparent 75%, transparent); background-size: 20px 20px;">
+                            <!-- Scanner view would be here -->
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm" id="startBarcodeScannerBtn">
+                                <i class="bi bi-camera-video me-1"></i>Start Scanner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Or enter barcode manually:</label>
+                    <input type="text" class="form-control" id="manualBarcodeInput" placeholder="Enter barcode number">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="processManualBarcodeBtn">
+                    <i class="bi bi-arrow-right me-2"></i>Process
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Loan Details -->
+<div class="modal fade" id="loanDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Loan Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="loanDetailsContent">
+                <!-- Loan details loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="returnFromModalBtn">
+                    <i class="bi bi-check-circle me-2"></i>Process Return
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Return Confirmation -->
+<div class="modal fade" id="returnConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Returns</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="confirmationContent">
+                    <!-- Confirmation details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmReturnBtn">
+                    <i class="bi bi-check-circle me-2"></i>Confirm Returns
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Return Receipt -->
+<div class="modal fade" id="returnReceiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Return Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receiptContent">
+                <!-- Receipt will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="printReceiptBtn">
+                    <i class="bi bi-printer me-2"></i>Print Receipt
+                </button>
+                <button type="button" class="btn btn-success" id="emailReceiptBtn">
+                    <i class="bi bi-envelope me-2"></i>Email to Patron
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .loan-row {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .loan-row:hover {
+        background-color: rgba(var(--primary-rgb), 0.05);
+        transform: translateX(5px);
+    }
+    
+    .loan-row.selected {
+        background-color: rgba(var(--primary-rgb), 0.1);
+        border-left: 4px solid var(--primary-blue);
+    }
+    
+    .loan-row.overdue {
+        background-color: rgba(var(--danger-rgb), 0.05);
+    }
+    
+    .loan-row.overdue:hover {
+        background-color: rgba(var(--danger-rgb), 0.1);
+    }
+    
+    #selectedLoans .loan-item {
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    
+    #selectedLoans .loan-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .loan-item.overdue {
+        border-left: 4px solid var(--danger);
+    }
+    
+    .sticky-top {
+        position: sticky;
+        z-index: 100;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .badge.bg-danger {
+        background-color: var(--danger) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize variables
+        let selectedLoans = new Map(); // Map of loanId -> loan data
+        let currentLoanDetails = null;
+        
+        // Initialize loan rows with overdue status
+        document.querySelectorAll('.loan-row').forEach(row => {
+            const dueDate = new Date(row.dataset.dueDate);
+            const today = new Date();
+            if (dueDate < today) {
+                row.classList.add('overdue');
+            }
+        });
+        
+        // Loan selection functionality
+        const selectAllCheckbox = document.getElementById('selectAllLoans');
+        const loanCheckboxes = document.querySelectorAll('.loan-checkbox');
+        const loanRows = document.querySelectorAll('.loan-row');
+        
+        // Select all loans
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            loanCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const row = checkbox.closest('.loan-row');
+                if (isChecked) {
+                    row.classList.add('selected');
+                    addLoanToSelection(parseInt(checkbox.value));
+                } else {
+                    row.classList.remove('selected');
+                    removeLoanFromSelection(parseInt(checkbox.value));
+                }
+            });
+            updateSelectedLoansDisplay();
+            updateProcessButton();
+        });
+        
+        // Individual loan selection
+        loanCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const row = this.closest('.loan-row');
+                const loanId = parseInt(this.value);
+                
+                if (this.checked) {
+                    row.classList.add('selected');
+                    addLoanToSelection(loanId);
+                } else {
+                    row.classList.remove('selected');
+                    removeLoanFromSelection(loanId);
+                }
+                
+                // Update select all checkbox
+                updateSelectAllCheckbox();
+                updateSelectedLoansDisplay();
+                updateProcessButton();
+            });
+        });
+        
+        // Click row to select
+        loanRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (!e.target.closest('.form-check') && !e.target.closest('.btn-group')) {
+                    const checkbox = this.querySelector('.loan-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+        
+        // Return single button
+        document.querySelectorAll('.return-single-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const loanId = parseInt(this.dataset.loanId);
+                processSingleReturn(loanId);
+            });
+        });
+        
+        // View details button
+        document.querySelectorAll('.view-details-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const loanId = parseInt(this.dataset.loanId);
+                showLoanDetails(loanId);
+            });
+        });
+        
+        // Barcode scanning
+        document.getElementById('scanBookBtn').addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('scanBarcodeModal'));
+            modal.show();
+        });
+        
+        // Manual barcode input
+        document.getElementById('processBarcodeBtn').addEventListener('click', function() {
+            const barcode = document.getElementById('barcodeInput').value.trim();
+            if (barcode) {
+                processBarcode(barcode);
+            }
+        });
+        
+        // Barcode input enter key
+        document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('processBarcodeBtn').click();
+            }
+        });
+        
+        // Manual barcode from modal
+        document.getElementById('processManualBarcodeBtn').addEventListener('click', function() {
+            const barcode = document.getElementById('manualBarcodeInput').value.trim();
+            if (barcode) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('scanBarcodeModal'));
+                modal.hide();
+                processBarcode(barcode);
+            }
+        });
+        
+        // Bulk return button
+        document.getElementById('bulkReturnBtn').addEventListener('click', function() {
+            // Select all overdue loans
+            document.querySelectorAll('.loan-row.overdue .loan-checkbox').forEach(checkbox => {
+                if (!checkbox.checked) {
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+            
+            if (selectedLoans.size > 0) {
+                showToast(`Selected ${selectedLoans.size} overdue loans for return`, 'info');
+            } else {
+                showToast('No overdue loans found', 'warning');
+            }
+        });
+        
+        // Clear selection button
+        document.getElementById('clearSelectionBtn').addEventListener('click', function() {
+            clearSelections();
+        });
+        
+        // Book condition change
+        document.getElementById('bookCondition').addEventListener('change', function() {
+            const damageNotes = document.getElementById('damageNotes');
+            if (this.value === 'damaged' || this.value === 'lost') {
+                damageNotes.style.display = 'block';
+            } else {
+                damageNotes.style.display = 'none';
+            }
+        });
+        
+        // Fine options
+        document.querySelectorAll('input[name="fineOption"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const waiveSection = document.getElementById('waiveReasonSection');
+                const partialSection = document.getElementById('partialPaymentSection');
+                
+                if (this.id === 'waiveFines') {
+                    waiveSection.style.display = 'block';
+                    partialSection.style.display = 'none';
+                } else if (this.id === 'partialPayment') {
+                    waiveSection.style.display = 'none';
+                    partialSection.style.display = 'block';
+                } else {
+                    waiveSection.style.display = 'none';
+                    partialSection.style.display = 'none';
+                }
+            });
+        });
+        
+        // Process return button
+        document.getElementById('processReturnBtn').addEventListener('click', function() {
+            if (selectedLoans.size === 0) {
+                showToast('No loans selected for return', 'warning');
+                return;
+            }
+            
+            showReturnConfirmation();
+        });
+        
+        // Process single return
+        function processSingleReturn(loanId) {
+            const loanRow = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+            if (!loanRow) return;
+            
+            // Add to selection if not already
+            if (!selectedLoans.has(loanId)) {
+                const checkbox = loanRow.querySelector('.loan-checkbox');
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+            
+            // Show return confirmation
+            showReturnConfirmation();
+        }
+        
+        // Process barcode
+        function processBarcode(barcode) {
+            // Clear barcode input
+            document.getElementById('barcodeInput').value = '';
+            
+            // In real implementation, this would search for the loan
+            // For demo, we'll simulate finding a loan
+            console.log(`Processing barcode: ${barcode}`);
+            
+            // Try to find loan by various methods
+            let foundLoan = null;
+            
+            // Search by loan ID
+            let loanRow = document.querySelector(`.loan-row[data-loan-id="${barcode}"]`);
+            if (loanRow) {
+                foundLoan = {
+                    id: parseInt(barcode),
+                    row: loanRow
+                };
+            }
+            
+            // If not found by loan ID, try to find by copy number
+            if (!foundLoan) {
+                // This would be an AJAX search in real implementation
+                // For demo, we'll just show a message
+                showToast(`Loan not found for barcode: ${barcode}`, 'warning');
+                return;
+            }
+            
+            // Select the found loan
+            const checkbox = foundLoan.row.querySelector('.loan-checkbox');
+            if (!checkbox.checked) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+            
+            // Scroll to the row
+            foundLoan.row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight
+            foundLoan.row.style.animation = 'pulse 2s';
+            
+            showToast('Loan found and selected', 'success');
+        }
+        
+        // Show loan details
+        function showLoanDetails(loanId) {
+            const loanRow = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+            if (!loanRow) return;
+            
+            // Extract loan data from row
+            const patronName = loanRow.querySelector('h6.fw-bold').textContent;
+            const patronType = loanRow.querySelector('small.text-muted').textContent;
+            const patronId = loanRow.querySelector('.badge.bg-light').textContent;
+            const bookTitle = loanRow.querySelectorAll('h6.fw-bold')[1].textContent;
+            const author = loanRow.querySelector('p.text-muted.small').textContent;
+            const copyId = loanRow.querySelector('.badge.bg-light.text-dark.small').textContent;
+            const dueDate = loanRow.querySelector('.fw-bold').textContent;
+            const status = loanRow.querySelector('.badge').textContent;
+            
+            // Calculate fine if overdue
+            let fineAmount = '₦0.00';
+            if (loanRow.classList.contains('overdue')) {
+                const dueDate = new Date(loanRow.dataset.dueDate);
+                const today = new Date();
+                const daysOverdue = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
+                fineAmount = `₦${(daysOverdue * 50).toFixed(2)}`;
+            }
+            
+            // Populate modal
+            document.getElementById('loanDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Patron Information</h6>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="me-3">
+                                        <i class="bi bi-person-circle fs-2 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">${patronName}</h5>
+                                        <p class="text-muted mb-1">${patronType}</p>
+                                        <span class="badge bg-primary">${patronId}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Active Loans</small>
+                                        <p class="fw-bold mb-0">3</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Unpaid Fines</small>
+                                        <p class="fw-bold text-danger mb-0">${fineAmount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Book Information</h6>
+                                <div class="d-flex mb-3">
+                                    <div class="me-3">
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 80px;">
+                                            <i class="bi bi-book text-muted fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">${bookTitle}</h6>
+                                        <p class="text-muted small mb-1">${author}</p>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            ${copyId ? `<span class="badge bg-secondary small">${copyId}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Loan Details</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Loan Date</small>
+                                <p class="fw-bold mb-0">Apr 15, 2024</p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Due Date</small>
+                                <p class="fw-bold mb-0">${dueDate}, 2024</p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Status</small>
+                                <p class="mb-0">${status}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Store current loan ID
+            currentLoanDetails = loanId;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+            modal.show();
+        }
+        
+        // Return from modal button
+        document.getElementById('returnFromModalBtn').addEventListener('click', function() {
+            if (currentLoanDetails) {
+                processSingleReturn(currentLoanDetails);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('loanDetailsModal'));
+                modal.hide();
+            }
+        });
+        
+        // Add loan to selection
+        function addLoanToSelection(loanId) {
+            if (!selectedLoans.has(loanId)) {
+                const row = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+                if (row) {
+                    const patronName = row.querySelector('h6.fw-bold').textContent;
+                    const bookTitle = row.querySelectorAll('h6.fw-bold')[1].textContent;
+                    const copyId = row.querySelector('.badge.bg-light.text-dark.small').textContent;
+                    const dueDate = row.querySelector('.fw-bold').textContent;
+                    const isOverdue = row.classList.contains('overdue');
+                    
+                    let fineAmount = '₦0.00';
+                    if (isOverdue) {
+                        const dueDateObj = new Date(row.dataset.dueDate);
+                        const today = new Date();
+                        const daysOverdue = Math.ceil((today - dueDateObj) / (1000 * 60 * 60 * 24));
+                        fineAmount = `₦${(daysOverdue * 50).toFixed(2)}`;
+                    }
+                    
+                    selectedLoans.set(loanId, {
+                        id: loanId,
+                        patronName: patronName,
+                        bookTitle: bookTitle,
+                        copyId: copyId,
+                        dueDate: dueDate,
+                        isOverdue: isOverdue,
+                        fineAmount: fineAmount
+                    });
+                }
+            }
+        }
+        
+        // Remove loan from selection
+        function removeLoanFromSelection(loanId) {
+            selectedLoans.delete(loanId);
+        }
+        
+        // Update selected loans display
+        function updateSelectedLoansDisplay() {
+            const container = document.getElementById('selectedLoans');
+            
+            if (selectedLoans.size === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-cart fs-1 mb-2"></i>
+                        <p class="mb-0">No loans selected</p>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                let regularCount = 0;
+                let overdueCount = 0;
+                let totalFines = 0;
+                
+                selectedLoans.forEach((loan, loanId) => {
+                    const fineAmount = parseFloat(loan.fineAmount.replace('₦', '')) || 0;
+                    totalFines += fineAmount;
+                    
+                    if (loan.isOverdue) {
+                        overdueCount++;
+                    } else {
+                        regularCount++;
+                    }
+                    
+                    html += `
+                        <div class="loan-item ${loan.isOverdue ? 'overdue' : ''}" data-loan-id="${loanId}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1 me-2">
+                                    <h6 class="fw-bold mb-1">${loan.bookTitle}</h6>
+                                    <p class="text-muted small mb-1">${loan.patronName}</p>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span class="badge bg-light text-dark small">${loan.copyId}</span>
+                                        <span class="badge ${loan.isOverdue ? 'bg-danger' : 'bg-success'} small">
+                                            ${loan.isOverdue ? 'Overdue' : 'On time'}
+                                        </span>
+                                        ${loan.isOverdue ? `<span class="badge bg-warning small">${loan.fineAmount}</span>` : ''}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-loan">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Update summary
+                document.getElementById('bookCount').textContent = selectedLoans.size;
+                document.getElementById('regularCount').textContent = regularCount;
+                document.getElementById('overdueCount').textContent = overdueCount;
+                document.getElementById('totalFines').textContent = `₦${totalFines.toFixed(2)}`;
+                document.getElementById('totalItems').textContent = selectedLoans.size;
+                
+                // Show/hide fine section
+                const fineSection = document.getElementById('fineSection');
+                if (overdueCount > 0) {
+                    fineSection.style.display = 'block';
+                } else {
+                    fineSection.style.display = 'none';
+                }
+                
+                // Add remove button handlers
+                document.querySelectorAll('.remove-loan').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const loanItem = this.closest('.loan-item');
+                        const loanId = parseInt(loanItem.dataset.loanId);
+                        
+                        // Uncheck the corresponding checkbox
+                        const checkbox = document.querySelector(`.loan-checkbox[value="${loanId}"]`);
+                        if (checkbox) {
+                            checkbox.checked = false;
+                            checkbox.dispatchEvent(new Event('change'));
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Update select all checkbox
+        function updateSelectAllCheckbox() {
+            const checkedCount = document.querySelectorAll('.loan-checkbox:checked').length;
+            const totalCount = loanCheckboxes.length;
+            
+            selectAllCheckbox.checked = checkedCount === totalCount && totalCount > 0;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+        }
+        
+        // Update process button state
+        function updateProcessButton() {
+            const processBtn = document.getElementById('processReturnBtn');
+            processBtn.disabled = selectedLoans.size === 0;
+        }
+        
+        // Clear all selections
+        function clearSelections() {
+            loanCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const row = checkbox.closest('.loan-row');
+                row.classList.remove('selected');
+            });
+            
+            selectedLoans.clear();
+            
+            updateSelectAllCheckbox();
+            updateSelectedLoansDisplay();
+            updateProcessButton();
+            
+            // Reset form
+            document.getElementById('barcodeInput').value = '';
+            document.getElementById('bookCondition').value = 'good';
+            document.getElementById('damageNotes').style.display = 'none';
+            document.getElementById('damageNotes').value = '';
+            document.getElementById('returnNotes').value = '';
+            document.getElementById('applyFines').checked = true;
+            document.getElementById('waiveReasonSection').style.display = 'none';
+            document.getElementById('partialPaymentSection').style.display = 'none';
+            
+            showToast('All selections cleared', 'success');
+        }
+        
+        // Show return confirmation
+        function showReturnConfirmation() {
+            if (selectedLoans.size === 0) return;
+            
+            let regularCount = 0;
+            let overdueCount = 0;
+            let totalFines = 0;
+            let loanList = '';
+            
+            selectedLoans.forEach((loan, loanId) => {
+                const fineAmount = parseFloat(loan.fineAmount.replace('₦', '')) || 0;
+                totalFines += fineAmount;
+                
+                if (loan.isOverdue) {
+                    overdueCount++;
+                } else {
+                    regularCount++;
+                }
+                
+                loanList += `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <small class="fw-bold">${loan.bookTitle}</small><br>
+                            <small class="text-muted">${loan.patronName} • ${loan.copyId}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="${loan.isOverdue ? 'text-danger' : 'text-success'}">
+                                ${loan.isOverdue ? 'Overdue' : 'On time'}
+                            </small><br>
+                            <small class="${loan.isOverdue ? 'text-danger fw-bold' : 'text-muted'}">
+                                ${loan.isOverdue ? loan.fineAmount : 'No fine'}
+                            </small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            const fineOption = document.querySelector('input[name="fineOption"]:checked').id;
+            const condition = document.getElementById('bookCondition').value;
+            const notes = document.getElementById('returnNotes').value;
+            
+            let fineHandling = '';
+            if (fineOption === 'waiveFines' && totalFines > 0) {
+                const reason = document.getElementById('waiveReason').value;
+                fineHandling = `Waive fines (₦${totalFines.toFixed(2)})${reason ? ` - Reason: ${reason}` : ''}`;
+            } else if (fineOption === 'partialPayment' && totalFines > 0) {
+                const amount = document.getElementById('partialAmount').value || '0';
+                fineHandling = `Partial payment: ₦${amount} of ₦${totalFines.toFixed(2)}`;
+            } else if (totalFines > 0) {
+                fineHandling = `Apply fines: ₦${totalFines.toFixed(2)}`;
+            } else {
+                fineHandling = 'No fines applicable';
+            }
+            
+            document.getElementById('confirmationContent').innerHTML = `
+                <p>Please confirm the following returns:</p>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    ${selectedLoans.size} book(s) selected for return
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="fw-bold">Selected Books:</h6>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${loanList}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted">Regular Returns:</small>
+                        <p class="fw-bold mb-0">${regularCount}</p>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Overdue Returns:</small>
+                        <p class="fw-bold mb-0">${overdueCount}</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="fw-bold">Fine Handling:</h6>
+                    <p class="mb-0">${fineHandling}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="fw-bold">Book Condition:</h6>
+                    <p class="mb-0">${condition.charAt(0).toUpperCase() + condition.slice(1)}</p>
+                    ${condition === 'damaged' || condition === 'lost' ? 
+                      `<small class="text-muted">Notes: ${document.getElementById('damageNotes').value || 'None'}</small>` : ''}
+                </div>
+                
+                ${notes ? `
+                <div class="mb-3">
+                    <h6 class="fw-bold">Return Notes:</h6>
+                    <p class="mb-0">${notes}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('returnConfirmationModal'));
+            modal.show();
+        }
+        
+        // Confirm return button
+        document.getElementById('confirmReturnBtn').addEventListener('click', function() {
+            // Show processing indicator
+            const btn = document.getElementById('confirmReturnBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+            btn.disabled = true;
+            
+            // In real implementation, this would submit the return via AJAX
+            // For now, we'll simulate processing
+            setTimeout(() => {
+                // Simulate successful return
+                const totalBooks = selectedLoans.size;
+                
+                // Close confirmation modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('returnConfirmationModal'));
+                modal.hide();
+                
+                // Show success message
+                const successToast = `
+                    <div class="toast align-items-center text-bg-success border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Success! ${totalBooks} book(s) returned to library.
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                
+                showToast(successToast);
+                
+                // Show receipt
+                showReturnReceipt();
+                
+                // Restore button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                // Clear selections
+                clearSelections();
+                
+            }, 2000);
+        });
+        
+        // Show return receipt
+        function showReturnReceipt() {
+            // Generate receipt content
+            const today = new Date().toLocaleString();
+            const totalBooks = selectedLoans.size;
+            let regularCount = 0;
+            let overdueCount = 0;
+            let totalFines = 0;
+            let loanDetails = '';
+            
+            selectedLoans.forEach((loan, loanId) => {
+                const fineAmount = parseFloat(loan.fineAmount.replace('₦', '')) || 0;
+                totalFines += fineAmount;
+                
+                if (loan.isOverdue) {
+                    overdueCount++;
+                } else {
+                    regularCount++;
+                }
+                
+                loanDetails += `
+                    <tr>
+                        <td>${loan.bookTitle}</td>
+                        <td>${loan.patronName}</td>
+                        <td>${loan.copyId}</td>
+                        <td class="${loan.isOverdue ? 'text-danger fw-bold' : 'text-success'}">
+                            ${loan.isOverdue ? 'Overdue' : 'On Time'}
+                        </td>
+                        <td class="${loan.isOverdue ? 'text-danger fw-bold' : 'text-muted'}">
+                            ${loan.isOverdue ? loan.fineAmount : 'None'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            const fineOption = document.querySelector('input[name="fineOption"]:checked').id;
+            let fineStatus = '';
+            if (fineOption === 'waiveFines') {
+                fineStatus = 'WAIVED';
+            } else if (fineOption === 'partialPayment') {
+                const amount = document.getElementById('partialAmount').value || '0';
+                fineStatus = `PARTIAL (₦${amount} paid)`;
+            } else if (totalFines > 0) {
+                fineStatus = 'APPLIED';
+            } else {
+                fineStatus = 'NONE';
+            }
+            
+            document.getElementById('receiptContent').innerHTML = `
+                <div class="receipt">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold text-primary">RETURN RECEIPT</h4>
+                        <p class="text-muted mb-0">Ramat Library - University of Maiduguri</p>
+                        <small class="text-muted">${today}</small>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5 class="fw-bold mb-0">${totalBooks}</h5>
+                                    <small class="text-muted">Total Books</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5 class="fw-bold mb-0">${regularCount}</h5>
+                                    <small class="text-muted">On Time</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5 class="fw-bold mb-0">${overdueCount}</h5>
+                                    <small class="text-muted">Overdue</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Patron</th>
+                                    <th>Copy ID</th>
+                                    <th>Status</th>
+                                    <th>Fine</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${loanDetails}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Summary</h6>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Books Returned:</span>
+                                        <span class="fw-bold">${totalBooks}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Total Fines:</span>
+                                        <span class="fw-bold ${totalFines > 0 ? 'text-danger' : ''}">₦${totalFines.toFixed(2)}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Fine Status:</span>
+                                        <span class="badge ${fineStatus === 'WAIVED' ? 'bg-success' : fineStatus === 'APPLIED' ? 'bg-danger' : 'bg-secondary'}">
+                                            ${fineStatus}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Book Condition:</span>
+                                        <span class="fw-bold">${document.getElementById('bookCondition').value.toUpperCase()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Processing Information</h6>
+                                    <p class="mb-2"><strong>Processed by:</strong> Staff Member</p>
+                                    <p class="mb-2"><strong>Time:</strong> ${new Date().toLocaleTimeString()}</p>
+                                    <p class="mb-0"><strong>Transaction ID:</strong> RET-${Date.now().toString().slice(-8)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        This receipt confirms that the listed books have been returned to the library collection.
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('returnReceiptModal'));
+            modal.show();
+        }
+        
+        // Print receipt button
+        document.getElementById('printReceiptBtn').addEventListener('click', function() {
+            const receiptContent = document.getElementById('receiptContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Return Receipt - Ramat Library</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .receipt { max-width: 800px; margin: 0 auto; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .text-primary { color: #0a2472 !important; }
+                        .text-danger { color: #dc3545 !important; }
+                        .text-success { color: #198754 !important; }
+                        .badge { padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    ${receiptContent}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            
+            const bgClass = type === 'success' ? 'text-bg-success' : 
+                           type === 'warning' ? 'text-bg-warning' : 
+                           type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+            
+            toastContainer.innerHTML = `
+                <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + B to focus barcode input
+            if (e.ctrlKey && e.key === 'b') {
+                e.preventDefault();
+                document.getElementById('barcodeInput').focus();
+            }
+            
+            // Ctrl + Enter to process return
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                const processBtn = document.getElementById('processReturnBtn');
+                if (!processBtn.disabled) {
+                    processBtn.click();
+                }
+            }
+            
+            // Escape to clear selections
+            if (e.key === 'Escape') {
+                document.getElementById('clearSelectionBtn').click();
+            }
+            
+            // Space to select/deselect focused row
+            if (e.key === ' ' && document.activeElement.closest('.loan-row')) {
+                e.preventDefault();
+                const row = document.activeElement.closest('.loan-row');
+                const checkbox = row.querySelector('.loan-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+        
+        // Focus first barcode input on load
+        setTimeout(() => {
+            document.getElementById('barcodeInput').focus();
+        }, 500);
+    });
+</script>
+{% endblock %}

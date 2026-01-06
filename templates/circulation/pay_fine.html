@@ -1,0 +1,800 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pay Fine - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/patron_dashboard/">My Dashboard</a></li>
+<li class="breadcrumb-item"><a href="/circulation/patron_dashboard/#fines">My Fines</a></li>
+<li class="breadcrumb-item active" aria-current="page">Pay Fine</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-cash-coin fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Pay Fine</h1>
+                <p class="lead text-muted">Settle your library fines online</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <!-- Fine Summary -->
+                <div class="row mb-5">
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Fine Details</h6>
+                                <div class="mb-3">
+                                    <small class="text-muted">Fine ID</small>
+                                    <p class="fw-bold mb-0">FIN-{{ fine.id|stringformat:"06d" }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Book</small>
+                                    <p class="fw-bold mb-0">{{ fine.loan.book_copy.book.title|truncatechars:30 }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Reason</small>
+                                    <p class="fw-bold mb-0">{{ fine.reason }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Due Date</small>
+                                    <p class="fw-bold mb-0">{{ fine.loan.due_date|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="border-left: 5px solid var(--danger) !important;">
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                <div class="text-center mb-3">
+                                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="text-center">
+                                    <small class="text-muted">Amount Due</small>
+                                    <h1 class="fw-bold text-danger">₦{{ fine.amount }}</h1>
+                                    <span class="badge bg-danger">UNPAID</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4">Select Payment Method</h4>
+                    
+                    <div class="row g-4">
+                        <!-- Online Payment -->
+                        <div class="col-md-6">
+                            <div class="card payment-method-card border-0 shadow-sm h-100" data-method="online">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-credit-card fs-1 text-primary"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Online Payment</h5>
+                                    <p class="text-muted small mb-4">
+                                        Pay instantly with debit/credit card or bank transfer
+                                    </p>
+                                    <div class="mt-auto">
+                                        <span class="badge bg-success">Recommended</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Transfer -->
+                        <div class="col-md-6">
+                            <div class="card payment-method-card border-0 shadow-sm h-100" data-method="bank">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-bank fs-1 text-success"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Bank Transfer</h5>
+                                    <p class="text-muted small mb-4">
+                                        Transfer directly to our bank account
+                                    </p>
+                                    <div class="mt-auto">
+                                        <span class="badge bg-info">Manual Verification</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash at Library -->
+                        <div class="col-md-6">
+                            <div class="card payment-method-card border-0 shadow-sm h-100" data-method="cash">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-cash fs-1 text-warning"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Cash at Library</div>
+                                    <p class="text-muted small mb-4">
+                                        Pay in person at the circulation desk
+                                    </p>
+                                    <div class="mt-auto">
+                                        <span class="badge bg-secondary">In-person</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Money -->
+                        <div class="col-md-6">
+                            <div class="card payment-method-card border-0 shadow-sm h-100" data-method="mobile">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-phone fs-1 text-info"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Mobile Money</h5>
+                                    <p class="text-muted small mb-4">
+                                        Pay with mobile money services
+                                    </p>
+                                    <div class="mt-auto">
+                                        <span class="badge bg-primary">Instant</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected Payment Method Form -->
+                <div id="paymentFormSection" style="display: none;">
+                    <h4 class="fw-bold mb-4">Payment Details</h4>
+                    
+                    <form id="paymentForm">
+                        <!-- Online Payment Form -->
+                        <div id="onlinePaymentForm" class="payment-method-form" style="display: none;">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Card Type</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="cardType" id="visa" checked>
+                                        <label class="form-check-label" for="visa">
+                                            <i class="bi bi-credit-card me-1"></i>Visa
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="cardType" id="mastercard">
+                                        <label class="form-check-label" for="mastercard">
+                                            <i class="bi bi-credit-card me-1"></i>MasterCard
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="cardType" id="verve">
+                                        <label class="form-check-label" for="verve">
+                                            <i class="bi bi-credit-card me-1"></i>Verve
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Card Number</label>
+                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Expiry Date</label>
+                                    <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">CVV</label>
+                                    <input type="text" class="form-control" placeholder="123" maxlength="3">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Cardholder Name</label>
+                                <input type="text" class="form-control" placeholder="As shown on card">
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Transfer Form -->
+                        <div id="bankPaymentForm" class="payment-method-form" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Transfer the amount to our bank account using the details below. 
+                                Include the Fine ID as reference.
+                            </div>
+                            
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><strong>Bank Name:</strong> Zenith Bank</p>
+                                            <p class="mb-2"><strong>Account Name:</strong> Ramat Library, UNIMAID</p>
+                                            <p class="mb-2"><strong>Account Number:</strong> 1012345678</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><strong>Amount:</strong> ₦{{ fine.amount }}</p>
+                                            <p class="mb-2"><strong>Reference:</strong> FIN-{{ fine.id|stringformat:"06d" }}</p>
+                                            <p class="mb-0"><strong>Branch:</strong> University of Maiduguri</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="form-label fw-bold">Upload Proof of Payment</label>
+                                <input type="file" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                                <small class="text-muted">Upload screenshot or receipt of transfer</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash Payment Form -->
+                        <div id="cashPaymentForm" class="payment-method-form" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Please visit the circulation desk during working hours to pay in cash.
+                            </div>
+                            
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Library Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><i class="bi bi-geo-alt me-2"></i><strong>Location:</strong> Ramat Library, UNIMAID</p>
+                                            <p class="mb-2"><i class="bi bi-clock me-2"></i><strong>Hours:</strong> Mon-Fri: 8am-6pm, Sat: 9am-2pm</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2"><i class="bi bi-telephone me-2"></i><strong>Phone:</strong> +234 80166 253 232</p>
+                                            <p class="mb-0"><i class="bi bi-envelope me-2"></i><strong>Email:</strong> ramatlibrary@unimaid.edu.ng</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="form-label fw-bold">Request Cash Payment</label>
+                                <p class="text-muted">We will reserve this fine for cash payment. Please pay within 3 days.</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmCash">
+                                    <label class="form-check-label" for="confirmCash">
+                                        I will pay cash at the library within 3 days
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Money Form -->
+                        <div id="mobilePaymentForm" class="payment-method-form" style="display: none;">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Select Mobile Money Service</label>
+                                <select class="form-select" id="mobileService">
+                                    <option value="mtn">MTN Mobile Money</option>
+                                    <option value="airtel">Airtel Money</option>
+                                    <option value="glo">Glo Cash</option>
+                                    <option value="etisalat">9mobile</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <input type="tel" class="form-control" placeholder="0803 123 4567">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Transaction ID (Optional)</label>
+                                <input type="text" class="form-control" placeholder="Enter transaction ID if already paid">
+                                <small class="text-muted">You can enter this after making payment</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Terms & Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreePaymentTerms" required>
+                                <label class="form-check-label" for="agreePaymentTerms">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#paymentTermsModal">payment terms and conditions</a>.
+                                    I understand that payments are non-refundable.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-success btn-lg" id="processPaymentBtn">
+                                <i class="bi bi-lock me-2"></i>Pay ₦{{ fine.amount }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="changeMethodBtn" style="display: none;">
+                                <i class="bi bi-arrow-left me-2"></i>Change Payment Method
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Fine History -->
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="fw-bold mb-3">Recent Fine Payments</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Apr 10, 2024</td>
+                                    <td>Overdue: "Database Systems"</td>
+                                    <td>₦200.00</td>
+                                    <td><span class="badge bg-primary">Online</span></td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Mar 25, 2024</td>
+                                    <td>Damage fee: "Computer Networks"</td>
+                                    <td>₦500.00</td>
+                                    <td><span class="badge bg-warning">Cash</span></td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Feb 15, 2024</td>
+                                    <td>Overdue: "Algorithms"</td>
+                                    <td>₦150.00</td>
+                                    <td><span class="badge bg-info">Bank</span></td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Terms Modal -->
+<div class="modal fade" id="paymentTermsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Terms & Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">1. Payment Processing</h6>
+                    <ul>
+                        <li>Online payments are processed immediately</li>
+                        <li>Bank transfers may take 24-48 hours to verify</li>
+                        <li>Cash payments must be made within 3 days of reservation</li>
+                        <li>All payments are in Nigerian Naira (₦)</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">2. Refund Policy</h6>
+                    <ul>
+                        <li>Fines payments are generally non-refundable</li>
+                        <li>Refunds may be considered for duplicate payments</li>
+                        <li>Refund requests must be made within 7 days of payment</li>
+                        <li>Refunds will be processed to original payment method</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">3. Receipts & Records</h6>
+                    <ul>
+                        <li>Electronic receipts are issued for all payments</li>
+                        <li>Receipts can be downloaded from your dashboard</li>
+                        <li>Payment records are maintained for 7 years</li>
+                        <li>You can request payment history at any time</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">4. Security & Privacy</h6>
+                    <ul>
+                        <li>All payment information is encrypted</li>
+                        <li>We do not store your card details</li>
+                        <li>Payment information is used only for transaction processing</li>
+                        <li>Your privacy is protected under our privacy policy</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="paymentSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Successful!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Payment Confirmed</h4>
+                <p class="mb-4">Your fine of <strong class="text-success">₦{{ fine.amount }}</strong> has been paid successfully.</p>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Transaction ID</small>
+                                <p class="fw-bold mb-0" id="transactionId">TXN-{{ "000000" }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Date & Time</small>
+                                <p class="fw-bold mb-0" id="paymentDate">{{ "Now" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Your library account is now clear. You can resume borrowing books.
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='/circulation/patron_dashboard/'">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="printReceipt()">
+                    <i class="bi bi-printer me-2"></i>Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .payment-method-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    
+    .payment-method-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-blue);
+        box-shadow: 0 10px 20px rgba(0, 31, 63, 0.15) !important;
+    }
+    
+    .payment-method-card.selected {
+        border-color: var(--primary-blue);
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.05), rgba(var(--accent-rgb), 0.05));
+    }
+    
+    .payment-method-form {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .card[style*="border-left"] {
+        border-left-width: 5px !important;
+        border-left-style: solid !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let selectedMethod = null;
+        
+        // Payment method selection
+        document.querySelectorAll('.payment-method-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selection from all cards
+                document.querySelectorAll('.payment-method-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // Select this card
+                this.classList.add('selected');
+                selectedMethod = this.dataset.method;
+                
+                // Show payment form section
+                const paymentFormSection = document.getElementById('paymentFormSection');
+                paymentFormSection.style.display = 'block';
+                
+                // Show change method button
+                document.getElementById('changeMethodBtn').style.display = 'block';
+                
+                // Hide all payment forms
+                document.querySelectorAll('.payment-method-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                
+                // Show selected payment form
+                document.getElementById(`${selectedMethod}PaymentForm`).style.display = 'block';
+                
+                // Scroll to form
+                paymentFormSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+        
+        // Change method button
+        document.getElementById('changeMethodBtn').addEventListener('click', function() {
+            // Hide payment form section
+            document.getElementById('paymentFormSection').style.display = 'none';
+            
+            // Deselect all cards
+            document.querySelectorAll('.payment-method-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Hide this button
+            this.style.display = 'none';
+            
+            // Scroll to methods
+            document.querySelector('.row.g-4').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        
+        // Card number formatting
+        const cardNumberInput = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let matches = value.match(/\d{4,16}/g);
+                let match = matches && matches[0] || '';
+                let parts = [];
+                
+                for (let i = 0, len = match.length; i < len; i += 4) {
+                    parts.push(match.substring(i, i + 4));
+                }
+                
+                if (parts.length) {
+                    e.target.value = parts.join(' ');
+                } else {
+                    e.target.value = value;
+                }
+            });
+        }
+        
+        // Expiry date formatting
+        const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                if (value.length >= 2) {
+                    e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+            });
+        }
+        
+        // Payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!document.getElementById('agreePaymentTerms').checked) {
+                showToast('You must agree to the payment terms and conditions.', 'warning');
+                return;
+            }
+            
+            // Validate cash payment confirmation
+            if (selectedMethod === 'cash' && !document.getElementById('confirmCash').checked) {
+                showToast('You must confirm you will pay within 3 days.', 'warning');
+                return;
+            }
+            
+            // Show processing
+            const submitBtn = document.getElementById('processPaymentBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing Payment...';
+            submitBtn.disabled = true;
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                // Generate mock transaction ID
+                const transactionId = 'TXN-' + Date.now().toString().slice(-6);
+                const paymentDate = new Date().toLocaleString();
+                
+                // Update success modal
+                document.getElementById('transactionId').textContent = transactionId;
+                document.getElementById('paymentDate').textContent = paymentDate;
+                
+                // Show success modal
+                const modal = new bootstrap.Modal(document.getElementById('paymentSuccessModal'));
+                modal.show();
+                
+                // Restore button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // In real implementation, this would submit the form to server
+                // For demo, we'll just show success
+            }, 3000);
+        });
+        
+        // Print receipt function
+        window.printReceipt = function() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Payment Receipt - Ramat Library</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .receipt-title { font-size: 24px; font-weight: bold; color: #0a2472; }
+                        .library-name { font-size: 18px; color: #666; margin-bottom: 10px; }
+                        .date { color: #666; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-weight: bold; border-bottom: 2px solid #0a2472; padding-bottom: 5px; margin-bottom: 10px; }
+                        .amount { text-align: center; margin: 30px 0; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; }
+                        .badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; background: #198754; color: white; }
+                        .payment-details { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="receipt-title">PAYMENT RECEIPT</div>
+                        <div class="library-name">Ramat Library - University of Maiduguri</div>
+                        <div class="date">${new Date().toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="amount">
+                        <small class="text-muted">Amount Paid</small>
+                        <h1 class="fw-bold text-success">₦{{ fine.amount }}</h1>
+                        <span class="badge">PAID</span>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Payment Details</div>
+                        <div class="payment-details">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Transaction ID:</strong> ${document.getElementById('transactionId').textContent}</p>
+                                    <p><strong>Fine ID:</strong> FIN-{{ fine.id|stringformat:"06d" }}</p>
+                                    <p><strong>Payment Method:</strong> ${selectedMethod ? selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1) : 'N/A'}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>Date & Time:</strong> ${document.getElementById('paymentDate').textContent}</p>
+                                    <p><strong>Status:</strong> <span style="color: green;">Completed</span></p>
+                                    <p><strong>Processed by:</strong> Automated System</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Fine Details</div>
+                        <p><strong>Book:</strong> {{ fine.loan.book_copy.book.title }}</p>
+                        <p><strong>Reason:</strong> {{ fine.reason }}</p>
+                        <p><strong>Due Date:</strong> {{ fine.loan.due_date|date:"M d, Y" }}</p>
+                        <p><strong>Patron:</strong> {{ user.get_full_name|default:user.username }}</p>
+                        <p><strong>Patron ID:</strong> {{ user.student_id|default:user.faculty_id|default:user.staff_id|default:"N/A" }}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Account Information</div>
+                        <p><strong>Account Status:</strong> <span style="color: green;">Clear - No outstanding fines</span></p>
+                        <p><strong>Borrowing Privileges:</strong> <span style="color: green;">Active</span></p>
+                        <p><strong>Next Review:</strong> N/A</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Thank you for settling your fine with Ramat Library!</p>
+                        <p>This receipt confirms your payment has been processed successfully.</p>
+                        <p>For inquiries, contact: ramatlibrary@unimaid.edu.ng | +234 80166 253 232</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            
+            const bgClass = type === 'success' ? 'text-bg-success' : 
+                           type === 'warning' ? 'text-bg-warning' : 
+                           type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+            
+            toastContainer.innerHTML = `
+                <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Initialize input validation
+        const cardNumber = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
+        if (cardNumber) {
+            cardNumber.addEventListener('blur', function() {
+                const value = this.value.replace(/\s+/g, '');
+                if (value.length < 16 || value.length > 19) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        }
+        
+        // Auto-select online payment method
+        setTimeout(() => {
+            document.querySelector('.payment-method-card[data-method="online"]').click();
+        }, 500);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + Enter to submit form
+            if (e.ctrlKey && e.key === 'Enter' && selectedMethod) {
+                e.preventDefault();
+                document.getElementById('processPaymentBtn').click();
+            }
+            
+            // Escape to go back
+            if (e.key === 'Escape') {
+                window.history.back();
+            }
+            
+            // Number keys 1-4 to select payment methods
+            if (e.key >= '1' && e.key <= '4') {
+                const methods = ['online', 'bank', 'cash', 'mobile'];
+                const index = parseInt(e.key) - 1;
+                if (index < methods.length) {
+                    const card = document.querySelector(`.payment-method-card[data-method="${methods[index]}"]`);
+                    if (card) card.click();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

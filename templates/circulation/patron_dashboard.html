@@ -1,0 +1,979 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Library Dashboard - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/dashboard/">My Library</a></li>
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-speedometer2 fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">My Library Dashboard</h1>
+                <p class="lead text-muted">Welcome back, {{ user.first_name|default:user.username }}! Manage your loans, reservations, and fines</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Alert -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info border-0 shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1">Welcome to Your Library Dashboard!</h6>
+                    <p class="mb-0">Track your borrowed items, manage reservations, and view your reading history.</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Member Since: {{ user.date_joined|date:"M d, Y" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-book text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ current_loans.count }}</h3>
+                        <p class="text-muted mb-0">Current Loans</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="#current-loans" class="btn btn-sm btn-outline-primary w-100">View All</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ active_reservations.count }}</h3>
+                        <p class="text-muted mb-0">Active Reservations</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="#reservations" class="btn btn-sm btn-outline-warning w-100">View All</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-cash-coin text-danger fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">₦{{ total_fines|default:"0.00" }}</h3>
+                        <p class="text-muted mb-0">Unpaid Fines</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    {% if total_fines > 0 %}
+                    <a href="#fines" class="btn btn-sm btn-outline-danger w-100">Pay Now</a>
+                    {% else %}
+                    <button class="btn btn-sm btn-outline-success w-100" disabled>All Paid</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-clock-history text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ loan_history.count }}</h3>
+                        <p class="text-muted mb-0">Loan History</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="#loan-history" class="btn btn-sm btn-outline-success w-100">View History</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Current Loans Section -->
+<section id="current-loans" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <i class="bi bi-book me-2"></i>Current Loans
+            <span class="badge bg-primary ms-2">{{ current_loans.count }}</span>
+        </h3>
+        <a href="/catalog/" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Borrow More Books
+        </a>
+    </div>
+    
+    {% if current_loans %}
+    <div class="row g-4">
+        {% for loan in current_loans %}
+        <div class="col-lg-6">
+            <div class="card loan-card border-0 shadow-hover h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="flex-grow-1 me-3">
+                            <h5 class="fw-bold mb-2">{{ loan.book_copy.book.title }}</h5>
+                            <p class="text-muted mb-3">{{ loan.book_copy.book.author }}</p>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar text-primary me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Loan Date</small>
+                                            <p class="mb-0 fw-bold">{{ loan.loan_date|date:"M d, Y" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar-check text-primary me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Due Date</small>
+                                            <p class="mb-0 fw-bold {% if loan.due_date < now %}text-danger{% endif %}">
+                                                {{ loan.due_date|date:"M d, Y" }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="mb-3">
+                                <span class="badge bg-light text-dark">Copy #{{ loan.book_copy.id }}</span>
+                            </div>
+                            <div class="loan-status">
+                                {% with days_left=loan.due_date|timeuntil:now %}
+                                {% if "day" in days_left %}
+                                <span class="badge bg-success">Due in {{ days_left|slice:":2" }} days</span>
+                                {% else %}
+                                <span class="badge bg-warning">Due today</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mt-3">
+                        <div class="col">
+                            <a href="{% url 'circulation:renew_loan' loan.id %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Renew Loan
+                            </a>
+                        </div>
+                        <div class="col">
+                            {% if loan.due_date < now %}
+                            <button class="btn btn-outline-danger w-100" disabled>
+                                <i class="bi bi-exclamation-triangle me-2"></i>Overdue
+                            </button>
+                            {% else %}
+                            <a href="#" class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#returnModal{{ loan.id }}">
+                                <i class="bi bi-check-circle me-2"></i>Mark for Return
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card border-0 shadow">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-3">No Current Loans</h4>
+            <p class="text-muted mb-4">You don't have any books checked out at the moment.</p>
+            <a href="/catalog/" class="btn btn-primary btn-lg">
+                <i class="bi bi-search me-2"></i>Browse Our Collection
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Active Reservations Section -->
+<section id="reservations" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <i class="bi bi-clock-history me-2"></i>Active Reservations
+            <span class="badge bg-warning ms-2">{{ active_reservations.count }}</span>
+        </h3>
+        <a href="/catalog/" class="btn btn-outline-warning">
+            <i class="bi bi-plus-circle me-2"></i>Make New Reservation
+        </a>
+    </div>
+    
+    {% if active_reservations %}
+    <div class="row g-4">
+        {% for reservation in active_reservations %}
+        <div class="col-lg-6">
+            <div class="card reservation-card border-0 shadow-hover h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="flex-grow-1 me-3">
+                            <h5 class="fw-bold mb-2">{{ reservation.book.title }}</h5>
+                            <p class="text-muted mb-3">{{ reservation.book.author }}</p>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar text-warning me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Reserved Date</small>
+                                            <p class="mb-0 fw-bold">{{ reservation.reservation_date|date:"M d, Y" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar-x text-warning me-3"></i>
+                                        <div>
+                                            <small class="text-muted">Expires on</small>
+                                            <p class="mb-0 fw-bold">{{ reservation.expiry_date|date:"M d, Y" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="reservation-status">
+                                {% if reservation.expiry_date < now %}
+                                <span class="badge bg-danger">Expired</span>
+                                {% else %}
+                                <span class="badge bg-warning">Active</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div>
+                            <small class="text-muted">Position in queue: 
+                                <span class="fw-bold">#{{ forloop.counter }}</span>
+                            </small>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ reservation.id }}">
+                                <i class="bi bi-x-circle me-2"></i>Cancel Reservation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card border-0 shadow">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <i class="bi bi-clock-history text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-3">No Active Reservations</h4>
+            <p class="text-muted mb-4">You don't have any book reservations at the moment.</p>
+            <a href="/catalog/" class="btn btn-warning btn-lg">
+                <i class="bi bi-search me-2"></i>Reserve a Book
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Unpaid Fines Section -->
+{% if unpaid_fines %}
+<section id="fines" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <i class="bi bi-cash-coin me-2"></i>Unpaid Fines
+            <span class="badge bg-danger ms-2">{{ unpaid_fines.count }}</span>
+        </h3>
+        <div class="total-fine">
+            <h4 class="fw-bold text-danger mb-0">Total: ₦{{ total_fines }}</h4>
+        </div>
+    </div>
+    
+    <div class="card border-0 shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Reason</th>
+                            <th>Due Date</th>
+                            <th>Days Overdue</th>
+                            <th>Fine Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fine in unpaid_fines %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <h6 class="mb-0">{{ fine.loan.book_copy.book.title }}</h6>
+                                    <small class="text-muted">{{ fine.loan.book_copy.book.author }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ fine.reason|truncatechars:30 }}</span>
+                            </td>
+                            <td>{{ fine.loan.due_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% with days_overdue=fine.loan.due_date|timesince:now|slice:":2" %}
+                                <span class="badge bg-danger">{{ days_overdue }} days</span>
+                                {% endwith %}
+                            </td>
+                            <td>
+                                <h5 class="fw-bold text-danger mb-0">₦{{ fine.amount }}</h5>
+                            </td>
+                            <td>
+                                <a href="{% url 'circulation:pay_fine' fine.id %}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-credit-card me-1"></i>Pay Now
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card-footer bg-light p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="fw-bold mb-2">Need Help with Fines?</h6>
+                        <p class="text-muted mb-0 small">
+                            If you have questions about your fines or need to discuss payment options, 
+                            please visit the circulation desk or contact library staff.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#payAllModal">
+                            <i class="bi bi-credit-card-2-front me-2"></i>Pay All Fines
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Loan History Section -->
+<section id="loan-history" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <i class="bi bi-clock-history me-2"></i>Loan History
+            <span class="badge bg-success ms-2">{{ loan_history.count }}</span>
+        </h3>
+        <a href="{% url 'circulation:patron_dashboard' %}?show_all=true" class="btn btn-outline-success">
+            <i class="bi bi-clock-history me-2"></i>View Full History
+        </a>
+    </div>
+    
+    {% if loan_history %}
+    <div class="card border-0 shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Author</th>
+                            <th>Loan Date</th>
+                            <th>Return Date</th>
+                            <th>Loan Period</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loan_history %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
+                                    <small class="text-muted">Copy #{{ loan.book_copy.id }}</small>
+                                </div>
+                            </td>
+                            <td>{{ loan.book_copy.book.author }}</td>
+                            <td>{{ loan.loan_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if loan.return_date %}
+                                {{ loan.return_date|date:"M d, Y" }}
+                                {% else %}
+                                <span class="text-muted">Not returned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if loan.return_date %}
+                                {% with days=loan.return_date|timeuntil:loan.loan_date %}
+                                {{ days|slice:":10" }}
+                                {% endwith %}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if loan.status == 'returned' %}
+                                <span class="badge bg-success">Returned</span>
+                                {% elif loan.status == 'overdue' %}
+                                <span class="badge bg-danger">Overdue</span>
+                                {% elif loan.status == 'lost' %}
+                                <span class="badge bg-dark">Lost</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <i class="bi bi-clock-history text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-3">No Loan History</h4>
+            <p class="text-muted mb-4">You haven't borrowed any books yet.</p>
+            <a href="/catalog/" class="btn btn-success btn-lg">
+                <i class="bi bi-book me-2"></i>Start Reading
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Quick Actions Card -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-lg bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+            <div class="card-body p-5 text-white">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h3 class="fw-bold mb-3">Need Help with Your Account?</h3>
+                        <p class="mb-4 opacity-90">
+                            Our library staff is here to help you with renewals, reservations, 
+                            fines, and any other questions about your library account.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="/accounts/staff_directory/" class="btn btn-light">
+                                <i class="bi bi-people me-2 text-primary"></i>Contact Staff
+                            </a>
+                            <a href="/accounts/profile/" class="btn btn-outline-light">
+                                <i class="bi bi-gear me-2"></i>Account Settings
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-center d-none d-lg-block">
+                        <i class="bi bi-headset" style="font-size: 5rem; opacity: 0.8;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Return Confirmation Modals -->
+{% for loan in current_loans %}
+<div class="modal fade" id="returnModal{{ loan.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mark for Return</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to mark this book for return?</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    This will notify library staff. You still need to physically return the book.
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <i class="bi bi-book fs-2 text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ loan.book_copy.book.title }}</h6>
+                        <p class="text-muted mb-0">{{ loan.book_copy.book.author }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="markForReturn({{ loan.id }})">
+                    <i class="bi bi-check-circle me-2"></i>Mark for Return
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Cancel Reservation Modals -->
+{% for reservation in active_reservations %}
+<div class="modal fade" id="cancelModal{{ reservation.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this reservation?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    This action cannot be undone. You will lose your place in the queue.
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <i class="bi bi-clock-history fs-2 text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ reservation.book.title }}</h6>
+                        <p class="text-muted mb-0">{{ reservation.book.author }}</p>
+                        <small class="text-muted">Reserved on: {{ reservation.reservation_date|date:"M d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Reservation</button>
+                <button type="button" class="btn btn-danger" onclick="cancelReservation({{ reservation.id }})">
+                    <i class="bi bi-x-circle me-2"></i>Cancel Reservation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Pay All Fines Modal -->
+{% if unpaid_fines %}
+<div class="modal fade" id="payAllModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pay All Fines</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are about to pay all outstanding fines.</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Total amount: <strong>₦{{ total_fines }}</strong>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" id="paymentMethod">
+                        <option value="online">Online Payment</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="cash">Cash at Library</option>
+                    </select>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmPayment">
+                    <label class="form-check-label" for="confirmPayment">
+                        I confirm that I want to pay all fines
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="payAllBtn" disabled>
+                    <i class="bi bi-credit-card-2-front me-2"></i>Pay ₦{{ total_fines }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .stat-card {
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 31, 63, 0.15);
+    }
+    
+    .loan-card, .reservation-card {
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .loan-card:hover, .reservation-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        border-color: var(--accent-blue);
+        box-shadow: 0 15px 30px rgba(58, 134, 255, 0.15);
+    }
+    
+    .loan-card:hover {
+        border-color: var(--primary-blue);
+    }
+    
+    .reservation-card:hover {
+        border-color: var(--warning);
+    }
+    
+    section {
+        scroll-margin-top: 100px;
+    }
+    
+    .table-hover tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        transform: translateX(5px);
+        background-color: rgba(var(--primary-rgb), 0.03);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set current date/time
+        const now = new Date();
+        const timeElement = document.querySelector('.lead.text-muted');
+        if (timeElement) {
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            timeElement.textContent += ` | Last updated: ${timeStr}`;
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Mark for return function
+        window.markForReturn = function(loanId) {
+            // In real implementation, this would be an AJAX call
+            console.log(`Marking loan ${loanId} for return`);
+            
+            // Show success message
+            const toastHtml = `
+                <div class="toast align-items-center text-bg-success border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Book marked for return. Please return it to the library.
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            showToast(toastHtml);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById(`returnModal${loanId}`));
+            modal.hide();
+            
+            // Update UI after delay
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        };
+        
+        // Cancel reservation function
+        window.cancelReservation = function(reservationId) {
+            // In real implementation, this would be an AJAX call
+            console.log(`Cancelling reservation ${reservationId}`);
+            
+            // Show success message
+            const toastHtml = `
+                <div class="toast align-items-center text-bg-success border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Reservation cancelled successfully.
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            showToast(toastHtml);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById(`cancelModal${reservationId}`));
+            modal.hide();
+            
+            // Update UI after delay
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        };
+        
+        // Pay all fines modal functionality
+        const confirmPaymentCheckbox = document.getElementById('confirmPayment');
+        const payAllBtn = document.getElementById('payAllBtn');
+        const paymentMethodSelect = document.getElementById('paymentMethod');
+        
+        if (confirmPaymentCheckbox && payAllBtn) {
+            confirmPaymentCheckbox.addEventListener('change', function() {
+                payAllBtn.disabled = !this.checked;
+            });
+            
+            payAllBtn.addEventListener('click', function() {
+                const paymentMethod = paymentMethodSelect.value;
+                
+                // In real implementation, this would be an AJAX call
+                console.log(`Paying all fines via ${paymentMethod}`);
+                
+                // Show processing message
+                const processingToast = `
+                    <div class="toast align-items-center text-bg-info border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bi bi-hourglass-split me-2"></i>
+                                Processing payment of ₦{{ total_fines }} via ${paymentMethod}...
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                showToast(processingToast);
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    // Show success message
+                    const successToast = `
+                        <div class="toast align-items-center text-bg-success border-0" role="alert">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Payment successful! All fines have been cleared.
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    showToast(successToast);
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('payAllModal'));
+                    modal.hide();
+                    
+                    // Reload page to update fines
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }, 3000);
+            });
+        }
+        
+        // Helper function to show toast
+        function showToast(html) {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            toastContainer.innerHTML = html;
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            // Remove toast after it's hidden
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Auto-refresh dashboard every 60 seconds
+        let refreshInterval = setInterval(() => {
+            // Show refresh indicator
+            const refreshIndicator = document.createElement('div');
+            refreshIndicator.className = 'position-fixed bottom-0 end-0 m-3';
+            refreshIndicator.innerHTML = `
+                <div class="toast align-items-center text-bg-info border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-arrow-clockwise me-2"></i>
+                            Updating dashboard data...
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(refreshIndicator);
+            
+            const toast = new bootstrap.Toast(refreshIndicator.querySelector('.toast'));
+            toast.show();
+            
+            setTimeout(() => {
+                refreshIndicator.remove();
+            }, 2000);
+            
+            // In real implementation, this would fetch fresh data via AJAX
+            console.log('Auto-refreshing patron dashboard...');
+        }, 60000);
+        
+        // Clean up interval on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(refreshInterval);
+        });
+        
+        // Loan countdown timers
+        function updateCountdowns() {
+            document.querySelectorAll('.loan-status .badge').forEach(badge => {
+                if (badge.textContent.includes('Due in')) {
+                    const daysText = badge.textContent.match(/\d+/);
+                    if (daysText) {
+                        let days = parseInt(daysText[0]);
+                        
+                        // Update days (simulating time passing)
+                        if (days > 0) {
+                            // In a real app, this would calculate actual time remaining
+                            // For demo, we'll just decrement a random number occasionally
+                            if (Math.random() > 0.95) {
+                                days--;
+                                if (days === 0) {
+                                    badge.textContent = 'Due today';
+                                    badge.className = 'badge bg-warning';
+                                } else {
+                                    badge.textContent = `Due in ${days} days`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update countdowns every minute
+        setInterval(updateCountdowns, 60000);
+        
+        // Print dashboard
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-outline-primary position-fixed d-none d-md-block';
+        printButton.innerHTML = '<i class="bi bi-printer"></i>';
+        printButton.style.bottom = '6rem';
+        printButton.style.left = '2rem';
+        printButton.style.zIndex = '100';
+        printButton.onclick = function() {
+            const printContent = document.querySelector('.main-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Ramat Library - My Dashboard Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+                        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .badge { padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+                        .text-primary { color: #0a2472 !important; }
+                        .text-danger { color: #dc3545 !important; }
+                        .text-success { color: #198754 !important; }
+                        .text-warning { color: #ffc107 !important; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Ramat Library - My Dashboard Report</h2>
+                    <p>Generated on ${new Date().toLocaleString()} for {{ user.get_full_name|default:user.username }}</p>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+        document.body.appendChild(printButton);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + P to print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                printButton.click();
+            }
+            
+            // Ctrl + R to refresh
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                location.reload();
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,855 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Dashboard - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Staff Dashboard</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-clipboard-data fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Circulation Staff Dashboard</h1>
+                <p class="lead text-muted">Manage loans, returns, and patron services</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Action Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card action-card border-0 shadow-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="action-icon mb-3">
+                    <i class="bi bi-cart-check fs-1 text-primary"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Checkout Book</h5>
+                <p class="text-muted mb-4">Process new book loans for patrons</p>
+                <a href="{% url 'circulation:checkout' %}" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-circle me-2"></i>New Checkout
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card action-card border-0 shadow-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="action-icon mb-3">
+                    <i class="bi bi-arrow-return-left fs-1 text-success"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Return Book</h5>
+                <p class="text-muted mb-4">Process book returns and calculate fines</p>
+                <a href="{% url 'circulation:return' %}" class="btn btn-success w-100">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Process Return
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card action-card border-0 shadow-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="action-icon mb-3">
+                    <i class="bi bi-calendar-check fs-1 text-warning"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Analytics</h5>
+                <p class="text-muted mb-4">View library usage statistics and reports</p>
+                <a href="{% url 'circulation:analytics' %}" class="btn btn-warning w-100 text-white">
+                    <i class="bi bi-bar-chart me-2"></i>View Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card action-card border-0 shadow-hover h-100">
+            <div class="card-body text-center p-4">
+                <div class="action-icon mb-3">
+                    <i class="bi bi-people fs-1 text-info"></i>
+                </div>
+                <h5 class="fw-bold mb-3">Patron Services</h5>
+                <p class="text-muted mb-4">Manage patron accounts and services</p>
+                <a href="/admin/accounts/libraryuser/" class="btn btn-info w-100 text-white">
+                    <i class="bi bi-person-gear me-2"></i>Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-book text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ pending_loans.count }}</h3>
+                        <p class="text-muted mb-0">Active Loans</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ overdue_loans.count }}</h3>
+                        <p class="text-muted mb-0">Overdue Loans</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ pending_reservations.count }}</h3>
+                        <p class="text-muted mb-0">Active Reservations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-arrow-return-right text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ recent_returns.count }}</h3>
+                        <p class="text-muted mb-0">Recent Returns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <ul class="nav nav-tabs nav-tabs-bordered" id="dashboardTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="active-loans-tab" data-bs-toggle="tab" data-bs-target="#active-loans" type="button" role="tab">
+                            <i class="bi bi-book me-2"></i>Active Loans
+                            <span class="badge bg-primary ms-2">{{ pending_loans.count }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="overdue-tab" data-bs-toggle="tab" data-bs-target="#overdue" type="button" role="tab">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Overdue Loans
+                            <span class="badge bg-danger ms-2">{{ overdue_loans.count }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations" type="button" role="tab">
+                            <i class="bi bi-clock-history me-2"></i>Reservations
+                            <span class="badge bg-warning ms-2">{{ pending_reservations.count }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="returns-tab" data-bs-toggle="tab" data-bs-target="#returns" type="button" role="tab">
+                            <i class="bi bi-arrow-return-right me-2"></i>Recent Returns
+                            <span class="badge bg-success ms-2">{{ recent_returns.count }}</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="tab-content" id="dashboardTabsContent">
+                    <!-- Active Loans Tab -->
+                    <div class="tab-pane fade show active" id="active-loans" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Patron</th>
+                                        <th>Book Title</th>
+                                        <th>Copy ID</th>
+                                        <th>Loan Date</th>
+                                        <th>Due Date</th>
+                                        <th>Days Left</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for loan in pending_loans %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
+                                                    <small class="text-muted">{{ loan.user.membership_type|title }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
+                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">#{{ loan.book_copy.id }}</span>
+                                        </td>
+                                        <td>{{ loan.loan_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="{% if loan.due_date < now %}text-danger fw-bold{% else %}text-dark{% endif %}">
+                                                {{ loan.due_date|date:"M d, Y" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% with days_left=loan.due_date|timeuntil:now %}
+                                            {% if "day" in days_left %}
+                                                <span class="badge bg-info">Due in {{ days_left|slice:":2" }} days</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Due today</span>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'circulation:return' %}?loan_id={{ loan.id }}" class="btn btn-sm btn-success">
+                                                <i class="bi bi-check-circle me-1"></i>Return
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-inbox fs-1 mb-3"></i>
+                                                <p class="mb-0">No active loans found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Overdue Loans Tab -->
+                    <div class="tab-pane fade" id="overdue" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Patron</th>
+                                        <th>Book Title</th>
+                                        <th>Copy ID</th>
+                                        <th>Due Date</th>
+                                        <th>Days Overdue</th>
+                                        <th>Fine Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for loan in overdue_loans %}
+                                    {% with days_overdue=loan.due_date|timesince:now|slice:":2" %}
+                                    <tr class="table-danger">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="bi bi-person-circle fs-4 text-danger"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
+                                                    <small class="text-danger">{{ loan.user.membership_type|title }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
+                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">#{{ loan.book_copy.id }}</span>
+                                        </td>
+                                        <td class="text-danger fw-bold">{{ loan.due_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-danger">{{ days_overdue }} days</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">₦{{ days_overdue|add:"0"|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{% url 'circulation:return' %}?loan_id={{ loan.id }}" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check-circle me-1"></i>Return
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#fineModal{{ loan.id }}">
+                                                    <i class="bi bi-cash-coin"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-check-circle fs-1 mb-3"></i>
+                                                <p class="mb-0">No overdue loans! Great work!</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Reservations Tab -->
+                    <div class="tab-pane fade" id="reservations" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Patron</th>
+                                        <th>Book Title</th>
+                                        <th>Reservation Date</th>
+                                        <th>Expiry Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservation in pending_reservations %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ reservation.user.get_full_name|default:reservation.user.username }}</h6>
+                                                    <small class="text-muted">{{ reservation.user.membership_type|title }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6 class="mb-0">{{ reservation.book.title }}</h6>
+                                            <small class="text-muted">{{ reservation.book.author }}</small>
+                                        </td>
+                                        <td>{{ reservation.reservation_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="{% if reservation.expiry_date < now %}text-danger{% endif %}">
+                                                {{ reservation.expiry_date|date:"M d, Y" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">Active</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#fulfillModal{{ reservation.id }}">
+                                                    <i class="bi bi-check-circle me-1"></i>Fulfill
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-clock-history fs-1 mb-3"></i>
+                                                <p class="mb-0">No active reservations</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Returns Tab -->
+                    <div class="tab-pane fade" id="returns" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Patron</th>
+                                        <th>Book Title</th>
+                                        <th>Return Date</th>
+                                        <th>Loan Period</th>
+                                        <th>Fine Applied</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for loan in recent_returns %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
+                                                    <small class="text-muted">{{ loan.user.membership_type|title }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
+                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
+                                        </td>
+                                        <td>{{ loan.return_date|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            {% with period=loan.return_date|timeuntil:loan.loan_date %}
+                                            {{ period|slice:":10" }}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            {% if loan.fines.exists %}
+                                            <span class="badge bg-danger">₦{{ loan.fines.first.amount }}</span>
+                                            {% else %}
+                                            <span class="badge bg-success">None</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">Returned</span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-arrow-return-right fs-1 mb-3"></i>
+                                                <p class="mb-0">No recent returns</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fulfill Reservation Modals -->
+{% for reservation in pending_reservations %}
+<div class="modal fade" id="fulfillModal{{ reservation.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Fulfill Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Fulfill reservation for <strong>{{ reservation.user.get_full_name }}</strong>?</p>
+                <p>Book: <strong>{{ reservation.book.title }}</strong></p>
+                <p>Reserved on: {{ reservation.reservation_date|date:"M d, Y" }}</p>
+                
+                <div class="mt-3">
+                    <label class="form-label">Select Book Copy:</label>
+                    <select class="form-select" id="copySelect{{ reservation.id }}">
+                        <option value="">Choose available copy...</option>
+                        {% comment %} Available copies would be populated via AJAX {% endcomment %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="fulfillReservation({{ reservation.id }})">
+                    <i class="bi bi-check-circle me-2"></i>Fulfill Reservation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Fine Modals for Overdue Loans -->
+{% for loan in overdue_loans %}
+<div class="modal fade" id="fineModal{{ loan.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Apply Fine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apply fine for overdue book:</p>
+                <p><strong>{{ loan.book_copy.book.title }}</strong></p>
+                <p>Patron: {{ loan.user.get_full_name }}</p>
+                <p>Due Date: {{ loan.due_date|date:"M d, Y" }}</p>
+                
+                <div class="mt-3">
+                    <label class="form-label">Fine Amount (₦):</label>
+                    <input type="number" class="form-control" id="fineAmount{{ loan.id }}" value="500" step="100">
+                </div>
+                
+                <div class="mt-3">
+                    <label class="form-label">Reason:</label>
+                    <textarea class="form-control" id="fineReason{{ loan.id }}" rows="2">Overdue return</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="applyFine({{ loan.id }})">
+                    <i class="bi bi-cash-coin me-2"></i>Apply Fine
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Quick Search -->
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Quick Patron Search</h5>
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control" id="patronSearch" placeholder="Search by name, ID, or email...">
+                    <button class="btn btn-primary" type="button" id="searchBtn">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .action-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15) !important;
+    }
+    
+    .action-card .action-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--accent-rgb), 0.1));
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover .action-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .stat-card {
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 20px rgba(58, 134, 255, 0.15);
+    }
+    
+    .nav-tabs-bordered .nav-link {
+        border: none;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        position: relative;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-tabs-bordered .nav-link.active {
+        color: var(--primary-blue);
+        border-bottom: 3px solid var(--primary-blue);
+        background: transparent;
+    }
+    
+    .nav-tabs-bordered .nav-link .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .table-hover tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        transform: translateX(5px);
+        background-color: rgba(var(--primary-rgb), 0.03);
+    }
+    
+    .table-hover .table-danger:hover {
+        background-color: rgba(var(--danger-rgb), 0.05) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add current date/time to header
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        // Update page subtitle with current date
+        const subtitle = document.querySelector('.lead.text-muted');
+        if (subtitle) {
+            subtitle.textContent += ' | ' + dateStr;
+        }
+        
+        // Initialize tab functionality
+        const triggerTabList = document.querySelectorAll('#dashboardTabs button');
+        triggerTabList.forEach(triggerEl => {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+        
+        // Patron search functionality
+        const searchInput = document.getElementById('patronSearch');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResults = document.getElementById('searchResults');
+        
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 500);
+        });
+        
+        searchBtn.addEventListener('click', performSearch);
+        
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // Simulate AJAX search
+            // In a real implementation, this would be an API call
+            searchResults.innerHTML = `
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">John Doe</h6>
+                            <small class="text-muted">Student</small>
+                        </div>
+                        <p class="mb-1">johndoe@student.unimaid.edu.ng</p>
+                        <small class="text-muted">3 active loans, 0 fines</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Jane Smith</h6>
+                            <small class="text-muted">Faculty</small>
+                        </div>
+                        <p class="mb-1">jsmith@unimaid.edu.ng</p>
+                        <small class="text-muted">5 active loans, ₦500 in fines</small>
+                    </a>
+                </div>
+            `;
+            searchResults.style.display = 'block';
+        }
+        
+        // Fulfill reservation function
+        window.fulfillReservation = function(reservationId) {
+            const copySelect = document.getElementById(`copySelect${reservationId}`);
+            const selectedCopy = copySelect.value;
+            
+            if (!selectedCopy) {
+                alert('Please select a book copy');
+                return;
+            }
+            
+            // In real implementation, this would be an AJAX call
+            console.log(`Fulfilling reservation ${reservationId} with copy ${selectedCopy}`);
+            alert(`Reservation fulfilled! Checkout book copy #${selectedCopy} to the patron.`);
+            bootstrap.Modal.getInstance(document.getElementById(`fulfillModal${reservationId}`)).hide();
+            
+            // Reload page or update table
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        };
+        
+        // Apply fine function
+        window.applyFine = function(loanId) {
+            const amount = document.getElementById(`fineAmount${loanId}`).value;
+            const reason = document.getElementById(`fineReason${loanId}`).value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid fine amount');
+                return;
+            }
+            
+            // In real implementation, this would be an AJAX call
+            console.log(`Applying fine of ₦${amount} for loan ${loanId}: ${reason}`);
+            alert(`Fine of ₦${amount} applied successfully!`);
+            bootstrap.Modal.getInstance(document.getElementById(`fineModal${loanId}`)).hide();
+            
+            // Reload page or update table
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        };
+        
+        // Auto-refresh data every 30 seconds
+        let refreshInterval = setInterval(() => {
+            // In real implementation, this would fetch fresh data via AJAX
+            console.log('Auto-refreshing dashboard data...');
+            
+            // Show refresh indicator
+            const refreshIndicator = document.createElement('div');
+            refreshIndicator.className = 'position-fixed top-0 end-0 m-3';
+            refreshIndicator.innerHTML = `
+                <div class="toast bg-success text-white" role="alert">
+                    <div class="toast-body">
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Updating dashboard data...
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(refreshIndicator);
+            
+            const toast = new bootstrap.Toast(refreshIndicator.querySelector('.toast'));
+            toast.show();
+            
+            setTimeout(() => {
+                refreshIndicator.remove();
+            }, 2000);
+        }, 30000);
+        
+        // Clean up interval on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(refreshInterval);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + 1-4 for tab switching
+            if (e.ctrlKey && e.key >= '1' && e.key <= '4') {
+                e.preventDefault();
+                const tabIndex = parseInt(e.key) - 1;
+                const tabButtons = document.querySelectorAll('#dashboardTabs button');
+                if (tabButtons[tabIndex]) {
+                    tabButtons[tabIndex].click();
+                }
+            }
+            
+            // Ctrl + F for search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        // Print functionality for current tab
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-outline-primary position-fixed d-none d-md-block';
+        printButton.innerHTML = '<i class="bi bi-printer"></i>';
+        printButton.style.bottom = '6rem';
+        printButton.style.left = '2rem';
+        printButton.style.zIndex = '100';
+        printButton.onclick = function() {
+            const activeTab = document.querySelector('#dashboardTabsContent .tab-pane.active');
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Ramat Library - Staff Dashboard Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .badge { padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Ramat Library - Staff Dashboard Report</h2>
+                    <p>Generated on ${new Date().toLocaleString()}</p>
+                    ${activeTab.outerHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+        document.body.appendChild(printButton);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Events - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Events</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-calendar-event fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Library Events & Programs</h1>
+                <p class="lead text-muted">Join workshops, seminars, exhibitions, and training sessions at Ramat Library</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <h5 class="mb-0">Filter Events</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="filter" id="all" checked>
+                                <label class="btn btn-outline-primary" for="all">All Events</label>
+                                
+                                <input type="radio" class="btn-check" name="filter" id="upcoming">
+                                <label class="btn btn-outline-primary" for="upcoming">Upcoming</label>
+                                
+                                <input type="radio" class="btn-check" name="filter" id="past">
+                                <label class="btn btn-outline-primary" for="past">Past Events</label>
+                            </div>
+                            
+                            {% if user.is_staff %}
+                            <a href="{% url 'events:create_event' %}" class="btn btn-primary ms-auto">
+                                <i class="bi bi-plus-circle me-2"></i>Create Event
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Grid -->
+<div class="row g-4">
+    {% for event in events %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card event-card h-100 border-0 shadow-hover overflow-hidden">
+            <div class="position-relative">
+                <!-- Event Image - You can add images to your Event model later -->
+                <div class="event-image-placeholder" style="height: 200px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-calendar-event text-white" style="font-size: 4rem; opacity: 0.8;"></i>
+                </div>
+                <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge bg-primary px-3 py-2">
+                        {{ event.date|date:"M d" }}
+                    </span>
+                </div>
+                {% if event.max_attendees and event.registrations.count >= event.max_attendees %}
+                <div class="position-absolute top-0 start-0 m-3">
+                    <span class="badge bg-danger px-3 py-2">FULL</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">{{ event.title }}</h5>
+                
+                <div class="event-meta mb-3">
+                    <div class="d-flex align-items-center text-muted mb-2">
+                        <i class="bi bi-clock me-2"></i>
+                        <div>
+                            <small>{{ event.date|date:"l, F j, Y" }}</small>
+                            <br>
+                            <small>{{ event.time|time:"g:i A" }}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center text-muted mb-2">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        <small>{{ event.location }}</small>
+                    </div>
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-person me-2"></i>
+                        <small>Organized by: {{ event.organizer.get_full_name|default:event.organizer.username }}</small>
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-4">{{ event.description|truncatechars:150 }}</p>
+                
+                <!-- Registration Info -->
+                <div class="registration-info mb-4">
+                    {% if event.max_attendees %}
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {% widthratio event.registrations.count event.max_attendees 100 %}%">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">
+                            <i class="bi bi-people me-1"></i>
+                            {{ event.registrations.count }} / {{ event.max_attendees }} registered
+                        </small>
+                        <small class="text-primary">
+                            {% widthratio event.registrations.count event.max_attendees 100 %}% full
+                        </small>
+                    </div>
+                    {% else %}
+                    <small class="text-muted">
+                        <i class="bi bi-people me-1"></i>
+                        {{ event.registrations.count }} registered
+                    </small>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-primary btn-sm">
+                        View Details
+                    </a>
+                    
+                    {% if user.is_authenticated %}
+                        {% if event.registrations.filter.user=user %}
+                            <span class="badge bg-success px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>Registered
+                            </span>
+                        {% else %}
+                            {% if event.registration_deadline and event.registration_deadline > now %}
+                                {% if event.max_attendees and event.registrations.count >= event.max_attendees %}
+                                    <span class="badge bg-danger px-3 py-2">Full</span>
+                                {% else %}
+                                    <a href="{% url 'events:register_for_event' event.pk %}" 
+                                       class="btn btn-primary btn-sm">
+                                        Register Now
+                                    </a>
+                                {% endif %}
+                            {% elif event.registration_deadline %}
+                                <span class="badge bg-secondary px-3 py-2">Registration Closed</span>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" 
+                           class="btn btn-primary btn-sm">
+                            Login to Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-muted mb-3">No Events Scheduled</h4>
+                <p class="text-muted mb-4">Check back soon for upcoming workshops, seminars, and programs.</p>
+                {% if user.is_staff %}
+                <a href="{% url 'events:create_event' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Create Your First Event
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if events.paginator.num_pages > 1 %}
+<div class="row mt-5">
+    <div class="col-12">
+        <nav aria-label="Events pagination">
+            <ul class="pagination justify-content-center">
+                {% if events.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ events.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                {% for num in events.paginator.page_range %}
+                    {% if events.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > events.number|add:'-3' and num < events.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if events.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ events.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+<!-- Upcoming Highlights -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-star me-2"></i>Featured Upcoming Events
+                </h5>
+            </div>
+            <div class="card-body">
+                {% with featured_events=events|slice:":3" %}
+                    {% if featured_events %}
+                    <div class="row g-3">
+                        {% for event in featured_events %}
+                        <div class="col-md-4">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-bold">{{ event.title }}</h6>
+                                    <small class="text-muted d-block mb-2">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        {{ event.date|date:"M d, Y" }} at {{ event.time|time:"g:i A" }}
+                                    </small>
+                                    <p class="small text-muted mb-3">{{ event.description|truncatechars:100 }}</p>
+                                    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                                        Learn More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No featured events at the moment.</p>
+                    </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .event-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 30px rgba(58, 134, 255, 0.2);
+    }
+    
+    .event-image-placeholder {
+        transition: all 0.3s ease;
+    }
+    
+    .event-card:hover .event-image-placeholder {
+        transform: scale(1.05);
+    }
+    
+    .progress {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+    
+    .progress-bar {
+        border-radius: 4px;
+    }
+    
+    .btn-check:checked + .btn-outline-primary {
+        background-color: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+    }
+    
+    .shadow-hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .shadow-hover:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.btn-check');
+        filterButtons.forEach(button => {
+            button.addEventListener('change', function() {
+                const filterValue = this.id;
+                const events = document.querySelectorAll('.event-card');
+                
+                events.forEach(eventCard => {
+                    const eventDate = new Date(eventCard.querySelector('.event-date').textContent);
+                    const now = new Date();
+                    
+                    switch(filterValue) {
+                        case 'upcoming':
+                            eventCard.style.display = eventDate >= now ? 'block' : 'none';
+                            break;
+                        case 'past':
+                            eventCard.style.display = eventDate < now ? 'block' : 'none';
+                            break;
+                        default:
+                            eventCard.style.display = 'block';
+                    }
+                });
+            });
+        });
+        
+        // Add event date to each card for filtering
+        const eventCards = document.querySelectorAll('.event-card');
+        eventCards.forEach(card => {
+            const dateText = card.querySelector('small:nth-child(2)').textContent;
+            // Create hidden element for filtering
+            const hiddenDate = document.createElement('span');
+            hiddenDate.className = 'event-date d-none';
+            hiddenDate.textContent = dateText;
+            card.appendChild(hiddenDate);
+        });
+        
+        // Registration button confirmation
+        const registerButtons = document.querySelectorAll('a[href*="register_for_event"]');
+        registerButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to register for this event?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Add calendar view toggle (for future enhancement)
+        const calendarToggle = document.createElement('div');
+        calendarToggle.className = 'd-flex gap-2 mb-4 justify-content-end';
+        calendarToggle.innerHTML = `
+            <button class="btn btn-outline-secondary" id="gridView">
+                <i class="bi bi-grid"></i>
+            </button>
+            <button class="btn btn-outline-secondary" id="listView">
+                <i class="bi bi-list"></i>
+            </button>
+        `;
+        
+        // Uncomment when you want to add view toggle
+        // document.querySelector('.row.mb-4 .col-12 .card-body').appendChild(calendarToggle);
+        
+        // View toggle functionality
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        
+        if (gridView && listView) {
+            gridView.addEventListener('click', () => {
+                document.querySelector('.row.g-4').className = 'row g-4';
+                gridView.classList.add('active');
+                listView.classList.remove('active');
+            });
+            
+            listView.addEventListener('click', () => {
+                document.querySelector('.row.g-4').className = 'row g-0';
+                const eventCards = document.querySelectorAll('.event-card');
+                eventCards.forEach(card => {
+                    card.classList.add('mb-3');
+                });
+                listView.classList.add('active');
+                gridView.classList.remove('active');
+            });
+            
+            // Set default view
+            gridView.classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

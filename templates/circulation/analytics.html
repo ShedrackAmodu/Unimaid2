@@ -1,0 +1,1170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Analytics</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-bar-chart fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Analytics Dashboard</h1>
+                <p class="lead text-muted">Library usage statistics and performance metrics</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Date Range Selector -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-0">View Analytics for:</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <select class="form-select" id="timeRangeSelect">
+                                <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+                                <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+                                <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+                                <option value="180" {% if days == 180 %}selected{% endif %}>Last 6 months</option>
+                                <option value="365" {% if days == 365 %}selected{% endif %}>Last year</option>
+                                <option value="custom">Custom range</option>
+                            </select>
+                            <button class="btn btn-primary" type="button" id="applyDateRange">
+                                <i class="bi bi-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="customRangeSection" class="row mt-3" style="display: none;">
+                    <div class="col-md-6">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" value="{% now 'Y-m-d' %}">
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="row mt-4 g-3">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-book text-primary fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ total_books }}</h3>
+                                <p class="text-muted mb-0">Total Books</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-people text-success fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+                                <p class="text-muted mb-0">Active Users</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-clock-history text-warning fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ active_loans }}</h3>
+                                <p class="text-muted mb-0">Active Loans</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0">{{ overdue_loans }}</h3>
+                                <p class="text-muted mb-0">Overdue Loans</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Charts Section -->
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <!-- Circulation Activity Chart -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Circulation Activity
+                    </h3>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-calendar me-1"></i>Daily
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-period="daily">Daily</a></li>
+                            <li><a class="dropdown-item" href="#" data-period="weekly">Weekly</a></li>
+                            <li><a class="dropdown-item" href="#" data-period="monthly">Monthly</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="circulationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Loan Distribution Chart -->
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-pie-chart me-2"></i>Loan Distribution
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="loanDistributionChart"></canvas>
+                </div>
+                <div class="row mt-3 text-center">
+                    <div class="col-4">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded">
+                            <small class="text-muted">Students</small>
+                            <h5 class="fw-bold mb-0">65%</h5>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-success bg-opacity-10 p-2 rounded">
+                            <small class="text-muted">Faculty</small>
+                            <h5 class="fw-bold mb-0">20%</h5>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-warning bg-opacity-10 p-2 rounded">
+                            <small class="text-muted">Staff</small>
+                            <h5 class="fw-bold mb-0">15%</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <!-- Recent Loans & Returns -->
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Recent Activity
+                    </h3>
+                    <span class="badge bg-primary">{{ recent_loans }} loans • {{ recent_returns }} returns</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <!-- Sample timeline items -->
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">Book Returned</h6>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                            <p class="mb-1">"Introduction to Algorithms" returned by John Doe</p>
+                            <small class="text-muted">Copy #B12345 • On time</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">New Loan</h6>
+                                <small class="text-muted">4 hours ago</small>
+                            </div>
+                            <p class="mb-1">"Database Systems" checked out by Dr. Jane Smith</p>
+                            <small class="text-muted">Copy #B67890 • Faculty loan</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-danger"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">Overdue Alert</h6>
+                                <small class="text-muted">1 day ago</small>
+                            </div>
+                            <p class="mb-1">"Computer Networks" overdue by Samuel Johnson</p>
+                            <small class="text-muted">Copy #B54321 • 3 days overdue • ₦150 fine</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">Reservation Fulfilled</h6>
+                                <small class="text-muted">2 days ago</small>
+                            </div>
+                            <p class="mb-1">"Artificial Intelligence" reservation fulfilled</p>
+                            <small class="text-muted">Copy #B98765 • Reserved for 5 days</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">New Member</h6>
+                                <small class="text-muted">3 days ago</small>
+                            </div>
+                            <p class="mb-1">New library member registered: Sarah Williams</p>
+                            <small class="text-muted">Student • STU2024001</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-clock-history me-2"></i>View Full Activity Log
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <!-- Popular Books -->
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-star me-2"></i>Most Popular Books
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Book Title</th>
+                                <th>Author</th>
+                                <th>Loans</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in popular_books %}
+                            <tr>
+                                <td>
+                                    <div class="rank-badge bg-primary text-white">{{ forloop.counter }}</div>
+                                </td>
+                                <td>
+                                    <h6 class="fw-bold mb-1">{{ book.title|truncatechars:30 }}</h6>
+                                    <small class="text-muted">{{ book.genre|default:"General" }}</small>
+                                </td>
+                                <td>{{ book.author|truncatechars:20 }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ book.loan_count|default:"0" }}</span>
+                                </td>
+                                <td>
+                                    {% if book.is_available %}
+                                    <span class="badge bg-success">Available</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Checked Out</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-book fs-1 mb-3"></i>
+                                        <p class="mb-0">No popular books data</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Top Categories -->
+                <div class="p-4 border-top">
+                    <h6 class="fw-bold mb-3">Top Categories</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span>Computer Science</span>
+                                <span class="badge bg-primary">42%</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span>Engineering</span>
+                                <span class="badge bg-success">23%</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span>Medicine</span>
+                                <span class="badge bg-info">15%</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span>Literature</span>
+                                <span class="badge bg-warning">10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Activity & Fines -->
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <!-- Most Active Users -->
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-trophy me-2"></i>Most Active Users
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Membership</th>
+                                <th>Loans</th>
+                                <th>Returns</th>
+                                <th>Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in active_users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h6>
+                                            <small class="text-muted">{{ user.email|truncatechars:20 }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ user.membership_type|title }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">{{ user.loan_count|default:"0" }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-success fw-bold">{{ user.loan_count|default:"0"|add:"-2" }}</span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: {{ user.loan_count|default:"0"|add:"0"|multiply:10 }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-people fs-1 mb-3"></i>
+                                        <p class="mb-0">No user activity data</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <!-- Fines & Revenue -->
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-cash-coin me-2"></i>Fines & Revenue
+                    </h3>
+                    <span class="badge bg-danger">₦{{ "1250.00" }} pending</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center p-3">
+                                <h2 class="fw-bold text-danger">₦{{ "1250.00" }}</h2>
+                                <small class="text-muted">Total Pending Fines</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center p-3">
+                                <h2 class="fw-bold text-success">₦{{ "850.00" }}</h2>
+                                <small class="text-muted">Fines Collected ({{ days }} days)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Fine Distribution</h6>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="finesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                            <small class="text-muted">Overdue Fines</small>
+                            <span class="badge bg-danger">₦950</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                            <small class="text-muted">Damage Fees</small>
+                            <span class="badge bg-warning">₦200</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                            <small class="text-muted">Lost Books</small>
+                            <span class="badge bg-dark">₦100</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                            <small class="text-muted">Waived Fines</small>
+                            <span class="badge bg-success">₦150</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export & Reports -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-download me-2"></i>Export Reports
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold mb-3">Circulation Report</h5>
+                                <p class="text-muted small mb-4">Daily loan and return statistics</p>
+                                <button class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-download me-2"></i>Export PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-cash-coin fs-1 text-success"></i>
+                                </div>
+                                <h5 class="fw-bold mb-3">Fines Report</h5>
+                                <p class="text-muted small mb-4">Fine collection and waivers</p>
+                                <button class="btn btn-outline-success w-100">
+                                    <i class="bi bi-download me-2"></i>Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-people fs-1 text-warning"></i>
+                                </div>
+                                <h5 class="fw-bold mb-3">User Activity</h5>
+                                <p class="text-muted small mb-4">Patron borrowing patterns</p>
+                                <button class="btn btn-outline-warning w-100">
+                                    <i class="bi bi-download me-2"></i>Export CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-graph-up fs-1 text-info"></i>
+                                </div>
+                                <h5 class="fw-bold mb-3">Full Analytics</h5>
+                                <p class="text-muted small mb-4">Complete dashboard data</p>
+                                <button class="btn btn-outline-info w-100">
+                                    <i class="bi bi-download me-2"></i>Export All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Custom Report -->
+                <div class="mt-4 pt-4 border-top">
+                    <h6 class="fw-bold mb-3">Generate Custom Report</h6>
+                    <form class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select">
+                                <option>Circulation Summary</option>
+                                <option>User Activity</option>
+                                <option>Fines Analysis</option>
+                                <option>Collection Usage</option>
+                                <option>Overdue Analysis</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date Range</label>
+                            <select class="form-select">
+                                <option>Last 7 days</option>
+                                <option>Last 30 days</option>
+                                <option>Last 90 days</option>
+                                <option>Last year</option>
+                                <option>Custom range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Format</label>
+                            <select class="form-select">
+                                <option>PDF</option>
+                                <option>Excel</option>
+                                <option>CSV</option>
+                                <option>HTML</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-gear me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Summary -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-2">Dashboard Summary</h5>
+                        <p class="text-muted mb-0">
+                            Last updated: {% now "F j, Y, g:i a" %} | 
+                            Data period: {{ days }} days | 
+                            <span class="text-success">System status: Normal</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button class="btn btn-outline-primary" id="refreshDashboard">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .chart-container {
+        position: relative;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-blue), var(--accent-blue));
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px var(--primary-blue);
+    }
+    
+    .timeline-content {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-content:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .rank-badge {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .progress {
+        border-radius: 3px;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .card.hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card.hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 31, 63, 0.15) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize variables
+        let circulationChart, distributionChart, finesChart;
+        
+        // Time range selector
+        const timeRangeSelect = document.getElementById('timeRangeSelect');
+        const customRangeSection = document.getElementById('customRangeSection');
+        const applyDateRangeBtn = document.getElementById('applyDateRange');
+        
+        timeRangeSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRangeSection.style.display = 'block';
+            } else {
+                customRangeSection.style.display = 'none';
+            }
+        });
+        
+        applyDateRangeBtn.addEventListener('click', function() {
+            const days = timeRangeSelect.value;
+            if (days === 'custom') {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                if (startDate && endDate) {
+                    // Calculate days between dates
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    window.location.href = `?days=${diffDays}`;
+                }
+            } else {
+                window.location.href = `?days=${days}`;
+            }
+        });
+        
+        // Initialize charts
+        initializeCharts();
+        
+        // Period dropdown for circulation chart
+        document.querySelectorAll('[data-period]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const period = this.dataset.period;
+                
+                // Update button text
+                const button = this.closest('.dropdown').querySelector('.dropdown-toggle');
+                button.innerHTML = `<i class="bi bi-calendar me-1"></i>${this.textContent}`;
+                
+                // Update chart based on period
+                updateCirculationChart(period);
+            });
+        });
+        
+        // Refresh dashboard button
+        document.getElementById('refreshDashboard').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Refreshing...';
+            btn.disabled = true;
+            
+            // Simulate data refresh
+            setTimeout(() => {
+                // Update charts with new data
+                updateAllCharts();
+                
+                // Show success message
+                showToast('Dashboard data refreshed successfully', 'success');
+                
+                // Restore button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        });
+        
+        // Export report buttons
+        document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-warning, .btn-outline-info').forEach(btn => {
+            if (btn.textContent.includes('Export')) {
+                btn.addEventListener('click', function() {
+                    const reportType = this.closest('.card-body').querySelector('h5').textContent;
+                    showToast(`Generating ${reportType}...`, 'info');
+                    
+                    // Simulate report generation
+                    setTimeout(() => {
+                        showToast(`${reportType} downloaded successfully`, 'success');
+                    }, 2000);
+                });
+            }
+        });
+        
+        // Initialize charts function
+        function initializeCharts() {
+            // Circulation Activity Chart
+            const circulationCtx = document.getElementById('circulationChart').getContext('2d');
+            circulationChart = new Chart(circulationCtx, {
+                type: 'line',
+                data: {
+                    labels: generateDateLabels(7),
+                    datasets: [
+                        {
+                            label: 'Loans',
+                            data: [12, 19, 8, 15, 22, 18, 14],
+                            borderColor: 'rgb(58, 134, 255)',
+                            backgroundColor: 'rgba(58, 134, 255, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Returns',
+                            data: [8, 12, 10, 14, 18, 15, 11],
+                            borderColor: 'rgb(40, 167, 69)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Transactions'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Loan Distribution Chart
+            const distributionCtx = document.getElementById('loanDistributionChart').getContext('2d');
+            distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Students', 'Faculty', 'Staff', 'Public'],
+                    datasets: [{
+                        data: [65, 20, 10, 5],
+                        backgroundColor: [
+                            'rgb(58, 134, 255)',
+                            'rgb(40, 167, 69)',
+                            'rgb(255, 193, 7)',
+                            'rgb(108, 117, 125)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Fines Chart
+            const finesCtx = document.getElementById('finesChart').getContext('2d');
+            finesChart = new Chart(finesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Overdue', 'Damage', 'Lost', 'Waived'],
+                    datasets: [{
+                        label: 'Amount (₦)',
+                        data: [950, 200, 100, 150],
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(33, 37, 41, 0.7)',
+                            'rgba(40, 167, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(220, 53, 69)',
+                            'rgb(255, 193, 7)',
+                            'rgb(33, 37, 41)',
+                            'rgb(40, 167, 69)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Amount (₦)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update circulation chart based on period
+        function updateCirculationChart(period) {
+            let labels, loanData, returnData;
+            
+            switch(period) {
+                case 'weekly':
+                    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                    loanData = [85, 92, 78, 88];
+                    returnData = [82, 85, 75, 80];
+                    break;
+                case 'monthly':
+                    labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                    loanData = [320, 340, 310, 330, 350, 340];
+                    returnData = [305, 325, 295, 315, 335, 325];
+                    break;
+                default: // daily
+                    labels = generateDateLabels(7);
+                    loanData = [12, 19, 8, 15, 22, 18, 14];
+                    returnData = [8, 12, 10, 14, 18, 15, 11];
+            }
+            
+            circulationChart.data.labels = labels;
+            circulationChart.data.datasets[0].data = loanData;
+            circulationChart.data.datasets[1].data = returnData;
+            circulationChart.update();
+        }
+        
+        // Update all charts with new data
+        function updateAllCharts() {
+            // Generate random data for demo
+            const newLoanData = Array.from({length: 7}, () => Math.floor(Math.random() * 25) + 5);
+            const newReturnData = Array.from({length: 7}, () => Math.floor(Math.random() * 20) + 5);
+            const newDistribution = [
+                Math.floor(Math.random() * 30) + 50, // Students
+                Math.floor(Math.random() * 20) + 15, // Faculty
+                Math.floor(Math.random() * 15) + 5,  // Staff
+                Math.floor(Math.random() * 10) + 1   // Public
+            ];
+            const newFines = [
+                Math.floor(Math.random() * 500) + 500, // Overdue
+                Math.floor(Math.random() * 200) + 100, // Damage
+                Math.floor(Math.random() * 150) + 50,  // Lost
+                Math.floor(Math.random() * 100) + 50   // Waived
+            ];
+            
+            // Update circulation chart
+            circulationChart.data.datasets[0].data = newLoanData;
+            circulationChart.data.datasets[1].data = newReturnData;
+            circulationChart.update();
+            
+            // Update distribution chart
+            const total = newDistribution.reduce((a, b) => a + b, 0);
+            const percentages = newDistribution.map(val => Math.round((val / total) * 100));
+            distributionChart.data.datasets[0].data = percentages;
+            distributionChart.update();
+            
+            // Update fines chart
+            finesChart.data.datasets[0].data = newFines;
+            finesChart.update();
+            
+            // Update summary numbers
+            const totalLoans = newLoanData.reduce((a, b) => a + b, 0);
+            const totalReturns = newReturnData.reduce((a, b) => a + b, 0);
+            const totalFines = newFines.slice(0, 3).reduce((a, b) => a + b, 0);
+            
+            // Update UI elements (in real app, this would be AJAX)
+            document.querySelectorAll('.fw-bold.mb-0')[1].textContent = totalLoans + totalReturns;
+            document.querySelectorAll('.fw-bold.mb-0')[3].textContent = Math.floor(Math.random() * 20) + 5;
+            document.querySelector('.badge.bg-danger').textContent = `₦${totalFines}`;
+        }
+        
+        // Generate date labels
+        function generateDateLabels(days) {
+            const labels = [];
+            const now = new Date();
+            
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                labels.push(date.toLocaleDateString('en-US', { 
+                    weekday: 'short',
+                    month: 'short', 
+                    day: 'numeric' 
+                }));
+            }
+            
+            return labels;
+        }
+        
+        // Helper function to show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '1060';
+            
+            const bgClass = type === 'success' ? 'text-bg-success' : 
+                           type === 'warning' ? 'text-bg-warning' : 
+                           type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+            
+            toastContainer.innerHTML = `
+                <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(toastContainer);
+            
+            const toastEl = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastEl, {
+                autohide: true,
+                delay: 5000
+            });
+            
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+        
+        // Auto-refresh dashboard every 5 minutes
+        let refreshInterval = setInterval(() => {
+            console.log('Auto-refreshing analytics data...');
+            updateAllCharts();
+        }, 300000); // 5 minutes
+        
+        // Clean up interval on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(refreshInterval);
+        });
+        
+        // Print dashboard
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-outline-primary position-fixed d-none d-md-block';
+        printButton.innerHTML = '<i class="bi bi-printer"></i>';
+        printButton.style.bottom = '6rem';
+        printButton.style.left = '2rem';
+        printButton.style.zIndex = '100';
+        printButton.onclick = function() {
+            const printContent = document.querySelector('.main-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Analytics Report - Ramat Library</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .badge { padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+                        .text-primary { color: #0a2472 !important; }
+                        .text-danger { color: #dc3545 !important; }
+                        .text-success { color: #198754 !important; }
+                        .text-warning { color: #ffc107 !important; }
+                        .timeline { display: none; }
+                        canvas { max-width: 100% !important; height: auto !important; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Ramat Library Analytics Report</h2>
+                    <p>Generated on ${new Date().toLocaleString()} | Period: ${document.getElementById('timeRangeSelect').options[document.getElementById('timeRangeSelect').selectedIndex].text}</p>
+                    <div style="border: 2px solid #0a2472; padding: 20px; border-radius: 10px;">
+                        ${printContent}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+        document.body.appendChild(printButton);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl + R to refresh
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                document.getElementById('refreshDashboard').click();
+            }
+            
+            // Ctrl + P to print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                printButton.click();
+            }
+            
+            // Ctrl + E to export
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                document.querySelector('.btn-outline-info.w-100').click();
+            }
+            
+            // Number keys 1-4 for time ranges
+            if (e.key >= '1' && e.key <= '5') {
+                const index = parseInt(e.key) - 1;
+                const options = timeRangeSelect.options;
+                if (index < options.length) {
+                    timeRangeSelect.selectedIndex = index;
+                    timeRangeSelect.dispatchEvent(new Event('change'));
+                    applyDateRangeBtn.click();
+                }
+            }
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Add hover effects to cards
+        document.querySelectorAll('.card.hover-lift, .card.border-0.shadow-sm').forEach(card => {
+            card.classList.add('hover-lift');
+        });
+    });
+</script>
+{% endblock %}

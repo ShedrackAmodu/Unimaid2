@@ -1,0 +1,441 @@
+<!-- blog/templates/blog/post_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} - Ramat Library Blog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'blog:post_list' %}">Blog</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ post.title|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block page_title %}{{ post.title }}{% endblock %}
+{% block page_subtitle %}{% if post.status == 'published' %}Published on {{ post.published_date|date:"F d, Y" }}{% else %}Draft Post{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <div class="card shadow-hover mb-4">
+            <!-- Post Header -->
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-3">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-person text-white fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">{{ post.author.get_full_name|default:post.author.username }}</h6>
+                                <small class="text-muted">
+                                    {% if post.author.staff_profile.position %}
+                                        {{ post.author.staff_profile.position }}
+                                    {% else %}
+                                        Library Staff
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        {% if post.status == 'draft' %}
+                        <span class="badge bg-warning fs-6">Draft</span>
+                        {% endif %}
+                        <div class="text-muted">
+                            <small><i class="bi bi-clock me-1"></i>{{ post.created_at|timesince }} ago</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Content -->
+                <article class="blog-content mb-4">
+                    <div class="lead mb-4" style="font-size: 1.25rem; line-height: 1.7;">
+                        {{ post.content|safe }}
+                    </div>
+                </article>
+
+                <!-- Tags/Categories -->
+                <div class="mb-4">
+                    <span class="text-muted me-2"><i class="bi bi-tags"></i></span>
+                    <span class="badge bg-light text-dark me-2">Library News</span>
+                    <span class="badge bg-light text-dark me-2">Announcement</span>
+                    {% if post.status == 'published' %}
+                    <span class="badge bg-light text-dark me-2">Published</span>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center border-top pt-4">
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm me-2" id="likeBtn">
+                            <i class="bi bi-hand-thumbs-up me-1"></i>Like
+                            <span class="badge bg-secondary ms-1" id="likeCount">0</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="shareBtn">
+                            <i class="bi bi-share me-1"></i>Share
+                        </button>
+                    </div>
+                    <div>
+                        {% if user.is_staff %}
+                        <a href="{% url 'blog:edit_post' post.pk %}" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                        <a href="{% url 'blog:delete_post' post.pk %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-between mb-5">
+            <div>
+                {% if previous_post %}
+                <a href="{% url 'blog:post_detail' previous_post.pk %}" class="btn btn-outline-primary">
+                    <i class="bi bi-chevron-left me-1"></i> Previous Post
+                </a>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'blog:post_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-grid me-1"></i> All Posts
+                </a>
+            </div>
+            <div>
+                {% if next_post %}
+                <a href="{% url 'blog:post_detail' next_post.pk %}" class="btn btn-outline-primary">
+                    Next Post <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Author Bio (Optional) -->
+        {% if post.author.staff_profile %}
+        <div class="card shadow-hover mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>About the Author</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px;">
+                            <i class="bi bi-person text-white fs-1"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="fw-bold">{{ post.author.get_full_name|default:post.author.username }}</h5>
+                        <p class="text-muted mb-2">{{ post.author.staff_profile.position }}</p>
+                        {% if post.author.staff_profile.bio %}
+                        <p class="mb-0">{{ post.author.staff_profile.bio|truncatechars:200 }}</p>
+                        {% endif %}
+                        <a href="{% url 'accounts:staff_directory' %}" class="btn btn-sm btn-outline-primary mt-3">
+                            View Full Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Related Posts (Optional) -->
+        <div class="card shadow-hover">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-newspaper me-2"></i>Related Posts</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for related in related_posts|slice:":3" %}
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold">
+                                    <a href="{% url 'blog:post_detail' related.pk %}" class="text-decoration-none">
+                                        {{ related.title|truncatechars:40 }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>{{ related.published_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center text-muted py-3">
+                        No related posts available.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Post Meta -->
+        <div class="card shadow-hover mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Post Information</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Status</span>
+                    <span class="fw-bold {% if post.status == 'published' %}text-success{% else %}text-warning{% endif %}">
+                        {{ post.get_status_display }}
+                    </span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Author</span>
+                    <span class="fw-bold">{{ post.author.get_full_name|default:post.author.username }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Created</span>
+                    <span class="fw-bold">{{ post.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% if post.published_date %}
+                <div class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Published</span>
+                    <span class="fw-bold">{{ post.published_date|date:"M d, Y" }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between">
+                    <span class="text-muted">Last Updated</span>
+                    <span class="fw-bold">{{ post.updated_at|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions (Staff Only) -->
+        {% if user.is_staff %}
+        <div class="card shadow-hover mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if post.status == 'draft' %}
+                    <form method="post" action="{% url 'blog:publish_post' post.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-2"></i>Publish Now
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'blog:edit_post' post.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2"></i>Edit Post
+                    </a>
+                    <a href="{% url 'blog:delete_post' post.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Post
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Share This Post -->
+        <div class="card shadow-hover mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-share me-2"></i>Share This Post</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-outline-primary btn-sm share-btn" data-platform="facebook">
+                        <i class="bi bi-facebook"></i>
+                    </button>
+                    <button class="btn btn-outline-info btn-sm share-btn" data-platform="twitter">
+                        <i class="bi bi-twitter"></i>
+                    </button>
+                    <button class="btn btn-outline-success btn-sm share-btn" data-platform="whatsapp">
+                        <i class="bi bi-whatsapp"></i>
+                    </button>
+                    <button class="btn btn-outline-dark btn-sm share-btn" data-platform="linkedin">
+                        <i class="bi bi-linkedin"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" id="copyLinkBtn">
+                        <i class="bi bi-link-45deg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscribe -->
+        <div class="card shadow-hover">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-bell me-2"></i>Stay Updated</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">Subscribe to receive notifications about new blog posts and library announcements.</p>
+                <form id="subscribeForm">
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </div>
+                </form>
+                <div class="alert alert-success d-none" id="subscribeSuccess">
+                    <i class="bi bi-check-circle me-2"></i>Subscribed successfully!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Like button functionality
+        const likeBtn = document.getElementById('likeBtn');
+        const likeCount = document.getElementById('likeCount');
+        
+        likeBtn.addEventListener('click', function() {
+            let currentCount = parseInt(likeCount.textContent);
+            if (likeBtn.classList.contains('active')) {
+                likeBtn.classList.remove('active');
+                likeBtn.innerHTML = '<i class="bi bi-hand-thumbs-up me-1"></i>Like';
+                likeCount.textContent = currentCount - 1;
+                likeBtn.classList.remove('btn-primary');
+                likeBtn.classList.add('btn-outline-primary');
+            } else {
+                likeBtn.classList.add('active');
+                likeBtn.innerHTML = '<i class="bi bi-hand-thumbs-up-fill me-1"></i>Liked';
+                likeCount.textContent = currentCount + 1;
+                likeBtn.classList.remove('btn-outline-primary');
+                likeBtn.classList.add('btn-primary');
+            }
+        });
+
+        // Share buttons
+        document.querySelectorAll('.share-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const platform = this.dataset.platform;
+                const url = window.location.href;
+                const title = '{{ post.title|escapejs }}';
+                let shareUrl = '';
+                
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                        break;
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
+                        break;
+                    case 'linkedin':
+                        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+                        break;
+                }
+                
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            });
+        });
+
+        // Copy link functionality
+        document.getElementById('copyLinkBtn').addEventListener('click', function() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                this.classList.remove('btn-outline-dark');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-dark');
+                }, 2000);
+            });
+        });
+
+        // Subscribe form
+        document.getElementById('subscribeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            
+            // In a real application, you would send this to your backend
+            // For now, just show success message
+            document.getElementById('subscribeSuccess').classList.remove('d-none');
+            this.reset();
+            
+            setTimeout(() => {
+                document.getElementById('subscribeSuccess').classList.add('d-none');
+            }, 3000);
+        });
+
+        // Update view count (simulated)
+        setTimeout(() => {
+            // In a real application, you would make an API call here
+            console.log('View recorded for post: {{ post.id }}');
+        }, 3000);
+    });
+</script>
+
+<style>
+    .blog-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    
+    .blog-content h2 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary-blue);
+        border-bottom: 2px solid var(--light-blue);
+        padding-bottom: 0.5rem;
+    }
+    
+    .blog-content h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--secondary-blue);
+    }
+    
+    .blog-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .blog-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+    
+    .blog-content blockquote {
+        border-left: 4px solid var(--accent-blue);
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+        font-style: italic;
+        color: var(--dark-text);
+        background: var(--light-blue);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .blog-content ul, .blog-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+    }
+    
+    .blog-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .share-btn {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50% !important;
+    }
+</style>
+{% endblock %}

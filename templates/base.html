@@ -767,11 +767,34 @@
                             {% endif %}
                         </ul>
                     </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-newspaper me-2"></i>News & Blog
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'blog:post_list' %}">
+                                <i class="bi bi-grid me-2"></i>All Posts
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'blog:create_post' %}">
+                                <i class="bi bi-plus-circle me-2"></i>Create Post
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'blog:draft_posts' %}">
+                                <i class="bi bi-pencil me-2"></i>My Drafts
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'blog:post_list' %}?status=draft">
+                                <i class="bi bi-eye-slash me-2"></i>All Drafts
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/">
+                        <a class="nav-link" href="{% url 'blog:post_list' %}">
                             <i class="bi bi-newspaper me-2"></i>News & Blog
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/events/">
                             <i class="bi bi-calendar-event me-2"></i>Events

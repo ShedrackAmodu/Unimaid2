@@ -1,0 +1,348 @@
+<!-- blog/templates/blog/post_confirm_delete.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Post - Ramat Library Blog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'blog:post_list' %}">Blog</a></li>
+<li class="breadcrumb-item"><a href="{% url 'blog:post_detail' post.pk %}">{{ post.title|truncatechars:20 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Delete</li>
+{% endblock %}
+
+{% block page_title %}Delete Blog Post{% endblock %}
+{% block page_subtitle %}Confirm deletion of "{{ post.title }}"{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-hover border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-trash display-1 text-danger mb-3"></i>
+                    <h4 class="fw-bold mb-3">Are you sure you want to delete this post?</h4>
+                    <p class="text-muted">This action cannot be undone. All data associated with this post will be permanently removed.</p>
+                </div>
+
+                <!-- Post Summary -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Post Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong class="text-muted d-block mb-1">Title:</strong>
+                                    <span class="fw-bold">{{ post.title }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="text-muted d-block mb-1">Author:</strong>
+                                    <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong class="text-muted d-block mb-1">Status:</strong>
+                                    <span class="badge {% if post.status == 'published' %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ post.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="text-muted d-block mb-1">Created:</strong>
+                                    <span>{{ post.created_at|date:"F d, Y" }}</span>
+                                </div>
+                                {% if post.published_date %}
+                                <div>
+                                    <strong class="text-muted d-block mb-1">Published:</strong>
+                                    <span>{{ post.published_date|date:"F d, Y" }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <strong class="text-muted d-block mb-1">Preview:</strong>
+                            <div class="border rounded p-3 bg-light">
+                                {{ post.content|striptags|truncatechars:200 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Impact Analysis -->
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold">Important Considerations</h6>
+                            <ul class="mb-0 ps-3">
+                                <li>This post will be removed from all public views</li>
+                                <li>Any links to this post will no longer work</li>
+                                <li>Analytics data for this post will be lost</li>
+                                <li>This action is permanent and cannot be reversed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Final Confirmation -->
+                    <div class="card mb-4 border-warning">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Final Confirmation</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                                <label class="form-check-label fw-bold" for="confirmDelete">
+                                    I understand that this action cannot be undone
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirmResponsibility" required>
+                                <label class="form-check-label fw-bold" for="confirmResponsibility">
+                                    I have the authority to delete this content
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmBackup" required>
+                                <label class="form-check-label fw-bold" for="confirmBackup">
+                                    I have backed up any important information from this post
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'blog:post_detail' post.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Post
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary" id="archiveBtn">
+                                <i class="bi bi-archive me-2"></i>Archive Instead
+                            </button>
+                            <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>
+                                <i class="bi bi-trash me-2"></i>Delete Permanently
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Alternative Actions -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Alternative Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="bi bi-eye-slash display-6 text-muted mb-3"></i>
+                            <h6 class="fw-bold mb-2">Unpublish</h6>
+                            <p class="text-muted small mb-3">Hide from public view but keep for later</p>
+                            <a href="{% url 'blog:edit_post' post.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                                Edit Post
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="bi bi-pencil display-6 text-muted mb-3"></i>
+                            <h6 class="fw-bold mb-2">Edit</h6>
+                            <p class="text-muted small mb-3">Update content instead of deleting</p>
+                            <a href="{% url 'blog:edit_post' post.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                                Go to Edit
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="bi bi-download display-6 text-muted mb-3"></i>
+                            <h6 class="fw-bold mb-2">Export</h6>
+                            <p class="text-muted small mb-3">Download post content before deleting</p>
+                            <button class="btn btn-sm btn-outline-primary w-100" id="exportBtn">
+                                Export Content
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDelete = document.getElementById('confirmDelete');
+        const confirmResponsibility = document.getElementById('confirmResponsibility');
+        const confirmBackup = document.getElementById('confirmBackup');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const archiveBtn = document.getElementById('archiveBtn');
+        const exportBtn = document.getElementById('exportBtn');
+
+        // Enable/disable delete button based on checkboxes
+        function updateDeleteButton() {
+            if (confirmDelete.checked && confirmResponsibility.checked && confirmBackup.checked) {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Delete Permanently';
+            } else {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="bi bi-lock me-2"></i>Complete All Checks';
+            }
+        }
+
+        // Add event listeners to checkboxes
+        [confirmDelete, confirmResponsibility, confirmBackup].forEach(checkbox => {
+            checkbox.addEventListener('change', updateDeleteButton);
+        });
+
+        // Initialize button state
+        updateDeleteButton();
+
+        // Archive button functionality
+        archiveBtn.addEventListener('click', function() {
+            if (confirm('Archive this post instead of deleting? It will be hidden but recoverable.')) {
+                // In a real application, you would make an AJAX call to archive the post
+                alert('Archiving functionality would be implemented here.');
+            }
+        });
+
+        // Export button functionality
+        exportBtn.addEventListener('click', function() {
+            const postData = {
+                title: '{{ post.title|escapejs }}',
+                content: '{{ post.content|escapejs }}',
+                author: '{{ post.author.get_full_name|default:post.author.username|escapejs }}',
+                created: '{{ post.created_at|date:"c" }}',
+                published: '{{ post.published_date|date:"c" }}',
+                status: '{{ post.status }}'
+            };
+
+            // Create and download JSON file
+            const dataStr = JSON.stringify(postData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'post_{{ post.id }}_backup.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            // Show success message
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Exported!';
+            exportBtn.classList.remove('btn-outline-primary');
+            exportBtn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                exportBtn.innerHTML = originalText;
+                exportBtn.classList.remove('btn-success');
+                exportBtn.classList.add('btn-outline-primary');
+            }, 2000);
+        });
+
+        // Add confirmation to delete button
+        deleteBtn.addEventListener('click', function(e) {
+            if (this.disabled) {
+                e.preventDefault();
+                alert('Please complete all confirmation checks first.');
+                return false;
+            }
+            
+            if (!confirm('FINAL WARNING: This will permanently delete the post "{{ post.title }}". Are you absolutely sure?')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Add loading state
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+            this.disabled = true;
+        });
+
+        // Add warning if trying to leave page
+        let formModified = false;
+        window.addEventListener('beforeunload', function(e) {
+            if (formModified) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+
+        // Track form modifications
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => formModified = true);
+        });
+
+        // Show delete countdown (optional)
+        let deleteCountdown = 5;
+        const countdownInterval = setInterval(() => {
+            if (deleteCountdown > 0 && !deleteBtn.disabled) {
+                deleteBtn.innerHTML = `<i class="bi bi-trash me-2"></i>Delete (${deleteCountdown})`;
+                deleteCountdown--;
+            } else if (!deleteBtn.disabled) {
+                clearInterval(countdownInterval);
+                deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Delete Permanently';
+            }
+        }, 1000);
+    });
+</script>
+
+<style>
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    #deleteBtn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    #deleteBtn:not(:disabled):hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .d-flex.justify-content-between > div {
+            width: 100%;
+        }
+        
+        .d-flex.justify-content-between .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}

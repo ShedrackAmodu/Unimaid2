@@ -1,0 +1,870 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Collections - Ramat Library Repository{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_list' %}">Repository</a></li>
+<li class="breadcrumb-item active" aria-current="page">Collections</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <h1 class="display-4 fw-bold mb-3">Collections</h1>
+        <p class="lead text-muted">
+            Browse organized groups of documents by subject, department, or project.
+        </p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+        <a href="{% url 'repository:document_list' %}" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-arrow-left me-2"></i>Back to Repository
+        </a>
+    </div>
+</div>
+
+<!-- Search and Stats -->
+<div class="row mb-5">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="get" class="d-flex">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               name="q" 
+                               class="form-control border-0" 
+                               placeholder="Search collections by name or description..."
+                               value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 bg-gradient-primary text-white">
+            <div class="card-body p-4 text-center">
+                <h2 class="display-3 fw-bold mb-0">{{ collections.paginator.count }}</h2>
+                <p class="mb-0">Collections</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if search_query %}
+<div class="mb-4">
+    <div class="alert alert-info border-0">
+        <i class="bi bi-info-circle me-2"></i>
+        Search results for: <strong>"{{ search_query }}"</strong>
+        <a href="{% url 'repository:collection_list' %}" class="btn btn-sm btn-outline-info ms-3">
+            Clear Search
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Collections Grid -->
+{% if collections %}
+<div class="row g-4 mb-5">
+    {% for collection in collections %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card collection-card h-100 border-0 shadow-hover">
+            <div class="card-body p-4 position-relative">
+                <!-- Collection Icon -->
+                <div class="collection-icon mb-4">
+                    <div class="position-relative" style="width: 80px; height: 80px;">
+                        <div class="bg-gradient-primary rounded-3 w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-folder2-open text-white fs-2"></i>
+                        </div>
+                        <div class="position-absolute top-0 end-0 translate-middle">
+                            <span class="badge bg-white text-primary rounded-circle p-2 shadow-sm">
+                                {{ collection.documents.count }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collection Title -->
+                <h3 class="fw-bold mb-3">
+                    <a href="{% url 'repository:collection_detail' pk=collection.pk %}" 
+                       class="text-decoration-none text-dark stretched-link">
+                        {{ collection.name }}
+                    </a>
+                </h3>
+
+                <!-- Collection Description -->
+                {% if collection.description %}
+                <p class="text-muted mb-4">
+                    {{ collection.description|truncatechars:120 }}
+                </p>
+                {% endif %}
+
+                <!-- Collection Metadata -->
+                <div class="collection-meta mt-auto">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-files me-1"></i>
+                                {{ collection.documents.count }} document{{ collection.documents.count|pluralize }}
+                            </small>
+                        </div>
+                        <div class="col-6 text-end">
+                            {% if collection.curator %}
+                            <small class="text-muted d-block">
+                                <i class="bi bi-person me-1"></i>
+                                {{ collection.curator.first_name|default:collection.curator.username }}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions (hover only) -->
+                <div class="collection-actions position-absolute end-0 bottom-0 m-3 opacity-0 transition-all">
+                    <div class="btn-group btn-group-sm shadow-sm">
+                        <a href="{% url 'repository:collection_detail' pk=collection.pk %}" 
+                           class="btn btn-light border">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'repository:collection_detail' pk=collection.pk %}" 
+                           class="btn btn-primary">
+                            Browse
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Collection Footer -->
+            <div class="card-footer bg-transparent border-top-0 pt-0">
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-primary" 
+                         style="width: {% widthratio collection.documents.count 50 100 %}%; max-width: 100%">
+                    </div>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    Updated {{ collection.updated_at|timesince }} ago
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if collections.paginator.num_pages > 1 %}
+<nav aria-label="Collection pagination">
+    <ul class="pagination justify-content-center">
+        {% if collections.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-chevron-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ collections.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in collections.paginator.page_range %}
+            {% if collections.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > collections.number|add:'-3' and num < collections.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if collections.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ collections.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ collections.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                <i class="bi bi-chevron-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-5">
+    <img src="{% static 'images/ramat_ai2.png' %}" alt="No Collections" class="img-fluid mb-4" style="max-height: 150px;">
+    <h3 class="text-muted mb-3">
+        {% if search_query %}
+        No collections found
+        {% else %}
+        No collections available
+        {% endif %}
+    </h3>
+    <p class="text-muted mb-4">
+        {% if search_query %}
+        No collections match your search criteria. Try different keywords.
+        {% else %}
+        Collections will appear here once they are created.
+        {% endif %}
+    </p>
+    <a href="{% url 'repository:document_list' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-arrow-left me-2"></i>Browse Documents Instead
+    </a>
+</div>
+{% endif %}
+
+<!-- Featured Collections -->
+{% if featured_collections %}
+<div class="mt-5 pt-5 border-top">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Featured Collections</h2>
+        <a href="#" class="btn btn-outline-primary">
+            View All Featured <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for collection in featured_collections %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-light h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="me-3">
+                            <div class="bg-primary rounded-circle p-3">
+                                <i class="bi bi-star-fill text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ collection.name|truncatechars:20 }}</h5>
+                            <p class="text-muted small mb-0">
+                                {{ collection.documents.count }} items
+                            </p>
+                        </div>
+                    </div>
+                    {% if collection.description %}
+                    <p class="text-muted small mb-3">{{ collection.description|truncatechars:80 }}</p>
+                    {% endif %}
+                    <a href="{% url 'repository:collection_detail' pk=collection.pk %}" 
+                       class="btn btn-sm btn-outline-primary w-100">
+                        Explore
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistics Section -->
+<div class="mt-5 pt-5 border-top">
+    <h2 class="fw-bold mb-4">Repository Statistics</h2>
+    <div class="row g-4">
+        <div class="col-md-3 col-6">
+            <div class="card border-0 text-center py-4">
+                <div class="card-body">
+                    <i class="bi bi-folder fs-1 text-primary mb-3"></i>
+                    <h3 class="fw-bold mb-2">{{ total_collections|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Collections</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 text-center py-4">
+                <div class="card-body">
+                    <i class="bi bi-file-earmark-text fs-1 text-success mb-3"></i>
+                    <h3 class="fw-bold mb-2">{{ total_documents|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Documents</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 text-center py-4">
+                <div class="card-body">
+                    <i class="bi bi-download fs-1 text-warning mb-3"></i>
+                    <h3 class="fw-bold mb-2">{{ total_downloads|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Total Downloads</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 text-center py-4">
+                <div class="card-body">
+                    <i class="bi bi-people fs-1 text-info mb-3"></i>
+                    <h3 class="fw-bold mb-2">{{ total_authors|default:"0" }}</h3>
+                    <p class="text-muted mb-0">Unique Authors</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How to Contribute -->
+<div class="mt-5 pt-5 border-top">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-4">How Collections Work</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Organized Content</h6>
+                            <p class="text-muted small mb-0">Group related documents together</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Easy Discovery</h6>
+                            <p class="text-muted small mb-0">Find related materials quickly</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Curated Selection</h6>
+                            <p class="text-muted small mb-0">Expertly selected content</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill text-success mt-1 me-3 fs-5"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Regular Updates</h6>
+                            <p class="text-muted small mb-0">New documents added regularly</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'accounts:contact' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-envelope me-2"></i>Suggest a Collection
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 bg-gradient-primary text-white overflow-hidden">
+                <div class="card-body p-5 position-relative">
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <i class="bi bi-quote fs-1 opacity-25"></i>
+                    </div>
+                    <h3 class="fw-bold mb-4">Need a New Collection?</h3>
+                    <p class="mb-4 opacity-75">
+                        Faculty and researchers can request new collections for their projects, 
+                        research groups, or departmental publications.
+                    </p>
+                    <a href="{% url 'accounts:contact' %}" class="btn btn-light">
+                        <i class="bi bi-chat-left-text me-2"></i>Contact Repository Manager
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Top -->
+<div class="text-center mt-5">
+    <a href="#" class="btn btn-outline-secondary" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="bi bi-arrow-up me-2"></i>Back to Top
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Collection Card Styles */
+    .collection-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 31, 63, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15);
+        border-color: var(--accent-blue);
+    }
+    
+    .collection-card:hover .collection-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .collection-actions {
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Collection Icon */
+    .collection-icon {
+        position: relative;
+    }
+    
+    .collection-icon .badge {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+    }
+    
+    .collection-card:hover .collection-icon .badge {
+        transform: scale(1.2);
+    }
+    
+    /* Progress Bar */
+    .progress {
+        background-color: rgba(0, 31, 63, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        transition: width 1s ease;
+    }
+    
+    /* Featured Collections */
+    .bg-gradient-primary {
+        background: var(--gradient-2);
+    }
+    
+    /* Statistics Cards */
+    .card.border-0 {
+        transition: all 0.3s ease;
+        border: 1px solid transparent !important;
+    }
+    
+    .card.border-0:hover {
+        transform: translateY(-5px);
+        border-color: rgba(0, 31, 63, 0.1) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Search Input */
+    .input-group-lg .form-control:focus {
+        box-shadow: none;
+        border-color: transparent;
+    }
+    
+    /* Pagination */
+    .page-link {
+        color: var(--primary-blue);
+        border: 1px solid rgba(0, 31, 63, 0.1);
+        margin: 0 2px;
+        border-radius: 8px !important;
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .page-link:hover {
+        background-color: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--accent-blue);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+        
+        .collection-card {
+            margin-bottom: 1.5rem;
+        }
+        
+        .collection-actions {
+            opacity: 1 !important;
+            position: static !important;
+            transform: none !important;
+            margin-top: 1rem;
+        }
+        
+        .btn-group-sm {
+            width: 100%;
+        }
+        
+        .btn-group-sm .btn {
+            flex: 1;
+        }
+    }
+    
+    /* Animation for card entrance */
+    @keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .collection-card {
+        animation: cardEntrance 0.5s ease forwards;
+        animation-delay: calc(var(--card-order) * 0.1s);
+        opacity: 0;
+    }
+    
+    /* Stretched link overlay fix */
+    .stretched-link::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        pointer-events: auto;
+        content: "";
+        background-color: rgba(0,0,0,0);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set animation delays for collection cards
+        const collectionCards = document.querySelectorAll('.collection-card');
+        collectionCards.forEach((card, index) => {
+            card.style.setProperty('--card-order', index);
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Collection card hover effects
+        collectionCards.forEach(card => {
+            const icon = card.querySelector('.collection-icon');
+            const actions = card.querySelector('.collection-actions');
+            
+            card.addEventListener('mouseenter', function() {
+                // Animate progress bar
+                const progressBar = this.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = progressBar.style.width;
+                }
+                
+                // Add pulse effect to icon
+                if (icon) {
+                    icon.style.transform = 'scale(1.05)';
+                    icon.style.transition = 'transform 0.3s ease';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                // Reset icon
+                if (icon) {
+                    icon.style.transform = 'scale(1)';
+                }
+            });
+            
+            // Handle stretched link click
+            const stretchedLink = card.querySelector('.stretched-link');
+            if (stretchedLink) {
+                card.addEventListener('click', function(e) {
+                    // Only navigate if click wasn't on action buttons
+                    if (!e.target.closest('.collection-actions') && 
+                        !e.target.closest('.btn') && 
+                        !e.target.closest('a:not(.stretched-link)')) {
+                        window.location.href = stretchedLink.getAttribute('href');
+                    }
+                });
+            }
+        });
+        
+        // Search input focus effect
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', function() {
+                this.parentElement.style.boxShadow = '0 0 0 3px rgba(58, 134, 255, 0.1)';
+                this.parentElement.style.borderRadius = '8px';
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                this.parentElement.style.boxShadow = 'none';
+            });
+        }
+        
+        // Statistics counter animation
+        const statNumbers = document.querySelectorAll('.fw-bold.mb-2');
+        statNumbers.forEach(stat => {
+            const originalText = stat.textContent.trim();
+            const number = parseInt(originalText.replace(/,/g, ''));
+            
+            if (!isNaN(number)) {
+                let current = 0;
+                const increment = number / 30;
+                const updateCounter = () => {
+                    if (current < number) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = number.toLocaleString();
+                    }
+                };
+                
+                // Start when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Update collection progress bars
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+        
+        // Filter collections by letter (optional feature)
+        const createAlphabetFilter = () => {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            const filterContainer = document.createElement('div');
+            filterContainer.className = 'alphabet-filter d-flex flex-wrap justify-content-center gap-2 mb-4';
+            
+            alphabet.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-secondary';
+                btn.textContent = letter;
+                btn.style.width = '40px';
+                btn.style.height = '40px';
+                
+                btn.addEventListener('click', function() {
+                    // Filter collections starting with this letter
+                    const collections = document.querySelectorAll('.collection-card');
+                    collections.forEach(card => {
+                        const title = card.querySelector('h3 a').textContent;
+                        if (title.toUpperCase().startsWith(letter)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    // Update active button
+                    filterContainer.querySelectorAll('.btn').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
+                });
+                
+                filterContainer.appendChild(btn);
+            });
+            
+            // Add "All" button
+            const allBtn = document.createElement('button');
+            allBtn.type = 'button';
+            allBtn.className = 'btn btn-sm btn-primary';
+            allBtn.textContent = 'All';
+            allBtn.style.width = '60px';
+            allBtn.style.height = '40px';
+            
+            allBtn.addEventListener('click', function() {
+                const collections = document.querySelectorAll('.collection-card');
+                collections.forEach(card => {
+                    card.style.display = 'block';
+                });
+                
+                filterContainer.querySelectorAll('.btn').forEach(b => {
+                    b.classList.remove('btn-primary');
+                    b.classList.add('btn-outline-secondary');
+                });
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-primary');
+            });
+            
+            filterContainer.appendChild(allBtn);
+            
+            // Insert after search
+            const searchCard = document.querySelector('.card.shadow-sm');
+            if (searchCard) {
+                searchCard.parentNode.insertBefore(filterContainer, searchCard.nextSibling);
+            }
+        };
+        
+        // Uncomment to enable alphabet filter
+        // createAlphabetFilter();
+        
+        // Collection view mode toggle (grid/list)
+        const createViewToggle = () => {
+            const toggleContainer = document.createElement('div');
+            toggleContainer.className = 'view-toggle btn-group mb-4';
+            toggleContainer.setAttribute('role', 'group');
+            
+            const gridBtn = document.createElement('button');
+            gridBtn.type = 'button';
+            gridBtn.className = 'btn btn-outline-primary active';
+            gridBtn.innerHTML = '<i class="bi bi-grid-3x3-gap"></i>';
+            gridBtn.title = 'Grid View';
+            
+            const listBtn = document.createElement('button');
+            listBtn.type = 'button';
+            listBtn.className = 'btn btn-outline-primary';
+            listBtn.innerHTML = '<i class="bi bi-list"></i>';
+            listBtn.title = 'List View';
+            
+            gridBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                listBtn.classList.remove('active');
+                document.querySelector('.row.g-4').classList.remove('list-view');
+            });
+            
+            listBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                gridBtn.classList.remove('active');
+                document.querySelector('.row.g-4').classList.add('list-view');
+            });
+            
+            toggleContainer.appendChild(gridBtn);
+            toggleContainer.appendChild(listBtn);
+            
+            // Add list view styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .list-view .collection-card {
+                    width: 100%;
+                }
+                .list-view .collection-card .card-body {
+                    display: flex;
+                    align-items: center;
+                }
+                .list-view .collection-icon {
+                    margin-bottom: 0;
+                    margin-right: 1.5rem;
+                    flex-shrink: 0;
+                }
+                .list-view .collection-meta {
+                    margin-left: auto;
+                    text-align: right;
+                }
+                @media (max-width: 768px) {
+                    .list-view .collection-card .card-body {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                    .list-view .collection-meta {
+                        margin-left: 0;
+                        margin-top: 1rem;
+                        text-align: left;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Insert toggle
+            const title = document.querySelector('h1.display-4');
+            if (title) {
+                title.parentNode.appendChild(toggleContainer);
+            }
+        };
+        
+        // Uncomment to enable view toggle
+        // createViewToggle();
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            // Focus search on Ctrl+F
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+            
+            // Scroll to top on Home key
+            if (e.key === 'Home') {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // Scroll to bottom on End key
+            if (e.key === 'End') {
+                e.preventDefault();
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+        });
+        
+        // Load more on scroll (infinite scroll concept)
+        let isLoading = false;
+        window.addEventListener('scroll', function() {
+            if (isLoading) return;
+            
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const pageHeight = document.body.offsetHeight;
+            
+            // Load more when 80% scrolled
+            if (scrollPosition >= pageHeight * 0.8) {
+                const nextPage = {{ collections.number|add:"1" }};
+                const totalPages = {{ collections.paginator.num_pages }};
+                
+                if (nextPage <= totalPages) {
+                    isLoading = true;
+                    
+                    // Show loading indicator
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'text-center my-5';
+                    loadingDiv.innerHTML = `
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading more collections...</span>
+                        </div>
+                    `;
+                    
+                    const collectionsGrid = document.querySelector('.row.g-4');
+                    collectionsGrid.parentNode.insertBefore(loadingDiv, collectionsGrid.nextSibling);
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        // In real implementation, fetch next page via AJAX
+                        console.log('Loading page', nextPage);
+                        loadingDiv.remove();
+                        isLoading = false;
+                    }, 1500);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,1033 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit Document{% else %}Upload New Document{% endif %} - Repository{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_list' %}">Repository</a></li>
+{% if form.instance.pk %}
+<li class="breadcrumb-item"><a href="{% url 'repository:document_detail' pk=form.instance.pk %}">{{ form.instance.title|truncatechars:20 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit</li>
+{% else %}
+<li class="breadcrumb-item active" aria-current="page">Upload Document</li>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-lg">
+            <!-- Form Header -->
+            <div class="card-header bg-gradient-primary text-white py-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div style="width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            {% if form.instance.pk %}
+                            <i class="bi bi-pencil-square fs-2"></i>
+                            {% else %}
+                            <i class="bi bi-cloud-upload fs-2"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="h2 fw-bold mb-1">
+                            {% if form.instance.pk %}Edit Document{% else %}Upload New Document{% endif %}
+                        </h1>
+                        <p class="mb-0 opacity-75">
+                            {% if form.instance.pk %}
+                            Update document details and metadata
+                            {% else %}
+                            Add a new document to the institutional repository
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-5">
+                <form method="post" enctype="multipart/form-data" id="document-form" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Form Errors Summary -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger border-0 mb-4">
+                        <h6 class="fw-bold mb-2">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Please correct the errors below
+                        </h6>
+                        <ul class="mb-0 ps-3">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row g-4">
+                        <!-- Left Column: Required Fields -->
+                        <div class="col-lg-8">
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                    Document Title <span class="text-danger">*</span>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                                {% endif %}
+                                {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.title.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Authors -->
+                            <div class="mb-4">
+                                <label for="{{ form.authors.id_for_label }}" class="form-label fw-bold">
+                                    Authors <span class="text-danger">*</span>
+                                </label>
+                                {{ form.authors }}
+                                <small class="form-text text-muted">{{ form.authors.help_text }}</small>
+                                {% if form.authors.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.authors.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Abstract -->
+                            <div class="mb-4">
+                                <label for="{{ form.abstract.id_for_label }}" class="form-label fw-bold">
+                                    Abstract / Summary
+                                </label>
+                                {{ form.abstract }}
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="form-text text-muted">
+                                        Provide a brief summary of the document (optional but recommended)
+                                    </small>
+                                    <small class="form-text text-muted" id="abstract-counter">
+                                        0 characters
+                                    </small>
+                                </div>
+                                {% if form.abstract.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.abstract.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- DOI -->
+                            <div class="mb-4">
+                                <label for="{{ form.doi.id_for_label }}" class="form-label fw-bold">
+                                    Digital Object Identifier (DOI)
+                                </label>
+                                {{ form.doi }}
+                                <small class="form-text text-muted">
+                                    Enter the DOI if available (e.g., 10.1234/example.doi)
+                                </small>
+                                {% if form.doi.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.doi.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Keywords (Additional field) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Keywords</label>
+                                <input type="text" class="form-control" id="keywords" 
+                                       placeholder="Enter keywords separated by commas (e.g., machine learning, artificial intelligence, data analysis)">
+                                <small class="form-text text-muted">
+                                    Add relevant keywords to improve discoverability
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: File & Settings -->
+                        <div class="col-lg-4">
+                            <!-- File Upload -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    Document File <span class="text-danger">*</span>
+                                </label>
+                                
+                                {% if form.instance.pk and form.instance.file %}
+                                <!-- Current File -->
+                                <div class="current-file card border mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                {% if form.instance.file.name|lower|slice:"-4:" == ".pdf" %}
+                                                <i class="bi bi-file-pdf fs-3 text-danger"></i>
+                                                {% elif form.instance.file.name|lower|slice:"-5:" == ".docx" or form.instance.file.name|lower|slice:"-4:" == ".doc" %}
+                                                <i class="bi bi-file-word fs-3 text-primary"></i>
+                                                {% elif form.instance.file.name|lower|slice:"-5:" == ".pptx" or form.instance.file.name|lower|slice:"-4:" == ".ppt" %}
+                                                <i class="bi bi-file-ppt fs-3 text-warning"></i>
+                                                {% elif form.instance.file.name|lower|slice:"-5:" == ".xlsx" or form.instance.file.name|lower|slice:"-4:" == ".xls" %}
+                                                <i class="bi bi-file-excel fs-3 text-success"></i>
+                                                {% else %}
+                                                <i class="bi bi-file-earmark fs-3 text-dark"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ form.instance.file.name|slice:"12:" }}</h6>
+                                                <small class="text-muted">
+                                                    {{ form.instance.file.size|filesizeformat }}
+                                                </small>
+                                            </div>
+                                            <a href="{{ form.instance.file.url }}" 
+                                               class="btn btn-sm btn-outline-primary ms-2" 
+                                               target="_blank" 
+                                               title="View current file">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Replace File Checkbox -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="replace-file">
+                                    <label class="form-check-label" for="replace-file">
+                                        Replace current file
+                                    </label>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- File Upload Area -->
+                                <div class="file-upload-area {% if form.instance.pk and form.instance.file and not form.instance.file.errors %}d-none{% endif %}" 
+                                     id="file-upload-area">
+                                    <div class="border-dashed rounded-3 p-4 text-center position-relative">
+                                        <i class="bi bi-cloud-arrow-up fs-1 text-muted mb-3"></i>
+                                        <h6 class="mb-2">Drop your file here</h6>
+                                        <p class="text-muted small mb-3">or click to browse</p>
+                                        {{ form.file }}
+                                        <small class="form-text text-muted d-block mt-2">
+                                            Maximum file size: 50MB<br>
+                                            Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT
+                                        </small>
+                                    </div>
+                                    <div class="file-preview mt-3" id="file-preview"></div>
+                                    {% if form.file.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.file.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Access Level -->
+                            <div class="mb-4">
+                                <label for="{{ form.access_level.id_for_label }}" class="form-label fw-bold">
+                                    Access Level <span class="text-danger">*</span>
+                                </label>
+                                {{ form.access_level }}
+                                <div class="mt-2">
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-unlock text-success me-1"></i>
+                                        <strong>Open Access:</strong> Visible to everyone
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-lock text-warning me-1"></i>
+                                        <strong>Restricted:</strong> Requires authentication
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-clock text-secondary me-1"></i>
+                                        <strong>Embargoed:</strong> Available after specified date
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-person text-dark me-1"></i>
+                                        <strong>Private:</strong> Only visible to uploader and staff
+                                    </small>
+                                </div>
+                                {% if form.access_level.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.access_level.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Collection -->
+                            <div class="mb-4">
+                                <label for="{{ form.collection.id_for_label }}" class="form-label fw-bold">
+                                    Collection
+                                </label>
+                                {{ form.collection }}
+                                <small class="form-text text-muted">
+                                    Select a collection to organize your document (optional)
+                                </small>
+                                {% if form.collection.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.collection.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Embargo Date (if access_level is embargoed) -->
+                            <div class="mb-4 d-none" id="embargo-date-field">
+                                <label class="form-label fw-bold">Embargo Date</label>
+                                <input type="date" class="form-control" id="embargo_date" name="embargo_date"
+                                       min="{{ today|date:'Y-m-d' }}">
+                                <small class="form-text text-muted">
+                                    Date when the document becomes publicly available
+                                </small>
+                            </div>
+                            
+                            <!-- License Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">License</label>
+                                <select class="form-select" id="license">
+                                    <option value="">Select a license...</option>
+                                    <option value="cc-by">Creative Commons Attribution (CC BY)</option>
+                                    <option value="cc-by-sa">Creative Commons Attribution-ShareAlike (CC BY-SA)</option>
+                                    <option value="cc-by-nc">Creative Commons Attribution-NonCommercial (CC BY-NC)</option>
+                                    <option value="cc-by-nc-sa">Creative Commons Attribution-NonCommercial-ShareAlike (CC BY-NC-SA)</option>
+                                    <option value="cc-by-nd">Creative Commons Attribution-NoDerivatives (CC BY-ND)</option>
+                                    <option value="cc-by-nc-nd">Creative Commons Attribution-NonCommercial-NoDerivatives (CC BY-NC-ND)</option>
+                                    <option value="all-rights">All Rights Reserved</option>
+                                    <option value="public-domain">Public Domain</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Choose the appropriate license for your document
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="border-top pt-4 mt-4">
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agree-terms" required>
+                            <label class="form-check-label" for="agree-terms">
+                                I confirm that I have the right to upload this document and that it complies with 
+                                copyright policies and institutional guidelines. I understand that metadata I provide 
+                                will be publicly visible (unless marked as private).
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agree-quality">
+                            <label class="form-check-label" for="agree-quality">
+                                I have reviewed the document and metadata for accuracy and completeness.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between mt-5 pt-4 border-top">
+                        <a href="{% if form.instance.pk %}{% url 'repository:document_detail' pk=form.instance.pk %}{% else %}{% url 'repository:document_list' %}{% endif %}" 
+                           class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                        
+                        <div class="btn-group">
+                            <button type="submit" name="save_draft" value="true" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-save me-2"></i>Save as Draft
+                            </button>
+                            <button type="submit" name="publish" value="true" class="btn btn-primary btn-lg" id="submit-btn">
+                                {% if form.instance.pk %}
+                                <i class="bi bi-save me-2"></i>Update Document
+                                {% else %}
+                                <i class="bi bi-cloud-upload me-2"></i>Upload Document
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Help & Guidelines -->
+            <div class="card-footer bg-light">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="d-flex">
+                            <i class="bi bi-info-circle text-primary me-3 fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Required Fields</h6>
+                                <p class="small text-muted mb-0">
+                                    Fields marked with <span class="text-danger">*</span> are required.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex">
+                            <i class="bi bi-shield-check text-primary me-3 fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Copyright Compliance</h6>
+                                <p class="small text-muted mb-0">
+                                    Ensure you have rights to upload and share this document.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex">
+                            <i class="bi bi-clock-history text-primary me-3 fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Review Process</h6>
+                                <p class="small text-muted mb-0">
+                                    Documents may be reviewed by repository staff before publishing.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Tips -->
+        <div class="card border-0 bg-light mt-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-lightbulb text-warning me-2"></i>Quick Tips
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <ul class="small text-muted mb-0">
+                            <li>Use descriptive titles for better discoverability</li>
+                            <li>Include all authors in the correct order</li>
+                            <li>Provide a clear abstract to help users understand your work</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="small text-muted mb-0">
+                            <li>Add relevant keywords to improve search results</li>
+                            <li>Choose the appropriate access level for your needs</li>
+                            <li>Select a license that matches your sharing preferences</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Form Styles */
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.25rem rgba(10, 36, 114, 0.25);
+    }
+    
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .form-control.is-valid, .form-select.is-valid {
+        border-color: #28a745;
+    }
+    
+    /* File Upload Area */
+    .border-dashed {
+        border: 3px dashed #dee2e6 !important;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .border-dashed:hover {
+        border-color: var(--primary-blue) !important;
+        background-color: rgba(10, 36, 114, 0.05);
+    }
+    
+    .file-upload-area input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    /* Current File Display */
+    .current-file {
+        transition: all 0.3s ease;
+    }
+    
+    .current-file:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    /* File Preview */
+    .file-preview {
+        display: none;
+    }
+    
+    .file-preview.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .file-preview .file-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    /* Form Checkboxes */
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .form-check-input:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.25rem rgba(10, 36, 114, 0.25);
+    }
+    
+    /* Submit Button */
+    #submit-btn {
+        transition: all 0.3s ease;
+    }
+    
+    #submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(10, 36, 114, 0.3);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .btn-group {
+            width: 100%;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    }
+    
+    /* Textarea Resize Control */
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    /* Access Level Icons */
+    .bi-unlock, .bi-lock, .bi-clock, .bi-person {
+        width: 16px;
+        text-align: center;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form elements
+        const form = document.getElementById('document-form');
+        const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+        const fileUploadArea = document.getElementById('file-upload-area');
+        const filePreview = document.getElementById('file-preview');
+        const replaceFileCheck = document.getElementById('replace-file');
+        const abstractField = document.getElementById('{{ form.abstract.id_for_label }}');
+        const abstractCounter = document.getElementById('abstract-counter');
+        const accessLevelSelect = document.getElementById('{{ form.access_level.id_for_label }}');
+        const embargoDateField = document.getElementById('embargo-date-field');
+        const submitBtn = document.getElementById('submit-btn');
+        const agreeTermsCheck = document.getElementById('agree-terms');
+        
+        // Initialize form validation
+        initializeFormValidation();
+        
+        // File upload handling
+        if (fileInput) {
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop
+            if (fileUploadArea) {
+                const uploadArea = fileUploadArea.querySelector('.border-dashed');
+                
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'var(--primary-blue)';
+                    this.style.backgroundColor = 'rgba(10, 36, 114, 0.1)';
+                });
+                
+                uploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#dee2e6';
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#dee2e6';
+                    this.style.backgroundColor = '#f8f9fa';
+                    
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        }
+        
+        // Replace file checkbox
+        if (replaceFileCheck) {
+            replaceFileCheck.addEventListener('change', function() {
+                fileUploadArea.classList.toggle('d-none', !this.checked);
+                if (!this.checked) {
+                    fileInput.value = '';
+                    filePreview.classList.remove('show');
+                }
+            });
+        }
+        
+        // Abstract character counter
+        if (abstractField && abstractCounter) {
+            abstractField.addEventListener('input', updateAbstractCounter);
+            updateAbstractCounter(); // Initial count
+            
+            function updateAbstractCounter() {
+                const length = abstractField.value.length;
+                abstractCounter.textContent = `${length} characters`;
+                
+                // Color coding
+                if (length === 0) {
+                    abstractCounter.className = 'form-text text-muted';
+                } else if (length < 100) {
+                    abstractCounter.className = 'form-text text-danger';
+                } else if (length < 200) {
+                    abstractCounter.className = 'form-text text-warning';
+                } else {
+                    abstractCounter.className = 'form-text text-success';
+                }
+            }
+        }
+        
+        // Access level change handler
+        if (accessLevelSelect) {
+            accessLevelSelect.addEventListener('change', function() {
+                if (this.value === 'embargo') {
+                    embargoDateField.classList.remove('d-none');
+                } else {
+                    embargoDateField.classList.add('d-none');
+                }
+            });
+            
+            // Initial state
+            accessLevelSelect.dispatchEvent(new Event('change'));
+        }
+        
+        // Keywords input with tag creation
+        const keywordsInput = document.getElementById('keywords');
+        if (keywordsInput) {
+            keywordsInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // In a real implementation, you might convert to tags
+                    console.log('Keywords entered:', this.value);
+                }
+            });
+        }
+        
+        // Form validation
+        function initializeFormValidation() {
+            const requiredFields = form.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                field.addEventListener('blur', validateField);
+                field.addEventListener('input', clearFieldError);
+            });
+            
+            // Real-time validation for file upload
+            if (fileInput) {
+                fileInput.addEventListener('change', validateFile);
+            }
+        }
+        
+        function validateField(e) {
+            const field = e.target;
+            if (field.hasAttribute('required') && !field.value.trim()) {
+                markInvalid(field, 'This field is required');
+                return false;
+            }
+            
+            // Field-specific validation
+            if (field.id === '{{ form.doi.id_for_label }}' && field.value) {
+                if (!isValidDOI(field.value)) {
+                    markInvalid(field, 'Please enter a valid DOI');
+                    return false;
+                }
+            }
+            
+            markValid(field);
+            return true;
+        }
+        
+        function validateFile() {
+            if (!fileInput.files.length) {
+                if (!form.instance.pk || (replaceFileCheck && replaceFileCheck.checked)) {
+                    showFileError('Please select a document file');
+                    return false;
+                }
+            } else {
+                const file = fileInput.files[0];
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                const allowedTypes = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'text/plain'
+                ];
+                
+                if (file.size > maxSize) {
+                    showFileError('File size must be less than 50MB');
+                    return false;
+                }
+                
+                if (!allowedTypes.includes(file.type) && 
+                    !file.name.match(/\.(pdf|doc|docx|ppt|pptx|txt)$/i)) {
+                    showFileError('Please upload a PDF, Word, PowerPoint, or text file');
+                    return false;
+                }
+                
+                hideFileError();
+                updateFilePreview(file);
+            }
+            return true;
+        }
+        
+        function isValidDOI(doi) {
+            // Basic DOI validation pattern
+            const doiPattern = /^10\.\d{4,9}\/[-._;()/:A-Z0-9]+$/i;
+            return doiPattern.test(doi);
+        }
+        
+        function markInvalid(field, message) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            
+            let feedback = field.nextElementSibling;
+            while (feedback && !feedback.classList.contains('invalid-feedback')) {
+                feedback = feedback.nextElementSibling;
+            }
+            
+            if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback d-block';
+                field.parentNode.appendChild(feedback);
+            }
+            feedback.textContent = message;
+        }
+        
+        function markValid(field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            
+            let feedback = field.nextElementSibling;
+            while (feedback && !feedback.classList.contains('invalid-feedback')) {
+                feedback = feedback.nextElementSibling;
+            }
+            
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                feedback.remove();
+            }
+        }
+        
+        function clearFieldError(e) {
+            const field = e.target;
+            field.classList.remove('is-invalid');
+            
+            let feedback = field.nextElementSibling;
+            while (feedback && !feedback.classList.contains('invalid-feedback')) {
+                feedback = feedback.nextElementSibling;
+            }
+            
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                feedback.remove();
+            }
+        }
+        
+        function showFileError(message) {
+            let errorDiv = fileUploadArea.querySelector('.file-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mt-2 file-error';
+                fileUploadArea.appendChild(errorDiv);
+            }
+            errorDiv.textContent = message;
+        }
+        
+        function hideFileError() {
+            const errorDiv = fileUploadArea.querySelector('.file-error');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && validateFile()) {
+                updateFilePreview(file);
+            }
+        }
+        
+        function updateFilePreview(file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
+            const fileType = file.name.split('.').pop().toUpperCase();
+            
+            const previewHTML = `
+                <div class="file-item">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            ${getFileIcon(file.name)}
+                        </div>
+                        <div>
+                            <h6 class="mb-1">${file.name}</h6>
+                            <small class="text-muted">${fileSize} MB • ${fileType}</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-file">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            `;
+            
+            filePreview.innerHTML = previewHTML;
+            filePreview.classList.add('show');
+            
+            // Add remove file functionality
+            const removeBtn = filePreview.querySelector('.remove-file');
+            removeBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                filePreview.classList.remove('show');
+                hideFileError();
+            });
+        }
+        
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            switch (ext) {
+                case 'pdf':
+                    return '<i class="bi bi-file-pdf fs-3 text-danger"></i>';
+                case 'doc':
+                case 'docx':
+                    return '<i class="bi bi-file-word fs-3 text-primary"></i>';
+                case 'ppt':
+                case 'pptx':
+                    return '<i class="bi bi-file-ppt fs-3 text-warning"></i>';
+                case 'xls':
+                case 'xlsx':
+                    return '<i class="bi bi-file-excel fs-3 text-success"></i>';
+                case 'txt':
+                    return '<i class="bi bi-file-text fs-3 text-secondary"></i>';
+                default:
+                    return '<i class="bi bi-file-earmark fs-3 text-dark"></i>';
+            }
+        }
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!agreeTermsCheck.checked) {
+                e.preventDefault();
+                showAlert('You must agree to the terms and conditions', 'danger');
+                agreeTermsCheck.focus();
+                return;
+            }
+            
+            // Validate all required fields
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    markInvalid(field, 'This field is required');
+                    isValid = false;
+                }
+            });
+            
+            // Validate file
+            if (!validateFile()) {
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                showAlert('Please correct the errors in the form', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ${form.instance.pk ? 'Updating...' : 'Uploading...'}
+            `;
+            
+            // Add keywords to form data if provided
+            if (keywordsInput && keywordsInput.value.trim()) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'keywords';
+                hiddenInput.value = keywordsInput.value;
+                form.appendChild(hiddenInput);
+            }
+            
+            // Add license to form data if selected
+            const licenseSelect = document.getElementById('license');
+            if (licenseSelect && licenseSelect.value) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'license';
+                hiddenInput.value = licenseSelect.value;
+                form.appendChild(hiddenInput);
+            }
+            
+            // Add embargo date if applicable
+            if (accessLevelSelect && accessLevelSelect.value === 'embargo') {
+                const embargoInput = document.getElementById('embargo_date');
+                if (embargoInput && embargoInput.value) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'embargo_date';
+                    hiddenInput.value = embargoInput.value;
+                    form.appendChild(hiddenInput);
+                }
+            }
+            
+            // In a real implementation, you might want to add progress tracking
+            console.log('Form submitted successfully');
+        });
+        
+        // Auto-save draft functionality
+        let autoSaveTimer;
+        const saveDraft = () => {
+            // In a real implementation, save to localStorage or make AJAX call
+            console.log('Auto-saving draft...');
+            showAlert('Draft saved', 'info');
+        };
+        
+        // Set up auto-save on form changes
+        const formInputs = form.querySelectorAll('input, textarea, select');
+        formInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(saveDraft, 3000);
+            });
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Save draft with Ctrl+S
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveDraft();
+            }
+            
+            // Submit form with Ctrl+Enter
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                submitBtn.click();
+            }
+            
+            // Focus search with /
+            if (e.key === '/' && !e.ctrlKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                const titleField = document.getElementById('{{ form.title.id_for_label }}');
+                if (titleField) titleField.focus();
+            }
+        });
+        
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert-dismissible.position-fixed');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            alertDiv.style.zIndex = '1060';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.maxWidth = '500px';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill'} me-2"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Form field focus effects
+        const formControls = form.querySelectorAll('.form-control, .form-select, .form-check-input');
+        formControls.forEach(control => {
+            control.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            control.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+        
+        // Add today's date to embargo date field
+        const embargoDateInput = document.getElementById('embargo_date');
+        if (embargoDateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            embargoDateInput.min = today;
+            if (!embargoDateInput.value) {
+                // Set default to 6 months from now
+                const futureDate = new Date();
+                futureDate.setMonth(futureDate.getMonth() + 6);
+                embargoDateInput.value = futureDate.toISOString().split('T')[0];
+            }
+        }
+    });
+</script>
+{% endblock %}

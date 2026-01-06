@@ -1,0 +1,565 @@
+<!-- blog/templates/blog/post_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Post - Ramat Library Blog{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'blog:post_list' %}">Blog</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ action }} Post</li>
+{% endblock %}
+
+{% block page_title %}{{ action }} Blog Post{% endblock %}
+{% block page_subtitle %}{% if action == 'Edit' %}Update existing post{% else %}Create a new blog post{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-hover">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pencil-square me-2"></i>{{ action }} Blog Post
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="postForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Form Errors -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Please correct the errors below
+                        </h6>
+                        <ul class="mb-0 ps-3">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Left Column: Main Form -->
+                        <div class="col-lg-8">
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-type me-2"></i>Post Title *
+                                </label>
+                                {{ form.title }}
+                                <div class="form-text">A clear, descriptive title for your post.</div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="mb-4">
+                                <label for="{{ form.content.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-text-paragraph me-2"></i>Content *
+                                </label>
+                                {{ form.content }}
+                                <div class="form-text">Write your blog post content here. You can use basic HTML formatting.</div>
+                            </div>
+
+                            <!-- Excerpt (Optional) -->
+                            <div class="mb-4">
+                                <label for="excerpt" class="form-label fw-bold">
+                                    <i class="bi bi-quote me-2"></i>Excerpt
+                                </label>
+                                <textarea class="form-control" id="excerpt" name="excerpt" rows="3" 
+                                          placeholder="Optional short summary of your post (will appear in post listings)"></textarea>
+                                <div class="form-text">Brief summary (1-2 sentences) shown in post previews.</div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Settings -->
+                        <div class="col-lg-4">
+                            <!-- Status -->
+                            <div class="card mb-4 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Post Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-toggle-on me-2"></i>Status
+                                        </label>
+                                        {{ form.status }}
+                                        <div class="form-text">
+                                            <strong>Draft:</strong> Save for later editing.<br>
+                                            <strong>Published:</strong> Make visible to all readers.
+                                        </div>
+                                    </div>
+
+                                    <!-- Published Date (for published posts) -->
+                                    <div class="mb-3" id="publishedDateField" style="display: none;">
+                                        <label for="{{ form.published_date.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-calendar me-2"></i>Publish Date
+                                        </label>
+                                        {{ form.published_date }}
+                                    </div>
+
+                                    <!-- Schedule Post (Optional) -->
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="schedulePost">
+                                            <label class="form-check-label fw-bold" for="schedulePost">
+                                                <i class="bi bi-clock me-2"></i>Schedule for later
+                                            </label>
+                                        </div>
+                                        <div class="mt-2" id="scheduleDate" style="display: none;">
+                                            <input type="datetime-local" class="form-control" id="scheduledDate" 
+                                                   name="scheduled_date">
+                                        </div>
+                                    </div>
+
+                                    <!-- Featured Post -->
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="featuredPost">
+                                            <label class="form-check-label fw-bold" for="featuredPost">
+                                                <i class="bi bi-star me-2"></i>Feature this post
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Featured posts appear prominently on the blog homepage.</div>
+                                    </div>
+
+                                    <!-- Categories/Tags -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">
+                                            <i class="bi bi-tags me-2"></i>Categories
+                                        </label>
+                                        <div class="border rounded p-3">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="category1" name="categories" value="news">
+                                                <label class="form-check-label" for="category1">Library News</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="category2" name="categories" value="research">
+                                                <label class="form-check-label" for="category2">Research</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="category3" name="categories" value="events">
+                                                <label class="form-check-label" for="category3">Events</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="category4" name="categories" value="services">
+                                                <label class="form-check-label" for="category4">Services</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="category5" name="categories" value="digital">
+                                                <label class="form-check-label" for="category5">Digital Library</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Actions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" name="save" value="save" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>Save Post
+                                        </button>
+                                        <button type="submit" name="preview" value="preview" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye me-2"></i>Preview
+                                        </button>
+                                        <a href="{% url 'blog:post_list' %}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- For Edit Form -->
+                                    {% if action == 'Edit' %}
+                                    <hr>
+                                    <div class="d-grid">
+                                        <a href="{% url 'blog:delete_post' post.pk %}" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash me-2"></i>Delete Post
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Preview Section -->
+            <div class="card-footer bg-light" id="previewSection" style="display: none;">
+                <h6 class="fw-bold mb-3"><i class="bi bi-eye me-2"></i>Preview</h6>
+                <div class="border rounded p-4 bg-white" id="postPreview">
+                    <!-- Preview content will be inserted here -->
+                </div>
+                <div class="mt-3 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="closePreview">
+                        Close Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Tips -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Writing Tips</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Clear Title</h6>
+                                <p class="text-muted small mb-0">Make titles descriptive and engaging</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Use Headings</h6>
+                                <p class="text-muted small mb-0">Break content with H2 and H3 tags</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Add Images</h6>
+                                <p class="text-muted small mb-0">Use relevant images to enhance content</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Proofread</h6>
+                                <p class="text-muted small mb-0">Check spelling and grammar before publishing</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Add Tags</h6>
+                                <p class="text-muted small mb-0">Use relevant categories for better discovery</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-check-circle text-success fs-5 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Call to Action</h6>
+                                <p class="text-muted small mb-0">End with clear next steps for readers</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusField = document.getElementById('{{ form.status.id_for_label }}');
+        const publishedDateField = document.getElementById('publishedDateField');
+        const scheduleCheckbox = document.getElementById('schedulePost');
+        const scheduleDate = document.getElementById('scheduleDate');
+        const titleField = document.getElementById('{{ form.title.id_for_label }}');
+        const contentField = document.getElementById('{{ form.content.id_for_label }}');
+        const previewSection = document.getElementById('previewSection');
+        const postPreview = document.getElementById('postPreview');
+        const previewBtn = document.querySelector('button[name="preview"]');
+        const closePreviewBtn = document.getElementById('closePreview');
+
+        // Toggle published date field based on status
+        function togglePublishedDate() {
+            if (statusField.value === 'published') {
+                publishedDateField.style.display = 'block';
+            } else {
+                publishedDateField.style.display = 'none';
+            }
+        }
+
+        // Initial check
+        togglePublishedDate();
+
+        // Listen for status changes
+        statusField.addEventListener('change', togglePublishedDate);
+
+        // Toggle schedule date field
+        scheduleCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                scheduleDate.style.display = 'block';
+                // Set default date to tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const formattedDate = tomorrow.toISOString().slice(0, 16);
+                document.getElementById('scheduledDate').value = formattedDate;
+            } else {
+                scheduleDate.style.display = 'none';
+            }
+        });
+
+        // Preview functionality
+        if (previewBtn) {
+            previewBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const title = titleField.value || 'Untitled Post';
+                const content = contentField.value || 'Content will appear here...';
+                const status = statusField.options[statusField.selectedIndex].text;
+                const categories = Array.from(document.querySelectorAll('input[name="categories"]:checked'))
+                    .map(cb => cb.nextElementSibling.textContent)
+                    .join(', ');
+                
+                // Generate preview HTML
+                const previewHTML = `
+                    <div class="preview-content">
+                        <h2 class="fw-bold mb-3">${title}</h2>
+                        <div class="mb-4">
+                            <span class="badge ${status === 'Published' ? 'bg-success' : 'bg-warning'} me-2">
+                                ${status}
+                            </span>
+                            ${categories ? `<span class="badge bg-light text-dark me-2">${categories}</span>` : ''}
+                        </div>
+                        <div class="preview-body" style="border-top: 1px solid #dee2e6; padding-top: 1rem;">
+                            ${content || '<p class="text-muted">No content yet...</p>'}
+                        </div>
+                        <div class="mt-4 pt-3 border-top">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                This is a preview. The actual post may look different when published.
+                            </small>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert preview
+                postPreview.innerHTML = previewHTML;
+                
+                // Show preview section
+                previewSection.style.display = 'block';
+                
+                // Scroll to preview
+                previewSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        // Close preview
+        if (closePreviewBtn) {
+            closePreviewBtn.addEventListener('click', function() {
+                previewSection.style.display = 'none';
+            });
+        }
+
+        // Character counter for title
+        const titleCounter = document.createElement('div');
+        titleCounter.className = 'form-text text-end mt-1';
+        titleCounter.innerHTML = '<span id="titleCount">0</span>/500 characters';
+        titleField.parentNode.appendChild(titleCounter);
+
+        titleField.addEventListener('input', function() {
+            document.getElementById('titleCount').textContent = this.value.length;
+        });
+
+        // Initialize title count
+        document.getElementById('titleCount').textContent = titleField.value.length;
+
+        // Auto-save draft (simplified version)
+        let autoSaveTimer;
+        const autoSaveIndicator = document.createElement('div');
+        autoSaveIndicator.className = 'position-fixed bottom-0 end-0 m-3 p-2 bg-success text-white rounded shadow';
+        autoSaveIndicator.style.display = 'none';
+        autoSaveIndicator.style.zIndex = '1000';
+        autoSaveIndicator.innerHTML = '<i class="bi bi-check-circle me-2"></i>Draft saved';
+        document.body.appendChild(autoSaveIndicator);
+
+        function autoSave() {
+            // In a real application, you would make an AJAX call here
+            console.log('Auto-saving draft...');
+            
+            // Show indicator
+            autoSaveIndicator.style.display = 'block';
+            setTimeout(() => {
+                autoSaveIndicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Set up auto-save on content change
+        contentField.addEventListener('input', function() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(autoSave, 3000);
+        });
+
+        // Form validation
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            if (!titleField.value.trim()) {
+                e.preventDefault();
+                alert('Please enter a title for your post.');
+                titleField.focus();
+                return false;
+            }
+            
+            if (!contentField.value.trim()) {
+                e.preventDefault();
+                alert('Please enter content for your post.');
+                contentField.focus();
+                return false;
+            }
+            
+            // Check if this is a preview button click
+            if (e.submitter && e.submitter.name === 'preview') {
+                e.preventDefault();
+                return false;
+            }
+            
+            return true;
+        });
+
+        // Add some basic formatting buttons to content field
+        if (contentField.tagName === 'TEXTAREA') {
+            const formatButtons = document.createElement('div');
+            formatButtons.className = 'd-flex flex-wrap gap-2 mb-2';
+            formatButtons.innerHTML = `
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="bold">
+                    <i class="bi bi-type-bold"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="italic">
+                    <i class="bi bi-type-italic"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="h2">
+                    <i class="bi bi-type-h2"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="link">
+                    <i class="bi bi-link"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="list">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary format-btn" data-format="quote">
+                    <i class="bi bi-quote"></i>
+                </button>
+            `;
+            
+            contentField.parentNode.insertBefore(formatButtons, contentField);
+            
+            // Add formatting functionality
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const format = this.dataset.format;
+                    const textarea = contentField;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const selectedText = textarea.value.substring(start, end);
+                    
+                    let formattedText = '';
+                    
+                    switch(format) {
+                        case 'bold':
+                            formattedText = `<strong>${selectedText}</strong>`;
+                            break;
+                        case 'italic':
+                            formattedText = `<em>${selectedText}</em>`;
+                            break;
+                        case 'h2':
+                            formattedText = `<h2>${selectedText}</h2>`;
+                            break;
+                        case 'link':
+                            const url = prompt('Enter URL:', 'https://');
+                            if (url) {
+                                formattedText = `<a href="${url}" target="_blank">${selectedText}</a>`;
+                            }
+                            break;
+                        case 'list':
+                            formattedText = `<ul>\n  <li>${selectedText}</li>\n</ul>`;
+                            break;
+                        case 'quote':
+                            formattedText = `<blockquote>${selectedText}</blockquote>`;
+                            break;
+                    }
+                    
+                    if (formattedText) {
+                        textarea.value = textarea.value.substring(0, start) + 
+                                        formattedText + 
+                                        textarea.value.substring(end);
+                        textarea.focus();
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+<style>
+    #{{ form.content.id_for_label }} {
+        min-height: 300px;
+    }
+    
+    .format-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px !important;
+    }
+    
+    .preview-content {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        line-height: 1.6;
+    }
+    
+    .preview-content h2 {
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+    
+    .preview-body {
+        font-size: 1.1rem;
+    }
+    
+    .preview-body h2, .preview-body h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .preview-body p {
+        margin-bottom: 1rem;
+    }
+    
+    .preview-body ul, .preview-body ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    
+    .preview-body blockquote {
+        border-left: 4px solid var(--accent-blue);
+        padding-left: 1rem;
+        margin: 1rem 0;
+        font-style: italic;
+        color: var(--dark-text);
+    }
+</style>
+{% endblock %}
