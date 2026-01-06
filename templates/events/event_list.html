@@ -138,7 +138,7 @@
                     </a>
                     
                     {% if user.is_authenticated %}
-                        {% if event.registrations.filter.user=user %}
+                        {% if event.is_registered %}
                             <span class="badge bg-success px-3 py-2">
                                 <i class="bi bi-check-circle me-1"></i>Registered
                             </span>

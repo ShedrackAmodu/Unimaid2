@@ -38,30 +38,30 @@
 <div class="row g-4 mb-5 animate__animated animate__fadeInUp">
     <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4">
-            <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
-            <div class="stat-label">Total Books</div>
-            <i class="bi bi-book fs-1 text-primary mt-3"></i>
+            <div class="stat-number mb-2">{{ total_faculties|default:"0" }}</div>
+            <div class="stat-label">Faculties</div>
+            <i class="bi bi-building fs-1 text-primary mt-3"></i>
         </div>
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4">
-            <div class="stat-number mb-2">{{ available_books|default:"45,000+" }}</div>
-            <div class="stat-label">Available Now</div>
-            <i class="bi bi-check-circle fs-1 text-success mt-3"></i>
+            <div class="stat-number mb-2">{{ total_departments|default:"0" }}</div>
+            <div class="stat-label">Departments</div>
+            <i class="bi bi-diagram-3 fs-1 text-success mt-3"></i>
         </div>
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4">
-            <div class="stat-number mb-2">{{ genres_count|default:"150+" }}</div>
-            <div class="stat-label">Genres</div>
+            <div class="stat-number mb-2">{{ total_topics|default:"0" }}</div>
+            <div class="stat-label">Topics</div>
             <i class="bi bi-tags fs-1 text-warning mt-3"></i>
         </div>
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4">
-            <div class="stat-number mb-2">{{ authors_count|default:"20,000+" }}</div>
-            <div class="stat-label">Authors</div>
-            <i class="bi bi-person-badge fs-1 text-info mt-3"></i>
+            <div class="stat-number mb-2">{{ total_books|default:"0" }}</div>
+            <div class="stat-label">Total Books</div>
+            <i class="bi bi-book fs-1 text-info mt-3"></i>
         </div>
     </div>
 </div>
@@ -330,77 +330,12 @@
             </div>
         </div>
         {% empty %}
-        <div class="col-lg-3 col-md-6">
-            <div class="card author-card border-0 shadow-hover text-center p-4">
-                <div class="author-avatar mb-3 mx-auto">
-                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill text-white fs-3"></i>
-                    </div>
-                </div>
-                <h5 class="fw-bold mb-2">Chinua Achebe</h5>
-                <p class="text-muted small mb-3">Nigerian novelist, poet, professor</p>
-                <div class="mb-3">
-                    <span class="badge bg-light text-dark">25+ books</span>
-                </div>
-                <a href="/catalog/books/?author=achebe" class="btn btn-sm btn-outline-primary">
-                    View Works
-                </a>
+        <div class="col-12 text-center py-5">
+            <div class="d-inline-block p-4 rounded-circle bg-light mb-4">
+                <i class="bi bi-person text-primary fs-1"></i>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card author-card border-0 shadow-hover text-center p-4">
-                <div class="author-avatar mb-3 mx-auto">
-                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill text-white fs-3"></i>
-                    </div>
-                </div>
-                <h5 class="fw-bold mb-2">Wole Soyinka</h5>
-                <p class="text-muted small mb-3">Nigerian playwright, poet, essayist</p>
-                <div class="mb-3">
-                    <span class="badge bg-light text-dark">20+ books</span>
-                </div>
-                <a href="/catalog/books/?author=soyinka" class="btn btn-sm btn-outline-primary">
-                    View Works
-                </a>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card author-card border-0 shadow-hover text-center p-4">
-                <div class="author-avatar mb-3 mx-auto">
-                    <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill text-white fs-3"></i>
-                    </div>
-                </div>
-                <h5 class="fw-bold mb-2">Chimamanda Adichie</h5>
-                <p class="text-muted small mb-3">Nigerian writer of novels, short stories</p>
-                <div class="mb-3">
-                    <span class="badge bg-light text-dark">15+ books</span>
-                </div>
-                <a href="/catalog/books/?author=adichie" class="btn btn-sm btn-outline-primary">
-                    View Works
-                </a>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card author-card border-0 shadow-hover text-center p-4">
-                <div class="author-avatar mb-3 mx-auto">
-                    <div class="rounded-circle bg-info d-flex align-items-center justify-content-center" 
-                         style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill text-white fs-3"></i>
-                    </div>
-                </div>
-                <h5 class="fw-bold mb-2">Stephen Hawking</h5>
-                <p class="text-muted small mb-3">English theoretical physicist</p>
-                <div class="mb-3">
-                    <span class="badge bg-light text-dark">10+ books</span>
-                </div>
-                <a href="/catalog/books/?author=hawking" class="btn btn-sm btn-outline-primary">
-                    View Works
-                </a>
-            </div>
+            <h4 class="text-muted mb-3">No Featured Authors</h4>
+            <p class="text-muted">Featured authors will be displayed here once added to the system.</p>
         </div>
         {% endfor %}
     </div>

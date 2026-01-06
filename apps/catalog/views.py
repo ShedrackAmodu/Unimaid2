@@ -49,7 +49,11 @@ class BookListView(ListView):
             ).distinct()
 
         if genre_filter:
-            queryset = queryset.filter(genre_id=genre_filter)
+            try:
+                genre_id = int(genre_filter)
+                queryset = queryset.filter(genre_id=genre_id)
+            except ValueError:
+                queryset = queryset.filter(genre__name=genre_filter)
 
         if author_filter:
             queryset = queryset.filter(authors__id=author_filter)
@@ -93,7 +97,73 @@ class AuthorListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Author.objects.prefetch_related('books').order_by('name')
+        queryset = Author.objects.prefetch_related('books').order_by('name')
+        search_query = self.request.GET.get('q')
+        letter_filter = self.request.GET.get('letter')
+        sort_by = self.request.GET.get('sort', 'name')
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(bio__icontains=search_query)
+            )
+
+        if letter_filter:
+            if letter_filter == '0-9':
+                queryset = queryset.filter(name__regex=r'^[0-9]')
+            else:
+                queryset = queryset.filter(name__istartswith=letter_filter)
+
+        if sort_by == 'popular':
+            queryset = queryset.annotate(book_count=Count('books')).order_by('-book_count', 'name')
+        elif sort_by == 'books':
+            queryset = queryset.annotate(book_count=Count('books')).order_by('-book_count', 'name')
+        elif sort_by == 'newest':
+            queryset = queryset.order_by('-created_at', 'name')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Basic statistics
+        total_authors = Author.objects.count()
+        total_books = Book.objects.active().count()
+        avg_books_per_author = round(total_books / total_authors, 1) if total_authors > 0 else 0
+
+        # Featured authors (top by book count)
+        featured_authors = Author.objects.annotate(
+            book_count=Count('books')
+        ).order_by('-book_count', 'name')[:4]
+
+        # Alphabet for filtering
+        alphabet = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
+        # Search query
+        search_query = self.request.GET.get('q', '')
+
+        # Genre statistics for progress bars (top 3 genres by author count)
+        top_genres = Genre.objects.annotate(
+            author_count=Count('books__authors', distinct=True)
+        ).filter(author_count__gt=0).order_by('-author_count')[:3]
+
+        # All genres with author counts for category links
+        genre_stats = Genre.objects.annotate(
+            author_count=Count('books__authors', distinct=True)
+        ).filter(author_count__gt=0).order_by('-author_count')[:5]
+
+        context.update({
+            'total_authors': total_authors,
+            'total_books': total_books,
+            'avg_books_per_author': avg_books_per_author,
+            'featured_authors': featured_authors,
+            'alphabet': alphabet,
+            'search_query': search_query,
+            'top_genres': top_genres,
+            'genre_stats': genre_stats,
+        })
+
+        return context
 
 
 class AuthorDetailView(DetailView):

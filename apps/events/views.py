@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.generic import ListView, DetailView
 from django.utils import timezone
-from .models import Event
+from django.db.models import Exists, OuterRef
+from .models import Event, EventRegistration
 from .forms import EventForm, EventRegistrationForm
 
 
@@ -18,7 +19,17 @@ class EventListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Event.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')
+        queryset = Event.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')
+        if self.request.user.is_authenticated:
+            queryset = queryset.annotate(
+                is_registered=Exists(
+                    EventRegistration.objects.filter(
+                        event=OuterRef('pk'),
+                        user=self.request.user
+                    )
+                )
+            )
+        return queryset
 
 
 class EventDetailView(DetailView):

@@ -437,78 +437,12 @@
                         </div>
                     </div>
                     {% empty %}
-                    <!-- Default Featured Authors -->
-                    <div class="col-lg-3 col-md-6">
-                        <div class="featured-author-card text-center">
-                            <div class="featured-avatar mb-3 mx-auto">
-                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
-                                     style="width: 120px; height: 120px;">
-                                    <span class="text-white fs-1 fw-bold">C</span>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold mb-2">Chinua Achebe</h5>
-                            <p class="text-muted small mb-3">Nigerian novelist, poet, professor</p>
-                            <div class="mb-3">
-                                <span class="badge bg-primary">25+ books</span>
-                            </div>
-                            <a href="/catalog/books/?author=achebe" class="btn btn-sm btn-outline-primary">
-                                View Works
-                            </a>
+                    <div class="col-12 text-center py-5">
+                        <div class="d-inline-block p-4 rounded-circle bg-light mb-4">
+                            <i class="bi bi-person text-primary fs-1"></i>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="featured-author-card text-center">
-                            <div class="featured-avatar mb-3 mx-auto">
-                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
-                                     style="width: 120px; height: 120px;">
-                                    <span class="text-white fs-1 fw-bold">W</span>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold mb-2">Wole Soyinka</h5>
-                            <p class="text-muted small mb-3">Nigerian playwright, poet, essayist</p>
-                            <div class="mb-3">
-                                <span class="badge bg-success">20+ books</span>
-                            </div>
-                            <a href="/catalog/books/?author=soyinka" class="btn btn-sm btn-outline-primary">
-                                View Works
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="featured-author-card text-center">
-                            <div class="featured-avatar mb-3 mx-auto">
-                                <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center"
-                                     style="width: 120px; height: 120px;">
-                                    <span class="text-white fs-1 fw-bold">C</span>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold mb-2">Chimamanda Adichie</h5>
-                            <p class="text-muted small mb-3">Nigerian writer of novels, short stories</p>
-                            <div class="mb-3">
-                                <span class="badge bg-warning">15+ books</span>
-                            </div>
-                            <a href="/catalog/books/?author=adichie" class="btn btn-sm btn-outline-primary">
-                                View Works
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="featured-author-card text-center">
-                            <div class="featured-avatar mb-3 mx-auto">
-                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center"
-                                     style="width: 120px; height: 120px;">
-                                    <span class="text-white fs-1 fw-bold">S</span>
-                                </div>
-                            </div>
-                            <h5 class="fw-bold mb-2">Stephen Hawking</h5>
-                            <p class="text-muted small mb-3">English theoretical physicist</p>
-                            <div class="mb-3">
-                                <span class="badge bg-info">10+ books</span>
-                            </div>
-                            <a href="/catalog/books/?author=hawking" class="btn btn-sm btn-outline-primary">
-                                View Works
-                            </a>
-                        </div>
+                        <h4 class="text-muted mb-3">No Featured Authors</h4>
+                        <p class="text-muted">Featured authors will be displayed here once added to the system.</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -558,33 +492,17 @@
                 <div class="mt-4">
                     <h6 class="fw-bold mb-3">Top Genres by Author Count</h6>
                     <div class="progress-stats">
+                        {% for genre in top_genres %}
                         <div class="progress-item mb-3">
                             <div class="d-flex justify-content-between mb-1">
-                                <span class="small">Fiction</span>
-                                <span class="small fw-bold">3,200 authors</span>
+                                <span class="small">{{ genre.name }}</span>
+                                <span class="small fw-bold">{{ genre.author_count }} authors</span>
                             </div>
                             <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-primary" style="width: 85%"></div>
+                                <div class="progress-bar {% if forloop.first %}bg-primary{% elif forloop.counter == 2 %}bg-success{% else %}bg-warning{% endif %}" style="width: {% widthratio genre.author_count top_genres.0.author_count 100 %}%"></div>
                             </div>
                         </div>
-                        <div class="progress-item mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="small">Science</span>
-                                <span class="small fw-bold">2,800 authors</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-success" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="small">History</span>
-                                <span class="small fw-bold">2,100 authors</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-warning" style="width: 60%"></div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -596,41 +514,15 @@
             <div class="card-body p-4">
                 <h4 class="fw-bold mb-4">Browse by Category</h4>
                 <div class="category-links">
-                    <a href="/catalog/books/?genre=fiction" class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                    {% for genre in genre_stats %}
+                    <a href="/catalog/books/?genre={{ genre.id }}" class="d-flex align-items-center justify-content-between py-3 {% if not forloop.last %}border-bottom{% endif %}">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-book text-primary me-3"></i>
-                            <span>Fiction Authors</span>
+                            <i class="bi {% if forloop.first %}bi-book text-primary{% elif forloop.counter == 2 %}bi-bezier2 text-success{% elif forloop.counter == 3 %}bi-clock-history text-warning{% elif forloop.counter == 4 %}bi-palette text-info{% else %}bi-people text-danger{% endif %} me-3"></i>
+                            <span>{{ genre.name }} Authors</span>
                         </div>
-                        <span class="badge bg-primary">3,200+</span>
+                        <span class="badge {% if forloop.first %}bg-primary{% elif forloop.counter == 2 %}bg-success{% elif forloop.counter == 3 %}bg-warning{% elif forloop.counter == 4 %}bg-info{% else %}bg-danger{% endif %}">{{ genre.author_count }}+</span>
                     </a>
-                    <a href="/catalog/books/?genre=science" class="d-flex align-items-center justify-content-between py-3 border-bottom">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-bezier2 text-success me-3"></i>
-                            <span>Science & Technology</span>
-                        </div>
-                        <span class="badge bg-success">2,800+</span>
-                    </a>
-                    <a href="/catalog/books/?genre=history" class="d-flex align-items-center justify-content-between py-3 border-bottom">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-clock-history text-warning me-3"></i>
-                            <span>History & Biography</span>
-                        </div>
-                        <span class="badge bg-warning">2,100+</span>
-                    </a>
-                    <a href="/catalog/books/?genre=arts" class="d-flex align-items-center justify-content-between py-3 border-bottom">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-palette text-info me-3"></i>
-                            <span>Arts & Literature</span>
-                        </div>
-                        <span class="badge bg-info">1,800+</span>
-                    </a>
-                    <a href="/catalog/books/?genre=social" class="d-flex align-items-center justify-content-between py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-people text-danger me-3"></i>
-                            <span>Social Sciences</span>
-                        </div>
-                        <span class="badge bg-danger">1,500+</span>
-                    </a>
+                    {% endfor %}
                 </div>
                 <div class="mt-4">
                     <a href="/catalog/genres/" class="btn btn-outline-primary w-100">
