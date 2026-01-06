@@ -650,10 +650,19 @@
             .navbar, .footer, .fab {
                 display: none !important;
             }
-            
+
             .card {
                 box-shadow: none !important;
                 border: 1px solid #dee2e6;
+            }
+        }
+
+        /* Full Width Content on Desktop */
+        @media (min-width: 1200px) {
+            .main-content .container {
+                max-width: 100%;
+                padding-left: 2rem;
+                padding-right: 2rem;
             }
         }
     </style>
