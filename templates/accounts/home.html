@@ -1,0 +1,1176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Home</li>
+{% endblock %}
+
+{% block page_header %}
+<!-- Hero Section with Video Carousel -->
+<div class="hero-section mb-5">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+        </div>
+        
+        <!-- Carousel Items -->
+        <div class="carousel-inner rounded-4">
+            <!-- Slide 1: Main Library Video -->
+            <div class="carousel-item active">
+                <video autoplay muted loop class="w-100" style="height: 600px; object-fit: cover;">
+                    <source src="{% static 'images/Ramat Library_ Gateway.mp4' %}" type="video/mp4">
+                </video>
+                <div class="carousel-caption d-flex align-items-center h-100">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h1 class="display-3 fw-bold text-white mb-4 animate__animated animate__fadeInUp">
+                                    Welcome to Ramat Library
+                                </h1>
+                                <p class="lead text-white mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                                    University of Maiduguri's premier academic resource center, 
+                                    empowering education and research since 1975.
+                                </p>
+                                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
+                                    <a href="/catalog/" class="btn btn-primary btn-lg px-4 py-3">
+                                        <i class="bi bi-search me-2"></i>Browse Collection
+                                    </a>
+                                    <a href="/accounts/register/" class="btn btn-outline-light btn-lg px-4 py-3">
+                                        <i class="bi bi-person-plus me-2"></i>Become a Member
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2: Hero Video -->
+            <div class="carousel-item">
+                <video autoplay muted loop class="w-100" style="height: 600px; object-fit: cover;">
+                    <source src="{% static 'images/hero1.mp4' %}" type="video/mp4">
+                </video>
+                <div class="carousel-caption d-flex align-items-center h-100">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h2 class="display-3 fw-bold text-white mb-4 animate__animated animate__fadeInUp">
+                                    Discover Knowledge
+                                </h2>
+                                <p class="lead text-white mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                                    Access over 50,000 books, journals, and digital resources for your academic success.
+                                </p>
+                                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
+                                    <a href="/repository/" class="btn btn-primary btn-lg px-4 py-3">
+                                        <i class="bi bi-archive me-2"></i>Digital Repository
+                                    </a>
+                                    <a href="/blog/" class="btn btn-outline-light btn-lg px-4 py-3">
+                                        <i class="bi bi-newspaper me-2"></i>Latest News
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Library Front Image -->
+            <div class="carousel-item">
+                <img src="{% static 'images/frontview.png' %}" class="d-block w-100" alt="Library Front View" style="height: 600px; object-fit: cover;">
+                <div class="carousel-caption d-flex align-items-center h-100">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h2 class="display-3 fw-bold text-white mb-4 animate__animated animate__fadeInUp">
+                                    State-of-the-Art Facilities
+                                </h2>
+                                <p class="lead text-white mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                                    Modern study spaces, digital labs, and quiet reading rooms await you.
+                                </p>
+                                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
+                                    <a href="/accounts/tour/" class="btn btn-primary btn-lg px-4 py-3">
+                                        <i class="bi bi-camera-video me-2"></i>Virtual Tour
+                                    </a>
+                                    <a href="/events/" class="btn btn-outline-light btn-lg px-4 py-3">
+                                        <i class="bi bi-calendar-event me-2"></i>Upcoming Events
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4: Students Reading -->
+            <div class="carousel-item">
+                <img src="{% static 'images/students_reading.png' %}" class="d-block w-100" alt="Students Reading" style="height: 600px; object-fit: cover;">
+                <div class="carousel-caption d-flex align-items-center h-100">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h2 class="display-3 fw-bold text-white mb-4 animate__animated animate__fadeInUp">
+                                    Join Our Community
+                                </h2>
+                                <p class="lead text-white mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                                    Connect with fellow students, researchers, and academic professionals.
+                                </p>
+                                <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
+                                    <a href="/accounts/staff_directory/" class="btn btn-primary btn-lg px-4 py-3">
+                                        <i class="bi bi-people me-2"></i>Meet Our Staff
+                                    </a>
+                                    <a href="/circulation/" class="btn btn-outline-light btn-lg px-4 py-3">
+                                        <i class="bi bi-book me-2"></i>Library Services
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+
+<!-- Welcome Message from Librarian -->
+<div class="welcome-message mb-5 animate__animated animate__fadeIn">
+    <div class="container-fluid">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{% static 'images/librarian.jpg' %}" alt="Head Librarian" class="img-fluid h-100" style="object-fit: cover;">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body p-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3">
+                                <img src="{% static 'images/ramat_ai3.png' %}" alt="Library Logo" style="width: 60px; height: auto;">
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">Message from the Librarian</h3>
+                                <small class="text-muted">Dr. [Librarian's Name], Head Librarian</small>
+                            </div>
+                        </div>
+                        
+                        <blockquote class="blockquote mb-4">
+                            <p class="lead">
+                                <i class="bi bi-quote text-primary fs-1 opacity-25 me-2"></i>
+                                Welcome to Ramat Library, the heart of academic excellence at the University of Maiduguri. 
+                                Our mission is to provide exceptional resources and services that support teaching, learning, 
+                                and research. Whether you're a student, faculty member, or researcher, you'll find a wealth 
+                                of knowledge and support here.
+                                <i class="bi bi-quote text-primary fs-1 opacity-25 ms-2" style="transform: rotate(180deg); display: inline-block;"></i>
+                            </p>
+                        </blockquote>
+                        
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Expert Guidance</h6>
+                                        <p class="text-muted small mb-0">Our staff is here to help you succeed</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Modern Resources</h6>
+                                        <p class="text-muted small mb-0">Latest digital and print collections</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">24/7 Access</h6>
+                                        <p class="text-muted small mb-0">Digital resources available anytime</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Research Support</h6>
+                                        <p class="text-muted small mb-0">Comprehensive research assistance</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="/accounts/staff_directory/" class="btn btn-outline-primary">
+                                <i class="bi bi-person-badge me-2"></i>Meet Our Team
+                            </a>
+                            <a href="/accounts/contact/" class="btn btn-link text-decoration-none ms-3">
+                                Contact Us <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Stats Section -->
+<section id="quick-stats" class="py-5 animate__animated animate__fadeIn">
+    <div class="container-fluid">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
+                    <div class="stat-label">Books & E-Books</div>
+                    <img src="{% static 'images/librarybooks.jfif' %}" alt="Books Collection" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ total_documents|default:"10,000+" }}</div>
+                    <div class="stat-label">Research Documents</div>
+                    <img src="{% static 'images/ramat_a4i.png' %}" alt="Research Documents" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">24/7</div>
+                    <div class="stat-label">Digital Access</div>
+                    <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Access" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ user_count|default:"5,000+" }}</div>
+                    <div class="stat-label">Active Members</div>
+                    <img src="{% static 'images/staff.png' %}" alt="Library Staff" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Collections Section -->
+<section class="py-5 bg-light">
+    <div class="container-fluid">
+        <div class="row align-items-center mb-5">
+            <div class="col-md-8">
+                <h2 class="display-5 fw-bold mb-3">Explore Our Collections</h2>
+                <p class="lead text-muted">Diverse academic resources across multiple disciplines</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="/catalog/" class="btn btn-outline-primary btn-lg">
+                    Browse All <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Science & Technology -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
+                    <div class="position-relative">
+                        <img src="{% static 'images/librarybooks.jfif' %}" class="card-img-top" alt="Science & Technology"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-primary px-3 py-2">Science</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Science & Technology</h4>
+                        <p class="text-muted mb-4">
+                            Latest research in engineering, computer science, medicine, and applied sciences.
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">12,000+ titles</small>
+                            <a href="/catalog/?genre=science" class="btn btn-sm btn-primary">
+                                Explore <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Humanities & Arts -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
+                    <div class="position-relative">
+                        <img src="{% static 'images/frontview.png' %}" class="card-img-top" alt="Humanities & Arts"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-success px-3 py-2">Humanities</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Humanities & Arts</h4>
+                        <p class="text-muted mb-4">
+                            Literature, philosophy, history, fine arts, and cultural studies collections.
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">8,500+ titles</small>
+                            <a href="/catalog/?genre=humanities" class="btn btn-sm btn-success">
+                                Explore <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Sciences -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
+                    <div class="position-relative">
+                        <img src="{% static 'images/students_reading.png' %}" class="card-img-top" alt="Social Sciences"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-warning px-3 py-2">Social Sciences</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Social Sciences</h4>
+                        <p class="text-muted mb-4">
+                            Economics, sociology, political science, psychology, and development studies.
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">6,800+ titles</small>
+                            <a href="/catalog/?genre=social_science" class="btn btn-sm btn-warning">
+                                Explore <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Library Services with Images -->
+<section class="py-5">
+    <div class="container-fluid">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Our Comprehensive Services</h2>
+            <p class="lead text-muted">Everything you need for academic success in one place</p>
+        </div>
+        
+        <div class="row g-4 align-items-center mb-5">
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="{% static 'images/librarybooks.jfif' %}" alt="Book Lending Service"
+                         class="img-fluid rounded-4 shadow-lg">
+                    <div class="position-absolute top-0 start-0 m-4">
+                        <span class="badge bg-primary px-3 py-2 fs-6">Most Popular</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-4">Book Lending & Circulation</h3>
+                <p class="text-muted mb-4">
+                    Borrow physical books, academic journals, and course materials with flexible loan periods
+                    tailored to your membership type. Renew online, reserve popular titles, and receive
+                    notifications for due dates.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-primary mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Flexible Loan Periods</h6>
+                                <p class="text-muted small mb-0">From 7 to 30 days based on membership</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-primary mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Online Renewals</h6>
+                                <p class="text-muted small mb-0">Renew items from your dashboard</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="/circulation/" class="btn btn-primary mt-4">
+                    <i class="bi bi-book me-2"></i>Learn About Circulation
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6 order-lg-2">
+                <div class="position-relative">
+                    <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Resources"
+                         class="img-fluid rounded-4 shadow-lg">
+                    <div class="position-absolute top-0 start-0 m-4">
+                        <span class="badge bg-success px-3 py-2 fs-6">24/7 Access</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 order-lg-1">
+                <h3 class="fw-bold mb-4">Digital Resources & E-Library</h3>
+                <p class="text-muted mb-4">
+                    Access thousands of e-books, academic journals, research databases, and multimedia
+                    resources online. Our digital library is available 24/7 from any device, anywhere
+                    on campus.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Online Databases</h6>
+                                <p class="text-muted small mb-0">Access to premium academic databases</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill text-success mt-1 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Remote Access</h6>
+                                <p class="text-muted small mb-0">Connect from anywhere on campus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="/repository/" class="btn btn-success mt-4">
+                    <i class="bi bi-laptop me-2"></i>Explore Digital Library
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Gallery -->
+<section class="py-5 bg-light">
+    <div class="container-fluid">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Library Spaces</h2>
+            <p class="lead text-muted">Explore our modern facilities designed for learning and research</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="gallery-item position-relative overflow-hidden rounded-4">
+                            <img src="{% static 'images/frontview.png' %}" alt="Library Entrance"
+                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                            <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
+                                <div>
+                                    <h5 class="text-white fw-bold mb-2">Main Entrance</h5>
+                                    <p class="text-white mb-0 small">Grand entrance to Ramat Library</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="gallery-item position-relative overflow-hidden rounded-4">
+                            <img src="{% static 'images/students_reading.png' %}" alt="Reading Area"
+                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                            <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
+                                <div>
+                                    <h5 class="text-white fw-bold mb-2">Reading Room</h5>
+                                    <p class="text-white mb-0 small">Quiet study and research area</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="gallery-item position-relative overflow-hidden rounded-4">
+                            <img src="{% static 'images/librarybooks.jfif' %}" alt="Book Stacks"
+                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                            <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
+                                <div>
+                                    <h5 class="text-white fw-bold mb-2">Book Stacks</h5>
+                                    <p class="text-white mb-0 small">Organized collection of academic books</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="gallery-item position-relative overflow-hidden rounded-4">
+                            <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Lab"
+                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                            <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
+                                <div>
+                                    <h5 class="text-white fw-bold mb-2">Digital Lab</h5>
+                                    <p class="text-white mb-0 small">Computer workstations for research</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card border-0 h-100">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h4 class="fw-bold mb-4">Virtual Tour</h4>
+                        <p class="text-muted flex-grow-1">
+                            Can't visit in person? Take our virtual tour to explore all library spaces, 
+                            view collections, and learn about our services from the comfort of your home.
+                        </p>
+                        <div class="mt-4">
+                            <a href="/accounts/tour/" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="bi bi-camera-video me-2"></i>Start Virtual Tour
+                            </a>
+                            <p class="text-center text-muted small mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Interactive 360° views available
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events with Images -->
+<section class="py-5">
+    <div class="container-fluid">
+        <div class="row align-items-center mb-5">
+            <div class="col-md-8">
+                <h2 class="display-5 fw-bold mb-3">Upcoming Events & Workshops</h2>
+                <p class="lead text-muted">Join our academic programs and community events</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="/events/" class="btn btn-outline-primary btn-lg">
+                    View Calendar <i class="bi bi-calendar3 ms-2"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for event in upcoming_events|slice:":3" %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card event-card h-100 border-0 shadow-hover overflow-hidden">
+                    <div class="position-relative">
+                        {% if forloop.first %}
+                        <img src="{% static 'images/students_reading.png' %}" class="card-img-top" alt="{{ event.title }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% elif forloop.counter == 2 %}
+                        <img src="{% static 'images/librarybooks.jfif' %}" class="card-img-top" alt="{{ event.title }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <img src="{% static 'images/frontview.png' %}" class="card-img-top" alt="{{ event.title }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-primary px-3 py-2">
+                                {{ event.date|date:"M d" }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">{{ event.title|truncatechars:60 }}</h5>
+                        <div class="d-flex align-items-center text-muted mb-3">
+                            <i class="bi bi-clock me-2"></i>
+                            <small>{{ event.time|time:"g:i A" }}</small>
+                            <i class="bi bi-geo-alt ms-3 me-2"></i>
+                            <small>{{ event.location|truncatechars:20 }}</small>
+                        </div>
+                        <p class="text-muted mb-4">{{ event.description|truncatechars:120 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-primary">
+                                <i class="bi bi-person me-1"></i>
+                                {{ event.organizer.first_name }} {{ event.organizer.last_name }}
+                            </small>
+                            <a href="/events/event/{{ event.id }}/" class="btn btn-sm btn-outline-primary">
+                                Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <img src="{% static 'images/ramat_ai2.png' %}" alt="No Events" class="img-fluid mb-4" style="max-height: 150px;">
+                    <h4 class="text-muted mb-3">No Upcoming Events</h4>
+                    <p class="text-muted mb-4">Check back soon for scheduled workshops and programs.</p>
+                    <a href="/events/" class="btn btn-primary">
+                        <i class="bi bi-calendar-plus me-2"></i>View Event Calendar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Quick Search with Background Image -->
+<section class="py-5 position-relative" style="background: linear-gradient(rgba(10, 36, 114, 0.9), rgba(10, 36, 114, 0.95)), url('{% static "images/ramat_ai.png" %}') center/cover;">
+    <div class="container-fluid position-relative">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center text-white">
+                <h2 class="display-5 fw-bold mb-4">Find Your Next Read</h2>
+                <p class="lead mb-5 opacity-90">
+                    Search through our extensive collection of 50,000+ books, journals, and research materials
+                </p>
+                
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4">
+                        <form action="/catalog/" method="get" class="row g-3">
+                            <div class="col-lg-9">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-search text-primary"></i>
+                                    </span>
+                                    <input type="text" name="q" class="form-control border-0" 
+                                           placeholder="Search by title, author, ISBN, or keyword..."
+                                           aria-label="Search library catalog">
+                                    <button class="btn btn-primary" type="button">
+                                        <i class="bi bi-sliders"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <button type="submit" class="btn btn-dark btn-lg w-100 h-100">
+                                    Search <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <span class="text-muted me-3">Popular searches:</span>
+                                    <a href="/catalog/?q=computer+science" class="btn btn-sm btn-outline-primary">
+                                        Computer Science
+                                    </a>
+                                    <a href="/catalog/?q=medicine" class="btn btn-sm btn-outline-primary">
+                                        Medicine
+                                    </a>
+                                    <a href="/catalog/?q=engineering" class="btn btn-sm btn-outline-primary">
+                                        Engineering
+                                    </a>
+                                    <a href="/catalog/?q=literature" class="btn btn-sm btn-outline-primary">
+                                        Literature
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-book fs-1 text-gold me-3"></i>
+                            <div class="text-start">
+                                <h4 class="fw-bold mb-0">50,000+</h4>
+                                <p class="mb-0 opacity-75">Books Available</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-file-earmark-text fs-1 text-gold me-3"></i>
+                            <div class="text-start">
+                                <h4 class="fw-bold mb-0">10,000+</h4>
+                                <p class="mb-0 opacity-75">Research Papers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person fs-1 text-gold me-3"></i>
+                            <div class="text-start">
+                                <h4 class="fw-bold mb-0">5,000+</h4>
+                                <p class="mb-0 opacity-75">Active Members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Membership CTA with Images -->
+<section class="py-5">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-gradient border-0 shadow-lg overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-lg-6">
+                            <div class="card-body p-5 d-flex flex-column h-100">
+                                <h2 class="display-6 fw-bold mb-4">Join Our Academic Community</h2>
+                                <p class="lead text-muted mb-4 flex-grow-1">
+                                    Become a member today and unlock access to all our resources, 
+                                    services, and facilities. Membership is free for all University 
+                                    of Maiduguri students, faculty, and staff.
+                                </p>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle text-primary mt-1 me-3 fs-5"></i>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Free Membership</h6>
+                                                <p class="text-muted small mb-0">For all UNIMAID affiliates</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-check-circle text-primary mt-1 me-3 fs-5"></i>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Instant Access</h6>
+                                                <p class="text-muted small mb-0">Start using resources immediately</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-3">
+                                    {% if user.is_authenticated %}
+                                    <a href="/circulation/dashboard/" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-speedometer2 me-2"></i>Go to Your Dashboard
+                                    </a>
+                                    {% else %}
+                                    <a href="/accounts/register/" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-person-plus me-2"></i>Register Now - It's Free!
+                                    </a>
+                                    <a href="/accounts/login/" class="btn btn-outline-primary btn-lg">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Existing User? Login
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="h-100 position-relative">
+                                <img src="{% static 'images/students_reading.png' %}" alt="Library Community"
+                                     class="img-fluid h-100" style="object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 w-100 p-4 bg-gradient"
+                                     style="background: linear-gradient(transparent, rgba(0, 31, 63, 0.8));">
+                                    <h5 class="text-white fw-bold mb-2">Join 5,000+ Active Members</h5>
+                                    <p class="text-white mb-0 small">Students, faculty, and researchers</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Hero Carousel Styles */
+    #heroCarousel .carousel-item {
+        height: 600px;
+    }
+    
+    #heroCarousel .carousel-caption {
+        background: linear-gradient(90deg, rgba(10, 36, 114, 0.8) 0%, rgba(10, 36, 114, 0.6) 100%);
+        padding: 3rem;
+        border-radius: 20px;
+        margin: 2rem;
+    }
+    
+    #heroCarousel .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin: 0 5px;
+        border: 2px solid white;
+        background: transparent;
+    }
+    
+    #heroCarousel .carousel-indicators button.active {
+        background: white;
+    }
+    
+    #heroCarousel .carousel-control-prev,
+    #heroCarousel .carousel-control-next {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0 2rem;
+    }
+    
+    #heroCarousel .carousel-control-prev:hover,
+    #heroCarousel .carousel-control-next:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Welcome Message Styles */
+    .welcome-message .card {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    
+    .welcome-message blockquote {
+        position: relative;
+        padding-left: 2rem;
+        border-left: 4px solid var(--accent-blue);
+    }
+    
+    /* Stat Card Enhancement */
+    .stat-card {
+        background: var(--light-text);
+        border-radius: 20px;
+        border: 2px solid rgba(0, 31, 63, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        border-color: var(--accent-blue);
+        box-shadow: 0 25px 50px rgba(0, 31, 63, 0.2);
+    }
+    
+    .stat-card img {
+        transition: transform 0.4s ease;
+    }
+    
+    .stat-card:hover img {
+        transform: scale(1.1);
+    }
+    
+    /* Collection Cards */
+    .collection-card {
+        transition: all 0.3s ease;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-8px);
+    }
+    
+    .collection-card .badge {
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    
+    /* Gallery Styles */
+    .gallery-item {
+        transition: transform 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+        transform: scale(1.02);
+    }
+    
+    .gallery-overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .gallery-item:hover .gallery-overlay {
+        opacity: 1;
+    }
+    
+    /* Event Cards */
+    .event-card {
+        transition: all 0.3s ease;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .event-card .badge {
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    
+    /* Quick Search Section */
+    .text-gold {
+        color: var(--gold-accent);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        #heroCarousel .carousel-item {
+            height: 400px;
+        }
+        
+        #heroCarousel .carousel-caption {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    /* Image Loading Animation */
+    img {
+        opacity: 0;
+        animation: fadeInImage 0.5s ease forwards;
+    }
+    
+    @keyframes fadeInImage {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize hero carousel
+        const heroCarousel = new bootstrap.Carousel('#heroCarousel', {
+            interval: 5000,
+            wrap: true,
+            touch: true,
+            pause: 'hover'
+        });
+        
+        // Pause videos when not active
+        const carouselItems = document.querySelectorAll('#heroCarousel .carousel-item');
+        carouselItems.forEach((item, index) => {
+            const video = item.querySelector('video');
+            if (video) {
+                video.volume = 0.3;
+                video.playbackRate = 0.9;
+            }
+        });
+        
+        // Video control on slide change
+        document.getElementById('heroCarousel').addEventListener('slid.bs.carousel', function(event) {
+            const activeItem = event.relatedTarget;
+            const activeVideo = activeItem.querySelector('video');
+            const previousItem = event.fromElement;
+            const previousVideo = previousItem.querySelector('video');
+            
+            // Play active video
+            if (activeVideo) {
+                activeVideo.play().catch(e => console.log("Video autoplay prevented:", e));
+            }
+            
+            // Pause previous video
+            if (previousVideo) {
+                previousVideo.pause();
+            }
+        });
+        
+        // Animate stat numbers
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const originalText = stat.textContent;
+            if (originalText.includes('+')) {
+                const number = parseInt(originalText);
+                let current = 0;
+                const increment = number / 30;
+                const updateCounter = () => {
+                    if (current < number) {
+                        current += increment;
+                        stat.textContent = Math.ceil(current).toLocaleString() + '+';
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = originalText;
+                    }
+                };
+                
+                // Start counter when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(stat);
+            }
+        });
+        
+        // Image lazy loading
+        const images = document.querySelectorAll('img');
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        images.forEach(img => {
+            if (!img.src && img.dataset.src) {
+                imageObserver.observe(img);
+            }
+        });
+        
+        // Gallery hover effect
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        galleryItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transform = 'scale(1.02) translateY(-5px)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'scale(1) translateY(0)';
+            });
+        });
+        
+        // Collection card animation
+        const collectionCards = document.querySelectorAll('.collection-card');
+        collectionCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+        });
+        
+        // Search form enhancement
+        const searchForm = document.querySelector('form[action="/catalog/"]');
+        const searchInput = searchForm.querySelector('input[name="q"]');
+        const searchButton = searchForm.querySelector('button[type="button"]');
+        
+        if (searchButton) {
+            searchButton.addEventListener('click', () => {
+                searchForm.classList.toggle('expanded');
+                if (searchForm.classList.contains('expanded')) {
+                    // Show advanced search options
+                    const advancedSearch = document.createElement('div');
+                    advancedSearch.className = 'advanced-search mt-3';
+                    advancedSearch.innerHTML = `
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm">
+                                    <option>All Categories</option>
+                                    <option>Books</option>
+                                    <option>Journals</option>
+                                    <option>Theses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm">
+                                    <option>All Years</option>
+                                    <option>2024</option>
+                                    <option>2023</option>
+                                    <option>2022</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm">
+                                    <option>All Languages</option>
+                                    <option>English</option>
+                                    <option>French</option>
+                                    <option>Arabic</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    searchForm.appendChild(advancedSearch);
+                } else {
+                    const advancedSearch = searchForm.querySelector('.advanced-search');
+                    if (advancedSearch) {
+                        advancedSearch.remove();
+                    }
+                }
+            });
+        }
+        
+        // Auto-play hero videos on load
+        const firstVideo = document.querySelector('#heroCarousel .carousel-item.active video');
+        if (firstVideo) {
+            firstVideo.play().catch(e => {
+                console.log("First video autoplay prevented:", e);
+                // Fallback to play on user interaction
+                document.addEventListener('click', function playVideoOnce() {
+                    firstVideo.play();
+                    document.removeEventListener('click', playVideoOnce);
+                });
+            });
+        }
+        
+        // Add parallax effect to hero section
+        window.addEventListener('scroll', () => {
+            const heroSection = document.querySelector('.hero-section');
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.3;
+            
+            if (heroSection) {
+                heroSection.style.transform = `translate3d(0, ${rate}px, 0)`;
+            }
+        });
+        
+        // Smooth scroll for carousel indicators
+        document.querySelectorAll('.carousel-indicators button').forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                heroCarousel.to(index);
+            });
+        });
+    });
+    
+    // Page load animations
+    window.addEventListener('load', () => {
+        // Fade in body
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.8s ease';
+        
+        setTimeout(() => {
+            document.body.style.opacity = '1';
+        }, 200);
+        
+        // Animate elements sequentially
+        const animatedElements = document.querySelectorAll('.animate__animated');
+        animatedElements.forEach((el, index) => {
+            setTimeout(() => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            }, 100);
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

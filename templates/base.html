@@ -1,0 +1,1196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ramat Library - University of Maiduguri{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #0a2472;
+            --secondary-blue: #001f3f;
+            --accent-blue: #007bff;
+            --light-blue: #e6f2ff;
+            --gold-accent: #ffd700;
+            --silver-accent: #c0c0c0;
+            --dark-text: #212529;
+            --light-text: #f8f9fa;
+            --gray-bg: #f8f9fa;
+            --card-shadow: 0 10px 30px rgba(0, 31, 63, 0.15);
+            --transition-speed: 0.4s;
+            --gradient-1: linear-gradient(135deg, #0a2472 0%, #001f3f 100%);
+            --gradient-2: linear-gradient(135deg, #0a2472 0%, #3a86ff 100%);
+        }
+
+        [data-theme="dark"] {
+            --primary-blue: #1a365d;
+            --secondary-blue: #0f1c2d;
+            --accent-blue: #3a86ff;
+            --light-blue: #1a365d;
+            --gold-accent: #ffcc00;
+            --silver-accent: #a0a0a0;
+            --dark-text: #f8f9fa;
+            --light-text: #121212;
+            --gray-bg: #121212;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --gradient-1: linear-gradient(135deg, #1a365d 0%, #0f1c2d 100%);
+            --gradient-2: linear-gradient(135deg, #1a365d 0%, #3a86ff 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed) ease-in-out, 
+                       color var(--transition-speed) ease-in-out,
+                       border-color var(--transition-speed) ease-in-out,
+                       transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--gray-bg);
+            color: var(--dark-text);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(58, 134, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            padding: 1.2rem 0;
+            background: var(--gradient-1) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid var(--gold-accent);
+            box-shadow: 0 5px 20px rgba(0, 31, 63, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.8rem 0;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 5px 30px rgba(0, 31, 63, 0.3);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+
+        .nav-badge {
+            background: linear-gradient(45deg, var(--gold-accent), var(--silver-accent));
+            color: var(--secondary-blue);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem !important;
+            margin: 0 0.3rem;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .navbar-nav .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link.active {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .dropdown-menu {
+            border: none;
+            background: var(--light-text);
+            box-shadow: var(--card-shadow);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 10px !important;
+            animation: fadeInDown 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            margin: 0.2rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            color: var(--dark-text);
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light-blue);
+            transform: translateX(5px);
+            color: var(--primary-blue);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-container {
+            position: relative;
+            margin-right: 1.5rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+        }
+
+        .theme-toggle:hover::before {
+            transform: translateX(100%);
+            transition: transform 0.6s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--gold-accent);
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .theme-toggle i {
+            font-size: 1.4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .particle-1 { width: 100px; height: 100px; background: radial-gradient(circle, var(--accent-blue), transparent); top: 20%; left: 10%; }
+        .particle-2 { width: 150px; height: 150px; background: radial-gradient(circle, var(--gold-accent), transparent); bottom: 30%; right: 15%; }
+        .particle-3 { width: 80px; height: 80px; background: radial-gradient(circle, var(--primary-blue), transparent); top: 60%; left: 85%; }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(to bottom, var(--primary-blue), transparent);
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--gradient-1);
+            color: white;
+            padding: 4rem 0 2rem;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--gold-accent), var(--silver-accent), var(--gold-accent));
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .footer h5 {
+            color: var(--gold-accent);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--gold-accent);
+            border-radius: 2px;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer a:hover {
+            color: var(--gold-accent);
+            transform: translateX(5px);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .footer-links li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--gold-accent);
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 45px;
+            margin-right: 0.8rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--gold-accent), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .social-links a:hover::before {
+            opacity: 1;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .social-links a i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .copyright {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--light-text);
+            color: var(--dark-text);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 31, 63, 0.2);
+        }
+
+        .card-header {
+            background: var(--gradient-2);
+            color: white;
+            border-radius: 16px 16px 0 0 !important;
+            padding: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 8px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: var(--gradient-2);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 15px rgba(58, 134, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(58, 134, 255, 0.4);
+        }
+
+        .btn-outline-primary {
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--gradient-2);
+            border-color: transparent;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Alert Styles */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light-text);
+            color: var(--dark-text);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* User Dropdown */
+        .user-dropdown .dropdown-toggle {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--gold-accent);
+            transform: translateY(-2px);
+        }
+
+        .user-dropdown .dropdown-toggle::after {
+            transition: transform 0.3s ease;
+        }
+
+        .user-dropdown.show .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 3rem;
+            height: 3rem;
+            border: 0.3em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-rotate 0.75s linear infinite;
+        }
+
+        @keyframes spinner-rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 20px rgba(58, 134, 255, 0.4);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .navbar-brand img {
+                width: 35px;
+                height: 35px;
+                margin-right: 8px;
+            }
+            
+            .hero-section {
+                padding: 3rem 0 !important;
+            }
+            
+            .footer {
+                text-align: center;
+            }
+            
+            .footer h5::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar, .footer, .fab {
+                display: none !important;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #dee2e6;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Floating Particles -->
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" style="width: 60px; height: 60px; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">
+                Ramat Library
+                <span class="nav-badge">UNIMAID</span>
+            </a>
+
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">
+                            <i class="bi bi-house-door me-2"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-book me-2"></i>Catalog
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/catalog/">
+                                <i class="bi bi-search me-2"></i>Browse Books
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/catalog/authors/">
+                                <i class="bi bi-person-badge me-2"></i>Authors
+                            </a></li>
+                            <li><a class="dropdown-item" href="/catalog/genres/">
+                                <i class="bi bi-tags me-2"></i>Genres
+                            </a></li>
+                            <li><a class="dropdown-item" href="/catalog/publishers/">
+                                <i class="bi bi-building me-2"></i>Publishers
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-earmark-text me-2"></i>Repository
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/repository/">
+                                <i class="bi bi-archive me-2"></i>Browse Documents
+                            </a></li>
+                            <li><a class="dropdown-item" href="/repository/collections/">
+                                <i class="bi bi-folder2-open me-2"></i>Collections
+                            </a></li>
+                            {% if user.is_staff %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/repository/upload/">
+                                <i class="bi bi-upload me-2"></i>Upload Document
+                            </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog/">
+                            <i class="bi bi-newspaper me-2"></i>News & Blog
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/events/">
+                            <i class="bi bi-calendar-event me-2"></i>Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/staff_directory/">
+                            <i class="bi bi-people me-2"></i>Staff
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Section: Theme & User -->
+                <div class="d-flex align-items-center">
+                    <!-- Theme Toggle -->
+                    <div class="theme-toggle-container">
+                        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+                    </div>
+
+                    <!-- User Section -->
+                    <div class="user-dropdown">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle d-flex align-items-center" type="button" 
+                                    data-bs-toggle="dropdown">
+                                <div class="me-2">
+                                    <i class="bi bi-person-circle fs-4"></i>
+                                </div>
+                                <div class="text-start">
+                                    <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
+                                    <small class="text-white-50" style="font-size: 0.8rem;">
+                                        {{ user.membership_type|default:"Member" }}
+                                    </small>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/accounts/dashboard/">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="/accounts/profile/">
+                                    <i class="bi bi-person me-2"></i>My Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="/circulation/dashboard/">
+                                    <i class="bi bi-book me-2"></i>My Loans
+                                    <span class="badge bg-primary ms-2">{{ user.loans.filter|length }}</span>
+                                </a></li>
+                                <li><a class="dropdown-item" href="/circulation/patron_dashboard/">
+                                    <i class="bi bi-bell me-2"></i>Notifications
+                                    <span class="badge bg-danger ms-2">3</span>
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.is_staff %}
+                                <li><a class="dropdown-item" href="/admin/">
+                                    <i class="bi bi-gear me-2"></i>Admin Panel
+                                </a></li>
+                                <li><a class="dropdown-item" href="/circulation/staff-dashboard/">
+                                    <i class="bi bi-clipboard-data me-2"></i>Staff Dashboard
+                                </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/accounts/logout/">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <div class="btn-group">
+                            <a href="/accounts/login/" class="btn btn-outline-light me-2 animate__animated animate__pulse animate__infinite">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </a>
+                            <a href="/accounts/register/" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-2"></i>Join Now
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+            <div class="d-flex align-items-center">
+                {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="bi bi-exclamation-circle-fill fs-4 me-3 text-danger"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+                {% else %}
+                <i class="bi bi-info-circle-fill fs-4 me-3 text-info"></i>
+                {% endif %}
+                <div class="flex-grow-1">
+                    {{ message }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            {% block breadcrumb %}
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb animate__animated animate__fadeIn">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">
+                        <i class="bi bi-house-door me-1"></i>Home
+                    </a></li>
+                    {% block breadcrumb_items %}{% endblock %}
+                </ol>
+            </nav>
+            {% endblock %}
+
+            <!-- Page Header -->
+            {% block page_header %}
+            <div class="row mb-5 animate__animated animate__fadeInUp">
+                <div class="col">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-book fs-3 text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="display-4 fw-bold mb-2">{% block page_title %}Welcome to Ramat Library{% endblock %}</h1>
+                            <p class="lead text-muted">{% block page_subtitle %}University of Maiduguri's Premier Academic Resource Center{% endblock %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+
+            <!-- Main Content Block -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">
+        <i class="bi bi-arrow-up"></i>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <!-- About Section -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="mb-4">
+                        <h5>Ramat Library</h5>
+                        <p class="mb-3">Supporting teaching, learning and research by providing timely access to quality print and electronic resources, information services, and skills training.</p>
+                        <div class="d-flex align-items-center">
+                            <img src="{% static 'images/logo.png' %}" alt="Library Seal" class="img-fluid me-3" style="max-height: 80px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                            <div>
+                                <h6 class="text-gold mb-1">University of Maiduguri</h6>
+                                <small>Established 1975</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h5>Quick Access</h5>
+                    <ul class="footer-links">
+                        <li><a href="/catalog/"><i class="bi bi-chevron-right me-1"></i>Browse Catalog</a></li>
+                        <li><a href="/repository/"><i class="bi bi-chevron-right me-1"></i>Institutional Repository</a></li>
+                        <li><a href="/blog/"><i class="bi bi-chevron-right me-1"></i>Library News</a></li>
+                        <li><a href="/events/"><i class="bi bi-chevron-right me-1"></i>Upcoming Events</a></li>
+                        <li><a href="/accounts/staff_directory/"><i class="bi bi-chevron-right me-1"></i>Meet Our Staff</a></li>
+                    </ul>
+                </div>
+
+                <!-- Services -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Our Services</h5>
+                    <ul class="footer-links">
+                        <li><a href="/circulation/"><i class="bi bi-chevron-right me-1"></i>Borrowing & Loans</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Research Assistance</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Interlibrary Loan</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Study Room Booking</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right me-1"></i>Digital Resources</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact & Social -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Connect With Us</h5>
+                    <div class="mb-4">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="bi bi-geo-alt fs-5 me-3 text-gold"></i>
+                            <div>
+                                <h6 class="text-white mb-1">Location</h6>
+                                <p class="mb-0" style="opacity: 0.9;">University of Maiduguri, Borno State, Nigeria</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="bi bi-telephone fs-5 me-3 text-gold"></i>
+                            <div>
+                                <h6 class="text-white mb-1">Phone</h6>
+                                <p class="mb-0" style="opacity: 0.9;">+234 80166 253 232</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-envelope fs-5 me-3 text-gold"></i>
+                            <div>
+                                <h6 class="text-white mb-1">Email</h6>
+                                <p class="mb-0" style="opacity: 0.9;">ramatlibrary@unimaid.edu.ng</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Links -->
+                    <div class="social-links d-flex flex-wrap">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="copyright">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start mb-3 mb-md-0">
+                        <p class="mb-0">
+                            &copy; 2024 <strong>Ramat Library</strong>, University of Maiduguri. 
+                            <span class="d-md-inline d-none">|</span> 
+                            <span class="d-block d-md-inline mt-1 mt-md-0">All rights reserved.</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="#" class="me-3">Privacy Policy</a>
+                        <a href="#" class="me-3">Terms of Use</a>
+                        <a href="/accounts/contact/">Contact Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        // Enhanced Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        const body = document.body;
+        
+        // Check for saved theme or system preference
+        const getPreferredTheme = () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) return savedTheme;
+            
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        };
+        
+        // Apply theme
+        const applyTheme = (theme) => {
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeIcon(theme);
+            dispatchThemeChangeEvent(theme);
+        };
+        
+        // Update icon based on theme
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-sun-fill';
+                themeIcon.title = 'Switch to light mode';
+                themeToggle.setAttribute('aria-label', 'Switch to light mode');
+            } else {
+                themeIcon.className = 'bi bi-moon-fill';
+                themeIcon.title = 'Switch to dark mode';
+                themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+            }
+        }
+        
+        // Dispatch custom event for theme change
+        function dispatchThemeChangeEvent(theme) {
+            const event = new CustomEvent('themeChange', { detail: { theme } });
+            window.dispatchEvent(event);
+        }
+        
+        // Initialize theme
+        applyTheme(getPreferredTheme());
+        
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // Add click animation
+            themeToggle.style.transform = 'rotate(360deg) scale(0.8)';
+            setTimeout(() => {
+                themeToggle.style.transform = '';
+            }, 300);
+            
+            applyTheme(newTheme);
+        });
+        
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Update URL without page reload
+                    history.pushState(null, null, targetId);
+                }
+            });
+        });
+
+        // Auto-hide alerts with fade-out animation
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.classList.add('animate__fadeOut');
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 500);
+            });
+        }, 5000);
+
+        // Floating particles animation
+        function animateParticles() {
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(particle => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Random animation
+                particle.animate([
+                    { transform: 'scale(1) rotate(0deg)', opacity: 0.1 },
+                    { transform: `scale(${1 + Math.random()}) rotate(${Math.random() * 360}deg)`, opacity: 0.2 },
+                    { transform: 'scale(1) rotate(0deg)', opacity: 0.1 }
+                ], {
+                    duration: Math.random() * 10000 + 5000,
+                    iterations: Infinity,
+                    easing: 'ease-in-out'
+                });
+            });
+        }
+        
+        // Animate particles on load
+        window.addEventListener('load', animateParticles);
+
+        // FAB visibility
+        const fab = document.querySelector('.fab');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                fab.style.opacity = '1';
+                fab.style.transform = 'translateY(0)';
+            } else {
+                fab.style.opacity = '0';
+                fab.style.transform = 'translateY(20px)';
+            }
+        });
+
+        // Page load animation
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+            
+            // Animate elements with delay
+            const animatedElements = document.querySelectorAll('.animate__animated');
+            animatedElements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + T to toggle theme
+            if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+                e.preventDefault();
+                themeToggle.click();
+            }
+            
+            // Escape to close dropdowns
+            if (e.key === 'Escape') {
+                const openDropdowns = document.querySelectorAll('.dropdown.show');
+                openDropdowns.forEach(dropdown => {
+                    bootstrap.Dropdown.getInstance(dropdown.querySelector('.dropdown-toggle')).hide();
+                });
+            }
+        });
+
+        // Performance optimization
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Recalculate particles on resize
+                animateParticles();
+            }, 250);
+        });
+
+        // Print functionality
+        const printButton = document.createElement('button');
+        printButton.innerHTML = '<i class="bi bi-printer"></i>';
+        printButton.className = 'btn btn-outline-light position-fixed d-none d-md-block';
+        printButton.style.bottom = '2rem';
+        printButton.style.left = '2rem';
+        printButton.style.zIndex = '100';
+        printButton.onclick = () => window.print();
+        document.body.appendChild(printButton);
+    </script>
+
+    <!-- Page-specific scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
