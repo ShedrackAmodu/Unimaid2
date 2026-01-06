@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registration Successful - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'events:event_list' %}" class="text-decoration-none">Events</a></li>
+<li class="breadcrumb-item"><a href="{% url 'events:event_detail' event.pk %}" class="text-decoration-none">{{ event.title|truncatechars:20 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Registration Complete</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+                <!-- Success Icon -->
+                <div class="mb-4">
+                    <div class="success-icon mx-auto">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                </div>
+                
+                <!-- Success Message -->
+                <h1 class="display-5 fw-bold text-success mb-3">Registration Successful!</h1>
+                <p class="lead text-muted mb-4">
+                    You have successfully registered for
+                    <strong class="text-primary">"{{ event.title }}"</strong>
+                </p>
+                
+                <!-- Event Summary -->
+                <div class="card border-primary mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar text-primary fs-4 me-3"></i>
+                                    <div class="text-start">
+                                        <small class="text-muted d-block">Date</small>
+                                        <strong>{{ event.date|date:"F j, Y" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-clock text-primary fs-4 me-3"></i>
+                                    <div class="text-start">
+                                        <small class="text-muted d-block">Time</small>
+                                        <strong>{{ event.time|time:"g:i A" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt text-primary fs-4 me-3"></i>
+                                    <div class="text-start">
+                                        <small class="text-muted d-block">Location</small>
+                                        <strong>{{ event.location }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person text-primary fs-4 me-3"></i>
+                                    <div class="text-start">
+                                        <small class="text-muted d-block">Registration ID</small>
+                                        <strong>#{{ registration_id|default:"N/A" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Next Steps -->
+                <div class="card border-0 bg-light mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-check2-square me-2"></i>What Happens Next?
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <span class="badge bg-primary rounded-circle p-2">1</span>
+                                    </div>
+                                    <div class="text-start">
+                                        <h6 class="fw-bold mb-1">Email Confirmation</h6>
+                                        <p class="small text-muted mb-0">Check your email for registration details</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <span class="badge bg-primary rounded-circle p-2">2</span>
+                                    </div>
+                                    <div class="text-start">
+                                        <h6 class="fw-bold mb-1">Event Reminder</h6>
+                                        <p class="small text-muted mb-0">You'll receive a reminder before the event</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <span class="badge bg-primary rounded-circle p-2">3</span>
+                                    </div>
+                                    <div class="text-start">
+                                        <h6 class="fw-bold mb-1">Check In</h6>
+                                        <p class="small text-muted mb-0">Bring your ID for check-in at the event</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-3 d-md-flex justify-content-center mt-4">
+                    <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-primary px-4 py-3">
+                        <i class="bi bi-calendar-event me-2"></i>View Event Details
+                    </a>
+                    
+                    <a href="{% url 'events:event_list' %}" class="btn btn-outline-primary px-4 py-3">
+                        <i class="bi bi-calendar-week me-2"></i>Browse More Events
+                    </a>
+                    
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary px-4 py-3">
+                        <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                    </a>
+                </div>
+                
+                <!-- Add to Calendar -->
+                <div class="mt-4">
+                    <button class="btn btn-outline-success" id="addToCalendarBtn">
+                        <i class="bi bi-calendar-plus me-2"></i>Add to Calendar
+                    </button>
+                </div>
+                
+                <!-- Share Registration -->
+                <div class="mt-4 pt-4 border-top">
+                    <p class="text-muted mb-3">Share this event with friends:</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm" id="copyLinkBtn">
+                            <i class="bi bi-link-45deg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Important Information -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Important Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <div class="d-flex">
+                        <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Please Note:</h6>
+                            <ul class="mb-0">
+                                <li>Arrive 15 minutes before the event for check-in</li>
+                                <li>Bring your student/staff ID for verification</li>
+                                <li>If you can no longer attend, please cancel your registration</li>
+                                <li>Contact the organizer if you have any questions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-muted mb-0">
+                        Need to cancel? 
+                        <a href="{% url 'events:event_detail' event.pk %}" class="text-decoration-none">
+                            Go to the event page
+                        </a> 
+                        and click "Cancel Registration"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .success-icon {
+        width: 120px;
+        height: 120px;
+        background: rgba(40, 167, 69, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: successPulse 2s infinite;
+    }
+    
+    @keyframes successPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+        }
+    }
+    
+    .badge.rounded-circle {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add to calendar functionality
+        const addToCalendarBtn = document.getElementById('addToCalendarBtn');
+        if (addToCalendarBtn) {
+            addToCalendarBtn.addEventListener('click', function() {
+                // Create calendar event data
+                const eventData = {
+                    title: '{{ event.title|escapejs }}',
+                    start: '{{ event.date|date:"Y-m-d" }}T{{ event.time|time:"H:i:s" }}',
+                    location: '{{ event.location|escapejs }}',
+                    description: '{{ event.description|truncatechars:100|escapejs }}'
+                };
+                
+                // Generate iCal content
+                const icalContent = [
+                    'BEGIN:VCALENDAR',
+                    'VERSION:2.0',
+                    'BEGIN:VEVENT',
+                    `SUMMARY:${eventData.title}`,
+                    `DTSTART:${eventData.start}`,
+                    `LOCATION:${event.location}`,
+                    `DESCRIPTION:${event.description}`,
+                    'END:VEVENT',
+                    'END:VCALENDAR'
+                ].join('\n');
+                
+                // Create download link
+                const blob = new Blob([icalContent], { type: 'text/calendar' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '{{ event.title|slugify }}-event.ics';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Show success message
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-check-circle me-2"></i>Added to Calendar!';
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-success');
+                }, 2000);
+            });
+        }
+        
+        // Copy link functionality
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const url = window.location.href.replace('/success/', '/');
+                
+                navigator.clipboard.writeText(url).then(() => {
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="bi bi-check"></i>';
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-secondary');
+                    }, 2000);
+                });
+            });
+        }
+        
+        // Share buttons
+        const shareButtons = document.querySelectorAll('.btn-outline-primary, .btn-outline-info, .btn-outline-success');
+        shareButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const platform = this.querySelector('i').className.split('-')[1];
+                const url = window.location.href.replace('/success/', '/');
+                const title = 'I just registered for: {{ event.title|escapejs }}';
+                
+                let shareUrl = '';
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                        break;
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
+                        break;
+                }
+                
+                if (shareUrl) {
+                    window.open(shareUrl, '_blank', 'width=600,height=400');
+                }
+            });
+        });
+        
+        // Auto-redirect after 30 seconds
+        setTimeout(() => {
+            const timerElement = document.createElement('div');
+            timerElement.className = 'alert alert-info mt-3';
+            timerElement.innerHTML = `
+                <i class="bi bi-info-circle me-2"></i>
+                You will be redirected to the event page in <span id="countdown">30</span> seconds
+            `;
+            
+            document.querySelector('.card-body').appendChild(timerElement);
+            
+            let seconds = 30;
+            const countdownElement = document.getElementById('countdown');
+            const countdownInterval = setInterval(() => {
+                seconds--;
+                countdownElement.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = "{% url 'events:event_detail' event.pk %}";
+                }
+            }, 1000);
+        }, 10000); // Start countdown after 10 seconds
+        
+        // Print registration confirmation
+        const printBtn = document.createElement('button');
+        printBtn.className = 'btn btn-outline-secondary mt-3';
+        printBtn.innerHTML = '<i class="bi bi-printer me-2"></i>Print Confirmation';
+        printBtn.onclick = () => window.print();
+        document.querySelector('.text-center').appendChild(printBtn);
+        
+        // Print styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @media print {
+                .navbar, .footer, .fab, .btn, .alert {
+                    display: none !important;
+                }
+                
+                .card {
+                    box-shadow: none !important;
+                    border: 1px solid #dee2e6 !important;
+                }
+                
+                .success-icon {
+                    animation: none !important;
+                }
+                
+                body {
+                    background: white !important;
+                    color: black !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}
