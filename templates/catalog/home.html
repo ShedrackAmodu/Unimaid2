@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Library Catalog - Browse Collections{% endblock %}
 
@@ -12,9 +13,9 @@
     <div class="col-12">
         <!-- Catalog Hero Section -->
         <div class="position-relative overflow-hidden rounded-4" style="height: 400px;">
-            <div class="position-absolute w-100 h-100 d-flex align-items-center" 
-                 style="background: linear-gradient(90deg, rgba(10, 36, 114, 0.85) 0%, rgba(10, 36, 114, 0.7) 100%), 
-                        url('images/librarybooks.jfif') center/cover;">
+            <div class="position-absolute w-100 h-100 d-flex align-items-center"
+                 style="background: linear-gradient(90deg, rgba(10, 36, 114, 0.85) 0%, rgba(10, 36, 114, 0.7) 100%),
+                        url('{% static "images/librarybooks.jfif" %}') center/cover;">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-8">
@@ -81,7 +82,7 @@
                 <div class="row g-0 h-100">
                     <div class="col-md-4">
                         <div class="position-relative h-100">
-                            <img src="images/librarybooks.jfif" class="img-fluid rounded-start h-100" 
+                            <img src="{% static 'images/librarybooks.jfif' %}" class="img-fluid rounded-start h-100"
                                  alt="{{ book.title }}" style="object-fit: cover;">
                             {% if book.is_available %}
                             <span class="position-absolute top-0 start-0 m-2 badge bg-success">
@@ -108,7 +109,17 @@
                                     <i class="bi bi-building me-1"></i>{{ book.publisher.name|truncatechars:30 }}
                                 </p>
                                 <div class="mb-3">
+                                    {% if book.faculty %}
+                                    <span class="badge bg-primary">{{ book.faculty.name }}</span>
+                                    {% endif %}
+                                    {% if book.department %}
+                                    <span class="badge bg-info">{{ book.department.name }}</span>
+                                    {% endif %}
+                                    {% if book.topic %}
+                                    <span class="badge bg-success">{{ book.topic.name }}</span>
+                                    {% elif book.genre %}
                                     <span class="badge bg-light text-dark">{{ book.genre.name }}</span>
+                                    {% endif %}
                                     {% if book.publication_date.year >= 2023 %}
                                     <span class="badge bg-info">New</span>
                                     {% endif %}
@@ -136,7 +147,7 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <img src="images/ramat_ai2.png" alt="No Books" class="img-fluid mb-4" style="max-height: 150px;">
+            <img src="{% static 'images/ramat_ai2.png' %}" alt="No Books" class="img-fluid mb-4" style="max-height: 150px;">
             <h4 class="text-muted mb-3">No Featured Books Available</h4>
             <p class="text-muted mb-4">Our collection is being updated. Please check back soon.</p>
         </div>
@@ -197,82 +208,41 @@
     </div>
 </section>
 
-<!-- Browse by Category -->
+<!-- Browse by Faculty & Department -->
 <section class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="display-5 fw-bold">Browse by Category</h2>
-        <a href="/catalog/genres/" class="btn btn-outline-primary">
-            All Categories <i class="bi bi-arrow-right ms-2"></i>
+        <h2 class="display-5 fw-bold">Browse by Faculty & Department</h2>
+        <a href="/catalog/faculties/" class="btn btn-outline-primary">
+            All Faculties <i class="bi bi-arrow-right ms-2"></i>
         </a>
     </div>
-    
+
     <div class="row g-4">
-        {% for genre in popular_genres|slice:":6" %}
+        {% for faculty in faculties|slice:":6" %}
         <div class="col-lg-4 col-md-6">
             <div class="card category-card border-0 shadow-hover overflow-hidden">
                 <div class="row g-0 h-100">
                     <div class="col-md-4 d-none d-md-block">
                         <div class="h-100 position-relative">
-                            <img src="images/librarybooks.jfif" class="img-fluid h-100" 
-                                 alt="{{ genre.name }}" style="object-fit: cover; filter: brightness(0.8);">
+                            <img src="{% static 'images/librarybooks.jfif' %}" class="img-fluid h-100"
+                                 alt="{{ faculty.name }}" style="object-fit: cover; filter: brightness(0.8);">
                             <div class="position-absolute top-50 start-50 translate-middle text-center">
-                                <span class="badge bg-primary fs-6">{{ genre.books.count|default:"0" }}</span>
+                                <span class="badge bg-primary fs-6">{{ faculty.books.count|default:"0" }}</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div class="card-body p-4">
-                            <h5 class="fw-bold mb-3">{{ genre.name }}</h5>
+                            <h5 class="fw-bold mb-3">{{ faculty.name }}</h5>
                             <p class="text-muted small mb-4">
-                                {{ genre.description|truncatechars:100|default:"Explore our collection in this category" }}
+                                {{ faculty.description|truncatechars:100|default:"Academic faculty with specialized departments" }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">{{ genre.books.count|default:"0" }} books</small>
-                                <a href="/catalog/genres/{{ genre.id }}/" class="btn btn-sm btn-outline-primary">
+                                <small class="text-muted">{{ faculty.books.count|default:"0" }} books</small>
+                                <a href="/catalog/faculties/{{ faculty.id }}/" class="btn btn-sm btn-outline-primary">
                                     Browse <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card category-card border-0 shadow-hover">
-                        <div class="card-body p-4 text-center">
-                            <i class="bi bi-bezier2 fs-1 text-primary mb-3"></i>
-                            <h5 class="fw-bold mb-2">Science & Technology</h5>
-                            <p class="text-muted small mb-3">Physics, Chemistry, Engineering, Computing</p>
-                            <a href="/catalog/books/?genre=science" class="btn btn-sm btn-outline-primary">
-                                Explore 12,000+ Books
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card category-card border-0 shadow-hover">
-                        <div class="card-body p-4 text-center">
-                            <i class="bi bi-pen fs-1 text-primary mb-3"></i>
-                            <h5 class="fw-bold mb-2">Arts & Humanities</h5>
-                            <p class="text-muted small mb-3">Literature, Philosophy, History, Fine Arts</p>
-                            <a href="/catalog/books/?genre=arts" class="btn btn-sm btn-outline-primary">
-                                Explore 8,500+ Books
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card category-card border-0 shadow-hover">
-                        <div class="card-body p-4 text-center">
-                            <i class="bi bi-people fs-1 text-primary mb-3"></i>
-                            <h5 class="fw-bold mb-2">Social Sciences</h5>
-                            <p class="text-muted small mb-3">Economics, Sociology, Psychology, Politics</p>
-                            <a href="/catalog/books/?genre=social_science" class="btn btn-sm btn-outline-primary">
-                                Explore 6,800+ Books
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -296,7 +266,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="card new-book-card border-0 shadow-hover">
                 <div class="position-relative">
-                    <img src="images/librarybooks.jfif" class="card-img-top" alt="{{ book.title }}" 
+                    <img src="{% static 'images/librarybooks.jfif' %}" class="card-img-top" alt="{{ book.title }}"
                          style="height: 200px; object-fit: cover;">
                     <span class="position-absolute top-0 end-0 m-2 badge bg-danger">New</span>
                 </div>
@@ -441,7 +411,7 @@
     <div class="card bg-gradient border-0 shadow-lg overflow-hidden">
         <div class="row g-0">
             <div class="col-lg-6 d-none d-lg-block">
-                <img src="images/students_reading.png" alt="Student Reading" 
+                <img src="{% static 'images/students_reading.png' %}" alt="Student Reading"
                      class="img-fluid h-100" style="object-fit: cover;">
             </div>
             <div class="col-lg-6">

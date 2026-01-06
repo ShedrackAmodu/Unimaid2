@@ -61,29 +61,71 @@
                     <!-- Filter Controls -->
                     <div class="col-lg-7">
                         <div class="row g-2">
-                            <div class="col-md-4">
-                                <select class="form-select filter-select" name="genre" onchange="updateFilter(this)">
-                                    <option value="">All Genres</option>
-                                    {% for genre in genres %}
-                                    <option value="{{ genre.id }}" 
-                                            {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ genre.name }}
+                            <!-- Faculty Filter -->
+                            <div class="col-md-3">
+                                <select class="form-select filter-select" name="faculty" onchange="updateFilter(this)">
+                                    <option value="">All Faculties</option>
+                                    {% for faculty in faculties %}
+                                    <option value="{{ faculty.id }}"
+                                            {% if request.GET.faculty == faculty.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ faculty.name|truncatechars:15 }}
                                     </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <!-- Department Filter -->
+                            <div class="col-md-3">
+                                <select class="form-select filter-select" name="department" onchange="updateFilter(this)">
+                                    <option value="">All Departments</option>
+                                    {% for department in departments %}
+                                    <option value="{{ department.id }}"
+                                            {% if request.GET.department == department.id|stringformat:"i" %}selected{% endif %}
+                                            data-faculty="{{ department.faculty.id }}">
+                                        {{ department.name|truncatechars:15 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Topic Filter -->
+                            <div class="col-md-3">
+                                <select class="form-select filter-select" name="topic" onchange="updateFilter(this)">
+                                    <option value="">All Topics</option>
+                                    {% for topic in topics %}
+                                    <option value="{{ topic.id }}"
+                                            {% if request.GET.topic == topic.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ topic.name|truncatechars:15 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Genre Filter -->
+                            <div class="col-md-3">
+                                <select class="form-select filter-select" name="genre" onchange="updateFilter(this)">
+                                    <option value="">All Genres</option>
+                                    {% for genre in genres %}
+                                    <option value="{{ genre.id }}"
+                                            {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ genre.name|truncatechars:15 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <!-- Author Filter -->
+                            <div class="col-md-6">
                                 <select class="form-select filter-select" name="author" onchange="updateFilter(this)">
                                     <option value="">All Authors</option>
                                     {% for author in authors %}
                                     <option value="{{ author.id }}"
                                             {% if request.GET.author == author.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ author.name|truncatechars:20 }}
+                                        {{ author.name|truncatechars:25 }}
                                     </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <!-- Sort Filter -->
+                            <div class="col-md-6">
                                 <select class="form-select filter-select" name="sort" onchange="updateFilter(this)">
                                     <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>
                                         Sort by Title
@@ -104,12 +146,12 @@
                 </div>
                 
                 <!-- Active Filters -->
-                {% if request.GET.q or request.GET.genre or request.GET.author %}
+                {% if request.GET.q or request.GET.faculty or request.GET.department or request.GET.topic or request.GET.genre or request.GET.author %}
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="d-flex flex-wrap align-items-center">
                             <span class="text-muted me-3">Active filters:</span>
-                            
+
                             {% if request.GET.q %}
                             <span class="badge bg-primary me-2 mb-2">
                                 Search: "{{ request.GET.q }}"
@@ -118,25 +160,52 @@
                                 </a>
                             </span>
                             {% endif %}
-                            
-                            {% if request.GET.genre and selected_genre %}
+
+                            {% if request.GET.faculty and selected_faculty %}
+                            <span class="badge bg-primary me-2 mb-2">
+                                Faculty: {{ selected_faculty.name }}
+                                <a href="?{{ request.GET.urlencode|remove_param:'faculty' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+
+                            {% if request.GET.department and selected_department %}
+                            <span class="badge bg-info me-2 mb-2">
+                                Department: {{ selected_department.name }}
+                                <a href="?{{ request.GET.urlencode|remove_param:'department' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+
+                            {% if request.GET.topic and selected_topic %}
                             <span class="badge bg-success me-2 mb-2">
+                                Topic: {{ selected_topic.name }}
+                                <a href="?{{ request.GET.urlencode|remove_param:'topic' }}" class="text-white ms-2">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                            {% endif %}
+
+                            {% if request.GET.genre and selected_genre %}
+                            <span class="badge bg-warning me-2 mb-2">
                                 Genre: {{ selected_genre.name }}
                                 <a href="?{{ request.GET.urlencode|remove_param:'genre' }}" class="text-white ms-2">
                                     <i class="bi bi-x"></i>
                                 </a>
                             </span>
                             {% endif %}
-                            
+
                             {% if request.GET.author and selected_author %}
-                            <span class="badge bg-warning me-2 mb-2">
+                            <span class="badge bg-secondary me-2 mb-2">
                                 Author: {{ selected_author.name|truncatechars:20 }}
                                 <a href="?{{ request.GET.urlencode|remove_param:'author' }}" class="text-white ms-2">
                                     <i class="bi bi-x"></i>
                                 </a>
                             </span>
                             {% endif %}
-                            
+
                             {% if request.GET.sort and request.GET.sort != "title" %}
                             <span class="badge bg-info me-2 mb-2">
                                 Sorted: {{ request.GET.sort|title }}
@@ -145,8 +214,8 @@
                                 </a>
                             </span>
                             {% endif %}
-                            
-                            {% if request.GET.q or request.GET.genre or request.GET.author %}
+
+                            {% if request.GET.q or request.GET.faculty or request.GET.department or request.GET.topic or request.GET.genre or request.GET.author %}
                             <a href="/catalog/books/" class="btn btn-sm btn-outline-danger mb-2">
                                 <i class="bi bi-x-circle me-1"></i>Clear All
                             </a>
