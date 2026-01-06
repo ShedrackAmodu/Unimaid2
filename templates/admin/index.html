@@ -1,0 +1,441 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_modify admin_urls %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+/* Custom dashboard styles */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 31, 63, 0.15);
+}
+
+.dashboard-card.stat-card {
+    text-align: center;
+}
+
+.dashboard-card.stat-card .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 10px 0;
+    background: var(--gradient-2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-card.stat-card .stat-label {
+    color: var(--dark-text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.dashboard-card.stat-card .stat-icon {
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    margin-bottom: 15px;
+}
+
+.dashboard-card .card-header {
+    background: var(--gradient-2);
+    color: white;
+    padding: 15px 20px;
+    margin: -25px -25px 20px -25px;
+    border-radius: 15px 15px 0 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.dashboard-card .card-body {
+    padding: 0;
+}
+
+.dashboard-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-card ul li {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-card ul li:last-child {
+    border-bottom: none;
+}
+
+.dashboard-card ul li a {
+    color: var(--dark-text);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex-grow: 1;
+}
+
+.dashboard-card ul li a:hover {
+    color: var(--accent-blue);
+    transform: translateX(5px);
+}
+
+.dashboard-card ul li .badge {
+    background: var(--gradient-2);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.quick-action-btn {
+    background: var(--light-blue);
+    border: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quick-action-btn:hover {
+    background: var(--accent-blue);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(58, 134, 255, 0.4);
+}
+
+.quick-action-btn.primary {
+    background: var(--gradient-2);
+    color: white;
+    border: none;
+}
+
+.module {
+    margin-bottom: 25px;
+}
+
+.module h2 {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    margin: 0 !important;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+}
+
+.module table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.module table th {
+    background: var(--light-blue);
+    color: var(--primary-blue);
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 31, 63, 0.1);
+}
+
+.module table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.module table tr:hover td {
+    background: var(--light-blue);
+}
+
+.dashboard-welcome {
+    background: var(--gradient-1);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-welcome h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.dashboard-welcome p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.dashboard-welcome .welcome-badge {
+    background: linear-gradient(45deg, var(--gold-accent), var(--silver-accent));
+    color: var(--secondary-blue);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-welcome h1 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-welcome">
+    <h1>Welcome to Ramat Library Admin</h1>
+    <p>University of Maiduguri's Library Management System</p>
+    <span class="welcome-badge">Administrator Dashboard</span>
+</div>
+
+<div class="dashboard-container">
+    <!-- Statistics Cards -->
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-people stat-icon"></i>
+        <div class="stat-number">{{ user_count|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+        <a href="{% url 'admin:accounts_libraryuser_changelist' %}" class="quick-action-btn">Manage Users</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-book stat-icon"></i>
+        <div class="stat-number">{{ book_count|default:"0" }}</div>
+        <div class="stat-label">Books in Catalog</div>
+        <a href="{% url 'admin:catalog_book_changelist' %}" class="quick-action-btn">View Books</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-file-earmark-text stat-icon"></i>
+        <div class="stat-number">{{ document_count|default:"0" }}</div>
+        <div class="stat-label">Research Documents</div>
+        <a href="{% url 'admin:repository_document_changelist' %}" class="quick-action-btn">View Documents</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-calendar-event stat-icon"></i>
+        <div class="stat-number">{{ event_count|default:"0" }}</div>
+        <div class="stat-label">Upcoming Events</div>
+        <a href="{% url 'admin:events_event_changelist' %}" class="quick-action-btn">Manage Events</a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions
+        </div>
+        <div class="card-body">
+            <div class="quick-actions">
+                <a href="{% url 'admin:accounts_libraryuser_add' %}" class="quick-action-btn primary">
+                    <i class="bi bi-person-plus"></i> Add User
+                </a>
+                <a href="{% url 'admin:catalog_book_add' %}" class="quick-action-btn">
+                    <i class="bi bi-book-plus"></i> Add Book
+                </a>
+                <a href="{% url 'admin:blog_blogpost_add' %}" class="quick-action-btn">
+                    <i class="bi bi-newspaper"></i> Create Post
+                </a>
+                <a href="{% url 'admin:repository_document_add' %}" class="quick-action-btn">
+                    <i class="bi bi-upload"></i> Upload Document
+                </a>
+                <a href="{% url 'admin:circulation_loan_changelist' %}" class="quick-action-btn">
+                    <i class="bi bi-arrow-left-right"></i> Manage Loans
+                </a>
+                <a href="{% url 'admin:events_event_add' %}" class="quick-action-btn">
+                    <i class="bi bi-calendar-plus"></i> Schedule Event
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-clock-history me-2"></i>Recent Activity
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for action in recent_actions|slice:":5" %}
+                <li>
+                    <a href="{{ action.get_admin_url }}">
+                        <i class="bi bi-{{ action.get_icon }} me-2"></i>
+                        {{ action.description }}
+                    </a>
+                    <span class="badge">{{ action.timestamp|timesince }} ago</span>
+                </li>
+                {% empty %}
+                <li>No recent activity</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-shield-check me-2"></i>System Status
+        </div>
+        <div class="card-body">
+            <ul>
+                <li>
+                    <span>Database</span>
+                    <span class="badge" style="background: #28a745;">Healthy</span>
+                </li>
+                <li>
+                    <span>Storage</span>
+                    <span class="badge" style="background: #28a745;">{{ storage_usage|default:"65%" }}</span>
+                </li>
+                <li>
+                    <span>Active Users</span>
+                    <span class="badge" style="background: var(--accent-blue);">{{ active_users|default:"0" }}</span>
+                </li>
+                <li>
+                    <span>Overdue Loans</span>
+                    <span class="badge" style="background: #dc3545;">{{ overdue_loans|default:"0" }}</span>
+                </li>
+                <li>
+                    <span>Pending Reservations</span>
+                    <span class="badge" style="background: #ffc107;">{{ pending_reservations|default:"0" }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Models -->
+<div style="margin-top: 40px;">
+    <div class="dashboard-container">
+        {% for app in app_list %}
+        <div class="dashboard-card">
+            <div class="card-header">
+                <i class="bi bi-{{ app.icon|default:'folder' }} me-2"></i>{{ app.name }}
+            </div>
+            <div class="card-body">
+                <table>
+                    {% for model in app.models %}
+                    <tr>
+                        <td>
+                            <a href="{{ model.admin_url }}" class="model-link">
+                                <i class="bi bi-{{ model.icon|default:'file-text' }} me-2"></i>
+                                {{ model.name }}
+                            </a>
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="badge">{{ model.count }}</span>
+                        </td>
+                        <td style="text-align: right; width: 100px;">
+                            {% if model.add_url %}
+                            <a href="{{ model.add_url }}" class="addlink" title="Add {{ model.name }}">
+                                <i class="bi bi-plus-circle"></i>
+                            </a>
+                            {% endif %}
+                            {% if model.admin_url %}
+                            <a href="{{ model.admin_url }}" class="changelink" title="Change {{ model.name }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stat numbers
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const originalText = stat.textContent;
+        const number = parseInt(originalText.replace(/,/g, ''));
+        if (!isNaN(number)) {
+            let current = 0;
+            const increment = number / 50;
+            const updateCounter = () => {
+                if (current < number) {
+                    current += increment;
+                    stat.textContent = Math.ceil(current).toLocaleString();
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    stat.textContent = originalText;
+                }
+            };
+            updateCounter();
+        }
+    });
+
+    // Add tooltips
+    const tooltips = document.querySelectorAll('[title]');
+    tooltips.forEach(element => {
+        element.addEventListener('mouseenter', function(e) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'custom-tooltip';
+            tooltip.textContent = this.getAttribute('title');
+            tooltip.style.position = 'absolute';
+            tooltip.style.background = 'var(--primary-blue)';
+            tooltip.style.color = 'white';
+            tooltip.style.padding = '5px 10px';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.fontSize = '0.9rem';
+            tooltip.style.zIndex = '10000';
+            document.body.appendChild(tooltip);
+
+            const rect = this.getBoundingClientRect();
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+            tooltip.style.left = (rect.left + (rect.width - tooltip.offsetWidth) / 2) + 'px';
+
+            this._tooltip = tooltip;
+        });
+
+        element.addEventListener('mouseleave', function() {
+            if (this._tooltip) {
+                this._tooltip.remove();
+                this._tooltip = null;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

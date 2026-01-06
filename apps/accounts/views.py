@@ -11,9 +11,15 @@ from django.conf import settings
 from .models import LibraryUser
 from .forms import LibraryUserCreationForm, LibraryUserChangeForm
 from apps.catalog.models import Book, Genre
-from apps.blog.models import BlogPost
 from apps.events.models import Event
 from apps.repository.models import Document
+from django.apps import apps as django_apps
+
+# Safe dynamic lookup for BlogPost
+try:
+    BlogPost = django_apps.get_model('blog', 'BlogPost')
+except (LookupError, ModuleNotFoundError):
+    BlogPost = None
 
 
 def login_view(request):
@@ -91,8 +97,11 @@ def home_view(request):
     # Featured books (most popular based on copies or recent)
     featured_books = Book.objects.active().prefetch_related('authors', 'genre')[:6]
 
-    # Recent blog posts
-    recent_news = BlogPost.objects.filter(status='published').order_by('-published_date')[:3]
+    # Recent blog posts (safe if blog app isn't installed)
+    if BlogPost is not None:
+        recent_news = BlogPost.objects.filter(status='published').order_by('-published_date')[:3]
+    else:
+        recent_news = []
 
     # Upcoming events
     upcoming_events = Event.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')[:4]

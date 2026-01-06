@@ -1,0 +1,492 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Ramat Library Admin{% endblock %}
+
+{% block extrastyle %}
+<style>
+:root {
+    --primary-blue: #0a2472;
+    --secondary-blue: #001f3f;
+    --accent-blue: #007bff;
+    --light-blue: #e6f2ff;
+    --gold-accent: #ffd700;
+    --silver-accent: #c0c0c0;
+    --dark-text: #212529;
+    --light-text: #f8f9fa;
+    --gray-bg: #f8f9fa;
+    --card-shadow: 0 10px 30px rgba(0, 31, 63, 0.15);
+    --gradient-1: linear-gradient(135deg, #0a2472 0%, #001f3f 100%);
+    --gradient-2: linear-gradient(135deg, #0a2472 0%, #3a86ff 100%);
+}
+
+/* Override Django Admin styles */
+#header {
+    background: var(--gradient-1) !important;
+    color: white;
+    border-bottom: 3px solid var(--gold-accent);
+    box-shadow: 0 5px 20px rgba(0, 31, 63, 0.2);
+}
+
+#header a:link, #header a:visited {
+    color: white !important;
+}
+
+#branding h1 {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+#branding h1::after {
+    content: "Admin";
+    background: linear-gradient(45deg, var(--gold-accent), var(--silver-accent));
+    color: var(--secondary-blue);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+div.breadcrumbs {
+    background: var(--light-blue) !important;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.1);
+    color: var(--secondary-blue);
+}
+
+div.breadcrumbs a {
+    color: var(--primary-blue) !important;
+    font-weight: 600;
+}
+
+div.breadcrumbs a:hover {
+    color: var(--accent-blue) !important;
+}
+
+/* Sidebar customization */
+#nav-sidebar {
+    background: var(--light-text);
+    border-right: 1px solid rgba(0, 31, 63, 0.1);
+}
+
+#nav-sidebar .module {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#nav-sidebar .module h2 {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px !important;
+    margin: 0 !important;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+}
+
+#nav-sidebar .module caption {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px !important;
+    margin: 0 !important;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+}
+
+#nav-sidebar .module th {
+    background: var(--light-blue) !important;
+    color: var(--primary-blue) !important;
+    font-weight: 600;
+}
+
+#nav-sidebar .module td {
+    padding: 12px 15px;
+}
+
+#nav-sidebar .module td a {
+    color: var(--dark-text);
+    text-decoration: none;
+    display: block;
+    padding: 8px 15px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+#nav-sidebar .module td a:hover {
+    background: var(--light-blue);
+    color: var(--accent-blue);
+    transform: translateX(5px);
+}
+
+/* Main content area */
+#content {
+    background: var(--gray-bg);
+    padding: 25px !important;
+}
+
+#content-main {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Form styling */
+fieldset.module {
+    border: 1px solid rgba(0, 31, 63, 0.1) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+fieldset.module h2 {
+    background: var(--gradient-1) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    margin: 0 !important;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+}
+
+.form-row {
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+    padding: 15px 0;
+}
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
+label {
+    color: var(--primary-blue) !important;
+    font-weight: 600 !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+    border: 2px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    padding: 10px 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25) !important;
+}
+
+/* Button styling */
+.submit-row {
+    background: var(--light-blue) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin-top: 30px;
+}
+
+.submit-row input[type="submit"] {
+    background: var(--gradient-2) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 25px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.submit-row input[type="submit"]:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(58, 134, 255, 0.4) !important;
+}
+
+.submit-row input.default {
+    background: var(--gradient-1) !important;
+}
+
+.submit-row a.deletelink {
+    background: #dc3545 !important;
+    border-radius: 8px !important;
+    padding: 10px 25px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.submit-row a.deletelink:hover {
+    background: #c82333 !important;
+    transform: translateY(-3px);
+}
+
+/* Object tools */
+.object-tools {
+    margin-bottom: 25px;
+}
+
+.object-tools a {
+    background: var(--gradient-2) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.object-tools a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(58, 134, 255, 0.4) !important;
+}
+
+.object-tools a.addlink {
+    background: var(--gradient-1) !important;
+}
+
+/* Changelist styling */
+#changelist {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+#changelist .actions {
+    background: var(--light-blue);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+#changelist-filter {
+    background: var(--light-blue);
+    border-radius: 10px;
+    padding: 15px;
+    margin-left: 20px;
+}
+
+#changelist-filter h2 {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 12px 15px !important;
+    margin: -15px -15px 15px -15px !important;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+}
+
+#changelist-filter h3 {
+    color: var(--primary-blue) !important;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+#changelist-filter li.selected a {
+    color: var(--accent-blue) !important;
+    font-weight: 600;
+}
+
+/* Table styling */
+#result_list {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#result_list thead th {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+#result_list tbody td {
+    padding: 15px !important;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+#result_list tbody tr:hover {
+    background: var(--light-blue) !important;
+}
+
+.paginator {
+    background: var(--light-blue) !important;
+    border: none !important;
+    padding: 15px !important;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Dashboard customization */
+.dashboard .module table {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard .module table caption {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px !important;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+}
+
+.dashboard .module table th {
+    background: var(--light-blue) !important;
+    color: var(--primary-blue) !important;
+    font-weight: 600;
+    border: none !important;
+}
+
+.dashboard .module table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+/* Button styling */
+.button, input[type="submit"], input[type="button"], .submit-row input, a.button {
+    background: var(--gradient-2) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.button:hover, input[type="submit"]:hover, input[type="button"]:hover, .submit-row input:hover, a.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(58, 134, 255, 0.4) !important;
+}
+
+/* Messages */
+.messagelist li {
+    background: var(--light-blue) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.messagelist li.success {
+    background: #d1e7dd !important;
+    color: #0f5132 !important;
+    border-left: 4px solid #0f5132 !important;
+}
+
+.messagelist li.error {
+    background: #f8d7da !important;
+    color: #842029 !important;
+    border-left: 4px solid #842029 !important;
+}
+
+.messagelist li.warning {
+    background: #fff3cd !important;
+    color: #664d03 !important;
+    border-left: 4px solid #664d03 !important;
+}
+
+.messagelist li.info {
+    background: var(--light-blue) !important;
+    color: var(--primary-blue) !important;
+    border-left: 4px solid var(--accent-blue) !important;
+}
+
+/* Login page */
+.login #header {
+    border-radius: 15px 15px 0 0;
+}
+
+.login #content {
+    padding: 40px !important;
+}
+
+.login .form-row {
+    padding: 15px 0;
+}
+
+.login .submit-row {
+    padding: 20px 0 0 0 !important;
+}
+
+/* Recent actions */
+.module#recent-actions-module {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.module#recent-actions-module h2 {
+    background: var(--gradient-2) !important;
+    color: white !important;
+    padding: 15px !important;
+    margin: 0 !important;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+}
+
+.module#recent-actions-module ul.actionlist {
+    padding: 15px;
+}
+
+.module#recent-actions-module ul.actionlist li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.module#recent-actions-module ul.actionlist li:last-child {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #header {
+        padding: 10px !important;
+    }
+
+    #branding h1 {
+        font-size: 1.4rem;
+    }
+
+    #content {
+        padding: 15px !important;
+    }
+
+    #content-main {
+        padding: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" style="height: 35px; margin-right: 10px; vertical-align: middle;">
+        Ramat Library
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+<div id="footer" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid rgba(0, 31, 63, 0.1); color: var(--primary-blue);">
+    <p style="margin: 0;">
+        <strong>Ramat Library Management System</strong> • University of Maiduguri<br>
+        <small>&copy; {% now "Y" %} All rights reserved.</small>
+    </p>
+</div>
+{% endblock %}
