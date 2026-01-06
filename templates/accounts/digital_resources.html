@@ -29,6 +29,24 @@
 {% block content %}
 <div class="digital-resources-page">
     <div class="container-fluid">
+        <!-- Library Resources Overview Notice -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info border-0 shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-4 me-3 text-info"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">Multiple Library Resources Available</h6>
+                            <p class="mb-2">This page shows external academic databases. For our institutional digital library with theses and documents, visit our <a href="/repository/" class="alert-link">Digital Library</a>.</p>
+                            <a href="/accounts/library-resources/" class="btn btn-sm btn-info">
+                                <i class="bi bi-collection me-1"></i>Compare All Resources
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Resource Categories -->
         <div class="row g-4 mb-5">
             <div class="col-md-6">
@@ -56,6 +74,45 @@
                         <div class="mt-3">
                             <span class="badge bg-success">Free Access</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Institutional Repository Highlight -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                    <div class="card-body p-5 text-white text-center">
+                        <i class="bi bi-file-earmark-text fs-1 mb-3"></i>
+                        <h3 class="fw-bold mb-3">Also Explore Our Digital Library</h3>
+                        <p class="lead mb-4 opacity-90">
+                            Access our institutional repository with theses, dissertations, research papers,
+                            and university publications - all available online 24/7.
+                        </p>
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-md-4">
+                                <div class="bg-white bg-opacity-20 rounded p-3">
+                                    <h4 class="fw-bold mb-1">10,000+</h4>
+                                    <p class="mb-0 small">Digital Documents</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-white bg-opacity-20 rounded p-3">
+                                    <h4 class="fw-bold mb-1">24/7</h4>
+                                    <p class="mb-0 small">Online Access</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-white bg-opacity-20 rounded p-3">
+                                    <h4 class="fw-bold mb-1">Free</h4>
+                                    <p class="mb-0 small">No Login Required</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/repository/" class="btn btn-light btn-lg mt-4">
+                            <i class="bi bi-arrow-right me-2"></i>Visit Digital Library
+                        </a>
                     </div>
                 </div>
             </div>

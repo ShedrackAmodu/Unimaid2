@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
+from django.core.files.base import ContentFile
+import qrcode
+from io import BytesIO
 from config.models import BaseModel
 
 
@@ -22,8 +25,44 @@ class LibraryUser(AbstractUser, BaseModel):
     faculty_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Faculty/Staff ID number")
     phone = models.CharField(max_length=20, blank=True, help_text="Phone number")
     emergency_contact = models.TextField(blank=True, help_text="Emergency contact information")
+    qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
 
     objects = UserManager()
+
+    def generate_qr_code(self):
+        """Generate QR code containing user information."""
+        # Create data string with user details
+        user_id = self.student_id or self.faculty_id or str(self.id)
+        data = f"User: {self.first_name} {self.last_name}\nID: {user_id}\nUsername: {self.username}\nType: {self.get_membership_type_display()}"
+
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save to BytesIO
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+
+        # Save to model field
+        filename = f"user_{self.id}_qr.png"
+        self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Generate QR code if not exists
+        if not self.qr_code:
+            self.generate_qr_code()
+            super().save(update_fields=['qr_code'])
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.username})"

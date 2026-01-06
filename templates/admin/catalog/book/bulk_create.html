@@ -1,0 +1,104 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Bulk Create Books{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label %}">{{ opts.app_label|title }}</a>
+    &rsaquo; <a href="{% url 'admin:catalog_book_changelist' %}">{{ opts.verbose_name_plural|title }}</a>
+    &rsaquo; Bulk Create
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Bulk Create Empty Book Records</h2>
+
+    <div class="form-row">
+        <p>Use this form to create multiple empty book records at once. You can create from 1 to 1000 book records in a single operation.</p>
+        <p><strong>Note:</strong> The created books will have placeholder data (like "Book 1 (Draft)", "Book 2 (Draft)", etc.) and you'll need to edit each one individually to add the actual book details.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <label for="num_books" style="display: block; font-weight: bold; margin-bottom: 5px;">Number of books to create:</label>
+            <input type="number" name="num_books" id="num_books" min="1" max="1000" value="10" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 200px;">
+            <p style="margin-top: 5px; color: #666; font-size: 12px;">Enter a number between 1 and 1000</p>
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="Create Books" class="default">
+            <a href="{% url 'admin:catalog_book_changelist' %}" class="cancel-link">Cancel</a>
+        </div>
+    </form>
+
+    <div class="form-row">
+        <h3>What happens next?</h3>
+        <ul>
+            <li>The system will create the specified number of empty book records</li>
+            <li>Each book will have a temporary title like "Book 1 (Draft)", "Book 2 (Draft)", etc.</li>
+            <li>You can then edit each book individually to add the real details (title, author, ISBN, etc.)</li>
+            <li>QR codes will be automatically generated for each book when you save the details</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.submit-row {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.cancel-link {
+    color: #999;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.cancel-link:hover {
+    color: #333;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-row input[type="number"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-row ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.form-row ul li {
+    margin-bottom: 3px;
+}
+</style>
+
+<script>
+// Add some client-side validation
+document.getElementById('num_books').addEventListener('input', function() {
+    var value = parseInt(this.value);
+    if (value < 1) {
+        this.value = 1;
+    } else if (value > 1000) {
+        this.value = 1000;
+    }
+});
+</script>
+{% endblock %}

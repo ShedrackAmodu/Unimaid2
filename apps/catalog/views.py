@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q, F, Count
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from .models import Book, Author, Publisher, Faculty, Department, Topic, Genre, BookCopy
 from .forms import BookForm, FacultyForm, DepartmentForm, TopicForm
@@ -521,3 +521,31 @@ def api_topics(request):
     else:
         topics = Topic.objects.values('id', 'name')
     return JsonResponse(list(topics), safe=False)
+
+
+def download_book_qr(request, book_id):
+    """Download QR code for a book."""
+    book = get_object_or_404(Book, id=book_id)
+    if not book.qr_code:
+        # Generate QR code if it doesn't exist
+        book.generate_qr_code()
+        book.save()
+
+    # Return the QR code file
+    response = HttpResponse(book.qr_code, content_type='image/png')
+    response['Content-Disposition'] = f'attachment; filename="book_{book.id}_qr.png"'
+    return response
+
+
+def download_copy_qr(request, copy_id):
+    """Download QR code for a book copy."""
+    copy = get_object_or_404(BookCopy, id=copy_id)
+    if not copy.qr_code:
+        # Generate QR code if it doesn't exist
+        copy.generate_qr_code()
+        copy.save()
+
+    # Return the QR code file
+    response = HttpResponse(copy.qr_code, content_type='image/png')
+    response['Content-Disposition'] = f'attachment; filename="copy_{copy.id}_qr.png"'
+    return response

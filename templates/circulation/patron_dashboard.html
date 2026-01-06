@@ -31,16 +31,19 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="alert alert-info border-0 shadow-sm">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-                <div class="flex-grow-1">
-                    <h6 class="fw-bold mb-1">Welcome to Your Library Dashboard!</h6>
-                    <p class="mb-0">Track your borrowed items, manage reservations, and view your reading history.</p>
-                </div>
-                <div class="text-end">
-                    <small class="text-muted">Member Since: {{ user.date_joined|date:"M d, Y" }}</small>
-                </div>
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div class="flex-grow-1">
+                <h6 class="fw-bold mb-1">Welcome to Your Library Dashboard!</h6>
+                <p class="mb-1">Track your borrowed items, manage reservations, and view your reading history.</p>
+                <a href="/accounts/library-resources/" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-collection me-1"></i>Explore All Library Resources
+                </a>
             </div>
+            <div class="text-end">
+                <small class="text-muted">Member Since: {{ user.date_joined|date:"M d, Y" }}</small>
+            </div>
+        </div>
         </div>
     </div>
 </div>
@@ -597,8 +600,8 @@
 <!-- Quick Actions Card -->
 <div class="row">
     <div class="col-lg-8 mx-auto">
-        <div class="card border-0 shadow-lg bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
-            <div class="card-body p-5 text-white">
+        <div class="card border-0 shadow-lg bg-white">
+            <div class="card-body p-5">
                 <div class="row align-items-center">
                     <div class="col-lg-8">
                         <h3 class="fw-bold mb-3">Need Help with Your Account?</h3>
@@ -607,10 +610,10 @@
                             fines, and any other questions about your library account.
                         </p>
                         <div class="d-flex flex-wrap gap-3">
-                            <a href="/accounts/staff_directory/" class="btn btn-light">
-                                <i class="bi bi-people me-2 text-primary"></i>Contact Staff
+                            <a href="/accounts/staff_directory/" class="btn btn-primary">
+                                <i class="bi bi-people me-2"></i>Contact Staff
                             </a>
-                            <a href="/accounts/profile/" class="btn btn-outline-light">
+                            <a href="/accounts/profile/" class="btn btn-outline-primary">
                                 <i class="bi bi-gear me-2"></i>Account Settings
                             </a>
                         </div>
@@ -749,44 +752,279 @@
         border-radius: 12px;
         border: 1px solid rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
+        min-height: 120px;
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0, 31, 63, 0.15);
     }
-    
-    .loan-card, .reservation-card {
+
+    .loan-card, .reservation-card, .request-card {
         border-radius: 16px;
         border: 1px solid rgba(0, 0, 0, 0.1);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 1rem;
     }
-    
-    .loan-card:hover, .reservation-card:hover {
+
+    .loan-card:hover, .reservation-card:hover, .request-card:hover {
         transform: translateY(-5px) scale(1.01);
         border-color: var(--accent-blue);
         box-shadow: 0 15px 30px rgba(58, 134, 255, 0.15);
     }
-    
+
     .loan-card:hover {
         border-color: var(--primary-blue);
     }
-    
+
     .reservation-card:hover {
         border-color: var(--warning);
     }
-    
+
+    .request-card:hover {
+        border-color: var(--info);
+    }
+
     section {
         scroll-margin-top: 100px;
+        margin-bottom: 3rem;
     }
-    
+
     .table-hover tbody tr {
         transition: all 0.2s ease;
     }
-    
+
     .table-hover tbody tr:hover {
         transform: translateX(5px);
         background-color: rgba(var(--primary-rgb), 0.03);
+    }
+
+    /* Enhanced responsive design for dashboard */
+    @media (max-width: 768px) {
+        .quick-stats-row .col-md-3 {
+            margin-bottom: 1rem;
+        }
+
+        .stat-card .card-body {
+            padding: 1rem;
+        }
+
+        .stat-card .d-flex {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stat-card .me-3 {
+            margin-right: 0 !important;
+            margin-bottom: 1rem;
+        }
+
+        .loan-card .row.g-3 .col-md-6 {
+            margin-bottom: 1rem;
+        }
+
+        .loan-card .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loan-card .text-end {
+            text-align: center !important;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th, .table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .table .fw-bold {
+            font-size: 0.9rem;
+        }
+
+        /* Table text truncation for mobile */
+        .table .text-truncate {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Mobile card stacking */
+        .row.g-4 > .col-lg-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Mobile buttons */
+        .btn-group .btn {
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+
+        .d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .d-flex.justify-content-between.align-items-center .me-3 {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.8rem;
+        }
+
+        .lead {
+            font-size: 1rem;
+        }
+
+        .stat-card {
+            min-height: 100px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.5rem;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+        }
+
+        .table th, .table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .card-body p {
+            font-size: 0.9rem;
+        }
+
+        .alert .d-flex {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .alert .me-3 {
+            margin-right: 0 !important;
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Enhanced table responsiveness */
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1rem;
+    }
+
+    .table thead th {
+        background: var(--gradient-2);
+        color: white;
+        border: none;
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-size: 0.9rem;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Mobile table specific styles */
+    @media (max-width: 576px) {
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+
+        .table thead th {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .table tbody td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        /* Hide less important columns on very small screens */
+        .table th:nth-child(4), .table td:nth-child(4),
+        .table th:nth-child(5), .table td:nth-child(5) {
+            display: none;
+        }
+    }
+
+    /* Enhanced card shadows and hover effects */
+    .card.shadow-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card.shadow-hover:hover {
+        box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15) !important;
+        transform: translateY(-8px) scale(1.02);
+    }
+
+    /* Button enhancements */
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 6px;
+    }
+
+    /* Improved spacing for mobile */
+    .mb-5 {
+        margin-bottom: 2rem !important;
+    }
+
+    @media (max-width: 768px) {
+        .mb-5 {
+            margin-bottom: 1.5rem !important;
+        }
+    }
+
+    /* Ensure no horizontal overflow */
+    * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Prevent text overflow */
+    .card-title, .card-text, h1, h2, h3, h4, h5, h6 {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    /* Responsive image handling */
+    .card img, .table img {
+        max-width: 100%;
+        height: auto;
     }
 </style>
 

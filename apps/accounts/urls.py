@@ -16,6 +16,7 @@ urlpatterns = [
     path('interlibrary-loan/', views.interlibrary_loan_view, name='interlibrary_loan'),
     path('study-room-booking/', views.study_room_booking_view, name='study_room_booking'),
     path('digital-resources/', views.digital_resources_view, name='digital_resources'),
+    path('library-resources/', views.library_resources_view, name='library_resources'),
     path('privacy-policy/', views.privacy_policy_view, name='privacy_policy'),
     path('terms-of-use/', views.terms_of_use_view, name='terms_of_use'),
     path('tour/', views.virtual_tour_view, name='virtual_tour'),
@@ -23,4 +24,7 @@ urlpatterns = [
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='accounts/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), name='password_reset_complete'),
+
+    # QR code downloads
+    path('users/<int:user_id>/qr/', views.download_user_qr, name='download_user_qr'),
 ]

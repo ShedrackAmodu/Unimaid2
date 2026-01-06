@@ -39,107 +39,120 @@
     <div class="col-12">
         <div class="card border-0 shadow-lg">
             <div class="card-body p-4">
+                <!-- Mobile Filter Toggle -->
+                <div class="d-lg-none mb-3">
+                    <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                        <i class="bi bi-funnel me-2"></i>Advanced Filters
+                        <span class="badge bg-primary ms-2">{{ request.GET|length|add:"-1" }}</span>
+                    </button>
+                </div>
+
                 <div class="row g-3 align-items-end">
                     <!-- Search Form -->
-                    <div class="col-lg-5">
+                    <div class="col-lg-5 col-12">
                         <form method="get" class="search-form">
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-light border-0">
                                     <i class="bi bi-search text-primary"></i>
                                 </span>
-                                <input type="text" name="q" class="form-control border-0" 
-                                       placeholder="Search by title, author, ISBN, or keyword..."
+                                <input type="text" name="q" class="form-control border-0"
+                                       placeholder="Search books..."
                                        value="{{ request.GET.q|default:'' }}"
                                        aria-label="Search books">
-                                <button class="btn btn-primary" type="submit">
+                                <button class="btn btn-primary d-lg-block d-none" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button class="btn btn-primary d-lg-none" type="submit">
                                     Search
                                 </button>
                             </div>
                         </form>
                     </div>
-                    
+
                     <!-- Filter Controls -->
                     <div class="col-lg-7">
-                        <div class="row g-2">
-                            <!-- Faculty Filter -->
-                            <div class="col-md-3">
-                                <select class="form-select filter-select" name="faculty" onchange="updateFilter(this)">
-                                    <option value="">All Faculties</option>
-                                    {% for faculty in faculties %}
-                                    <option value="{{ faculty.id }}"
-                                            {% if request.GET.faculty == faculty.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ faculty.name|truncatechars:15 }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                        <div class="collapse d-lg-block" id="filterCollapse">
+                            <div class="row g-2">
+                                <!-- Faculty Filter -->
+                                <div class="col-lg-3 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="faculty" onchange="updateFilter(this)">
+                                        <option value="">All Faculties</option>
+                                        {% for faculty in faculties %}
+                                        <option value="{{ faculty.id }}"
+                                                {% if request.GET.faculty == faculty.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ faculty.name|truncatechars:15 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Department Filter -->
+                                <div class="col-lg-3 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="department" onchange="updateFilter(this)">
+                                        <option value="">All Departments</option>
+                                        {% for department in departments %}
+                                        <option value="{{ department.id }}"
+                                                {% if request.GET.department == department.id|stringformat:"i" %}selected{% endif %}
+                                                data-faculty="{{ department.faculty.id }}">
+                                            {{ department.name|truncatechars:15 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Topic Filter -->
+                                <div class="col-lg-3 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="topic" onchange="updateFilter(this)">
+                                        <option value="">All Topics</option>
+                                        {% for topic in topics %}
+                                        <option value="{{ topic.id }}"
+                                                {% if request.GET.topic == topic.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ topic.name|truncatechars:15 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Genre Filter -->
+                                <div class="col-lg-3 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="genre" onchange="updateFilter(this)">
+                                        <option value="">All Genres</option>
+                                        {% for genre in genres %}
+                                        <option value="{{ genre.id }}"
+                                                {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ genre.name|truncatechars:15 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            <!-- Department Filter -->
-                            <div class="col-md-3">
-                                <select class="form-select filter-select" name="department" onchange="updateFilter(this)">
-                                    <option value="">All Departments</option>
-                                    {% for department in departments %}
-                                    <option value="{{ department.id }}"
-                                            {% if request.GET.department == department.id|stringformat:"i" %}selected{% endif %}
-                                            data-faculty="{{ department.faculty.id }}">
-                                        {{ department.name|truncatechars:15 }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <!-- Topic Filter -->
-                            <div class="col-md-3">
-                                <select class="form-select filter-select" name="topic" onchange="updateFilter(this)">
-                                    <option value="">All Topics</option>
-                                    {% for topic in topics %}
-                                    <option value="{{ topic.id }}"
-                                            {% if request.GET.topic == topic.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ topic.name|truncatechars:15 }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <!-- Genre Filter -->
-                            <div class="col-md-3">
-                                <select class="form-select filter-select" name="genre" onchange="updateFilter(this)">
-                                    <option value="">All Genres</option>
-                                    {% for genre in genres %}
-                                    <option value="{{ genre.id }}"
-                                            {% if request.GET.genre == genre.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ genre.name|truncatechars:15 }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row g-2 mt-2">
-                            <!-- Author Filter -->
-                            <div class="col-md-6">
-                                <select class="form-select filter-select" name="author" onchange="updateFilter(this)">
-                                    <option value="">All Authors</option>
-                                    {% for author in authors %}
-                                    <option value="{{ author.id }}"
-                                            {% if request.GET.author == author.id|stringformat:"i" %}selected{% endif %}>
-                                        {{ author.name|truncatechars:25 }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <!-- Sort Filter -->
-                            <div class="col-md-6">
-                                <select class="form-select filter-select" name="sort" onchange="updateFilter(this)">
-                                    <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>
-                                        Sort by Title
-                                    </option>
-                                    <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>
-                                        Newest First
-                                    </option>
-                                    <option value="popular" {% if request.GET.sort == "popular" %}selected{% endif %}>
-                                        Most Popular
-                                    </option>
-                                    <option value="available" {% if request.GET.sort == "available" %}selected{% endif %}>
-                                        Available Now
-                                    </option>
-                                </select>
+                            <div class="row g-2 mt-2">
+                                <!-- Author Filter -->
+                                <div class="col-lg-6 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="author" onchange="updateFilter(this)">
+                                        <option value="">All Authors</option>
+                                        {% for author in authors %}
+                                        <option value="{{ author.id }}"
+                                                {% if request.GET.author == author.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ author.name|truncatechars:25 }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Sort Filter -->
+                                <div class="col-lg-6 col-md-6 col-12">
+                                    <select class="form-select filter-select" name="sort" onchange="updateFilter(this)">
+                                        <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>
+                                            Sort by Title
+                                        </option>
+                                        <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>
+                                            Newest First
+                                        </option>
+                                        <option value="popular" {% if request.GET.sort == "popular" %}selected{% endif %}>
+                                            Most Popular
+                                        </option>
+                                        <option value="available" {% if request.GET.sort == "available" %}selected{% endif %}>
+                                            Available Now
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>

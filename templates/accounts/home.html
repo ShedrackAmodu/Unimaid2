@@ -64,7 +64,7 @@
                                     Discover Knowledge
                                 </h2>
                                 <p class="lead text-white mb-4 animate__animated animate__fadeInUp animate__delay-1s">
-                                    Access over 50,000 books, journals, and digital resources for your academic success.
+                                    Access over 50,000 physical books, journals, and digital resources for your academic success.
                                 </p>
                                 <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeInUp animate__delay-2s">
                                     <a href="/repository/" class="btn btn-primary btn-lg px-4 py-3">
@@ -147,36 +147,50 @@
     </div>
 </div>
 
-<!-- Welcome Message from Librarian -->
+<!-- Welcome Messages from University Leadership -->
 <div class="welcome-message mb-5 animate__animated animate__fadeIn">
     <div class="container-fluid">
         <div class="card border-0 shadow-lg overflow-hidden">
-            <div class="row g-0">
-                <div class="col-md-4">
-                    <img src="{% static 'images/librarian.jpg' %}" alt="Head Librarian" class="img-fluid h-100" style="object-fit: cover;">
+            <!-- Leadership Images Section -->
+            <div class="leadership-images p-4 bg-light">
+                <div class="row g-3 text-center">
+                    <div class="col-md-4">
+                        <img src="{% static 'images/Registrar.jpeg' %}" alt="Registrar" class="img-fluid rounded mb-3 shadow" style="height: 368px; width: 368px; object-fit: cover;">
+                        <h6 class="fw-bold mb-1">Ahmed Alhaji Lawan</h6>
+                        <small class="text-muted">Registrar, University of Maiduguri</small>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="{% static 'images/school-Vc.jpeg' %}" alt="Vice Chancellor" class="img-fluid rounded mb-3 shadow" style="height: 368px; width: 368px; object-fit: cover;">
+                        <h6 class="fw-bold mb-1">Prof. Mohammed Laminu Mele</h6>
+                        <small class="text-muted">Vice-Chancellor, University of Maiduguri</small>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="{% static 'images/librarian.jpg' %}" alt="University Librarian" class="img-fluid rounded mb-3 shadow" style="height: 368px; width: 368px; object-fit: cover;">
+                        <h6 class="fw-bold mb-1">Dr. Talatu Adamu Rabasa</h6>
+                        <small class="text-muted">University Librarian, Ramat Library</small>
+                    </div>
                 </div>
-                <div class="col-md-8">
-                    <div class="card-body p-5">
-                        <div class="d-flex align-items-center mb-4">
-                            <div class="me-3">
-                                <img src="{% static 'images/ramat_ai3.png' %}" alt="Library Logo" style="width: 60px; height: auto;">
-                            </div>
-                            <div>
-                                <h3 class="fw-bold mb-1">Message from the Librarian</h3>
-                                <small class="text-muted">Dr. [Librarian's Name], Head Librarian</small>
-                            </div>
-                        </div>
-                        
-                        <blockquote class="blockquote mb-4">
-                            <p class="lead">
-                                <i class="bi bi-quote text-primary fs-1 opacity-25 me-2"></i>
-                                Welcome to Ramat Library, the heart of academic excellence at the University of Maiduguri. 
-                                Our mission is to provide exceptional resources and services that support teaching, learning, 
-                                and research. Whether you're a student, faculty member, or researcher, you'll find a wealth 
-                                of knowledge and support here.
-                                <i class="bi bi-quote text-primary fs-1 opacity-25 ms-2" style="transform: rotate(180deg); display: inline-block;"></i>
-                            </p>
-                        </blockquote>
+            </div>
+
+            <!-- Message Section -->
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <img src="{% static 'images/ramat_ai3.png' %}" alt="Library Logo" style="width: 60px; height: auto;" class="me-3">
+                    <h3 class="fw-bold mb-1 d-inline">Welcome from University Leadership</h3>
+                    <br>
+                    <small class="text-muted">Messages from our esteemed leaders</small>
+                </div>
+
+                <blockquote class="blockquote mb-4">
+                    <p class="lead text-center">
+                        <i class="bi bi-quote text-primary fs-1 opacity-25 me-2"></i>
+                        Welcome to Ramat Library, the heart of academic excellence at the University of Maiduguri.
+                        Our mission is to provide exceptional resources and services that support teaching, learning,
+                        and research. Whether you're a student, faculty member, or researcher, you'll find a wealth
+                        of knowledge and support here.
+                        <i class="bi bi-quote text-primary fs-1 opacity-25 ms-2" style="transform: rotate(180deg); display: inline-block;"></i>
+                    </p>
+                </blockquote>
                         
                         <div class="row g-3">
                             <div class="col-sm-6">
@@ -234,36 +248,146 @@
 {% endblock %}
 
 {% block content %}
-<!-- Quick Stats Section -->
-<section id="quick-stats" class="py-5 animate__animated animate__fadeIn">
+
+<!-- Resource Type Guide -->
+<section class="py-5 bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
     <div class="container-fluid">
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
-                    <div class="stat-label">Books & E-Books</div>
-                    <img src="{% static 'images/librarybooks.jfif' %}" alt="Books Collection" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-white mb-3">Choose Your Library Experience</h2>
+            <p class="lead text-white-50 mb-4">Ramat Library offers multiple ways to access academic resources</p>
+            <div class="alert alert-light border-0 shadow-sm mx-auto" style="max-width: 800px;">
+                <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                <strong>New to the library?</strong> Learn about our different resource types below to find what best suits your needs.
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Physical Library -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-guide-card h-100 border-0 shadow-lg"
+                     style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div class="card-body p-4 text-center">
+                        <div class="resource-icon mb-4">
+                            <i class="bi bi-book fs-1 text-warning"></i>
+                            <div class="resource-badge bg-warning text-dark px-3 py-1 rounded-pill mt-2">
+                                <small class="fw-bold">Physical Resources</small>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3 text-dark">Physical Library</h4>
+                        <p class="text-muted mb-4">
+                            Browse and borrow physical books, journals, and printed materials from our collection.
+                        </p>
+
+                        <div class="features-list mb-4">
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <small>50,000+ physical books available</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <small>Borrow for 7-30 days</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <small>Visit library during operating hours</small>
+                            </div>
+                        </div>
+
+                        <a href="/catalog/" class="btn btn-warning btn-lg w-100">
+                            <i class="bi bi-search me-2"></i>Browse Physical Books
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ total_documents|default:"10,000+" }}</div>
-                    <div class="stat-label">Research Documents</div>
-                    <img src="{% static 'images/ramat_a4i.png' %}" alt="Research Documents" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+
+            <!-- Digital Library -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-guide-card h-100 border-0 shadow-lg"
+                     style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div class="card-body p-4 text-center">
+                        <div class="resource-icon mb-4">
+                            <i class="bi bi-file-earmark-text fs-1 text-success"></i>
+                            <div class="resource-badge bg-success px-3 py-1 rounded-pill mt-2">
+                                <small class="fw-bold">Digital Resources</small>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3 text-dark">Institutional Repository</h4>
+                        <p class="text-muted mb-4">
+                            Access theses, dissertations, research papers, and university publications online.
+                        </p>
+
+                        <div class="features-list mb-4">
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-info me-2"></i>
+                                <small>10,000+ digital documents</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-info me-2"></i>
+                                <small>24/7 online access</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-info me-2"></i>
+                                <small>No borrowing required</small>
+                            </div>
+                        </div>
+
+                        <a href="/repository/" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-archive me-2"></i>Visit Digital Library
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">24/7</div>
-                    <div class="stat-label">Digital Access</div>
-                    <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Access" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+
+            <!-- Online Databases -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-guide-card h-100 border-0 shadow-lg"
+                     style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div class="card-body p-4 text-center">
+                        <div class="resource-icon mb-4">
+                            <i class="bi bi-globe fs-1 text-info"></i>
+                            <div class="resource-badge bg-info px-3 py-1 rounded-pill mt-2">
+                                <small class="fw-bold">External Databases</small>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3 text-dark">Online Databases</h4>
+                        <p class="text-muted mb-4">
+                            Premium academic databases with journals, articles, and research materials.
+                        </p>
+
+                        <div class="features-list mb-4">
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-warning me-2"></i>
+                                <small>Access to premium databases</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-warning me-2"></i>
+                                <small>On-campus or VPN access</small>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-start mb-2 text-dark">
+                                <i class="bi bi-check-circle-fill text-warning me-2"></i>
+                                <small>Scholarly journals & articles</small>
+                            </div>
+                        </div>
+
+                        <a href="/accounts/library-resources/" class="btn btn-info btn-lg w-100">
+                            <i class="bi bi-database me-2"></i>Access Databases
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ user_count|default:"5,000+" }}</div>
-                    <div class="stat-label">Active Members</div>
-                    <img src="{% static 'images/staff.png' %}" alt="Library Staff" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+        </div>
+
+        <div class="text-center mt-5">
+            <div class="card bg-white border-0 shadow-sm mx-auto" style="max-width: 600px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Not Sure Which to Choose?</h5>
+                    <p class="text-muted mb-4">
+                        Visit our comprehensive <strong>Library Resources</strong> page for a detailed comparison
+                        and guidance on selecting the right resources for your research needs.
+                    </p>
+                    <a href="/accounts/library-resources/" class="btn btn-primary">
+                        <i class="bi bi-collection me-2"></i>Compare All Resources
+                    </a>
                 </div>
             </div>
         </div>
@@ -778,6 +902,42 @@
         </div>
     </div>
 </section>
+
+<!-- Quick Stats Section -->
+<section id="quick-stats" class="py-5 animate__animated animate__fadeIn">
+    <div class="container-fluid">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
+                    <div class="stat-label">Books & E-Books</div>
+                    <img src="{% static 'images/librarybooks.jfif' %}" alt="Books Collection" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ total_documents|default:"10,000+" }}</div>
+                    <div class="stat-label">Research Documents</div>
+                    <img src="{% static 'images/ramat_a4i.png' %}" alt="Research Documents" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">24/7</div>
+                    <div class="stat-label">Digital Access</div>
+                    <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Access" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center p-4 h-100">
+                    <div class="stat-number mb-2">{{ user_count|default:"5,000+" }}</div>
+                    <div class="stat-label">Active Members</div>
+                    <img src="{% static 'images/staff.png' %}" alt="Library Staff" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
@@ -927,12 +1087,99 @@
         }
     }
     
+    /* Resource Guide Cards */
+    .resource-guide-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--dark-text);
+    }
+
+    .resource-guide-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .resource-guide-card .card-body {
+        padding: 2rem;
+    }
+
+    .resource-icon {
+        transition: transform 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    .resource-guide-card:hover .resource-icon {
+        transform: scale(1.15);
+    }
+
+    .resource-badge {
+        transition: all 0.3s ease;
+        font-weight: bold;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+    }
+
+    .resource-guide-card:hover .resource-badge {
+        transform: scale(1.1);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .features-list {
+        margin: 1.5rem 0;
+    }
+
+    .features-list .d-flex {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .resource-guide-card:hover .features-list .d-flex {
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    .btn {
+        margin-top: 1.5rem;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .resource-guide-card .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: #000;
+    }
+
+    .resource-guide-card .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+
+    .resource-guide-card .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #6f42c1);
+        border: none;
+    }
+
+    .resource-guide-card .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
     /* Image Loading Animation */
     img {
         opacity: 0;
         animation: fadeInImage 0.5s ease forwards;
     }
-    
+
     @keyframes fadeInImage {
         from {
             opacity: 0;

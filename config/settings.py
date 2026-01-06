@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+# Third-party apps
+    "import_export",
 # Custom apps
     "apps.accounts",
     "apps.catalog",
@@ -142,15 +145,32 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Email configuration
 # https://docs.djangoproject.com/en/5.2/topics/email/
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"  # Placeholder - configure for production
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "piloteaglecrown@gmail.com"
-EMAIL_HOST_PASSWORD = "ugnporqmpdkjytof"
-DEFAULT_FROM_EMAIL = "noreply@ramatlibrary.unimaid.edu.ng"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "piloteaglecrown@gmail.com")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "ugnporqmpdkjytof")
+
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@ramatlibrary.unimaid.edu.ng")
+
+# Email templates directory
+EMAIL_TEMPLATES_DIR = BASE_DIR / "templates" / "emails"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Import-Export settings for bulk operations
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_SKIP_ADMIN_LOG = True  # Improve performance for large imports
+IMPORT_EXPORT_IMPORT_PERMISSION_CODE = 'add'
+IMPORT_EXPORT_EXPORT_PERMISSION_CODE = 'change'
+IMPORT_EXPORT_TMP_STORAGE_CLASS = 'import_export.tmp_storages.CacheStorage'
+
+# Increase import batch size for better performance with large datasets
+IMPORT_EXPORT_CHUNK_SIZE = 100  # Process 100 records at a time

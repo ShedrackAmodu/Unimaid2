@@ -65,7 +65,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: auto;
+            overflow-x: hidden;
             position: relative;
         }
 
@@ -312,6 +312,13 @@
             position: relative;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+
+        /* Make media scale down to container width */
+        img, video, iframe, embed, object {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
 
         .main-content::before {
@@ -640,30 +647,177 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                overflow-x: auto;
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .main-content .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-nav .nav-link {
+                padding: 0.6rem 0.8rem !important;
+                font-size: 0.9rem;
+                margin: 0 0.1rem;
             }
 
             .navbar-brand {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
 
             .navbar-brand img {
-                width: 35px;
-                height: 35px;
-                margin-right: 8px;
+                width: 40px !important;
+                height: 40px !important;
+                margin-right: 10px !important;
+            }
+
+            .theme-toggle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+
+            .user-dropdown .dropdown-toggle {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .user-dropdown .dropdown-toggle .me-2 {
+                display: none;
+            }
+
+            .navbar-toggler {
+                border: none;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.9rem;
+                overflow-x: hidden;
+            }
+
+            .navbar {
+                padding: 0.5rem 0;
+            }
+
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+
+            .navbar-brand img {
+                width: 30px;
+                height: 30px;
+                margin-right: 6px;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.85rem;
+                margin: 0 0.2rem;
+            }
+
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+                margin-right: 0.5rem;
+            }
+
+            .theme-toggle-container {
+                margin-right: 0.5rem;
+            }
+
+            .user-dropdown .dropdown-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .user-dropdown .dropdown-toggle .me-2 {
+                display: none;
             }
 
             .hero-section {
-                padding: 3rem 0 !important;
+                padding: 2rem 0 !important;
+            }
+
+            .hero-section h1 {
+                font-size: 2rem !important;
+            }
+
+            .hero-section p {
+                font-size: 1rem !important;
             }
 
             .main-content {
+                padding: 2rem 0;
                 overflow-x: auto;
             }
 
+            .page-header {
+                text-align: center;
+            }
+
+            .page-header .d-flex {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .page-header .me-3 {
+                margin-right: 0 !important;
+                margin-bottom: 1rem;
+            }
+
+            .card {
+                margin-bottom: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .btn-lg {
+                padding: 0.8rem 1.6rem;
+                font-size: 1rem;
+            }
+
+            .display-4 {
+                font-size: 2rem;
+            }
+
+            .display-5 {
+                font-size: 1.8rem;
+            }
+
+            .display-6 {
+                font-size: 1.5rem;
+            }
+
+            .h1, h1 { font-size: 1.8rem; }
+            .h2, h2 { font-size: 1.6rem; }
+            .h3, h3 { font-size: 1.4rem; }
+            .h4, h4 { font-size: 1.2rem; }
+            .h5, h5 { font-size: 1.1rem; }
+            .h6, h6 { font-size: 1rem; }
+
             .footer {
+                padding: 3rem 0 1rem;
                 text-align: center;
             }
 
@@ -672,11 +826,26 @@
                 transform: translateX(-50%);
             }
 
-            .social-links {
-                justify-content: center;
+            .footer-links {
+                text-align: left;
+                margin-bottom: 2rem;
             }
 
-            /* Ensure dropdowns don't overflow on mobile */
+            .social-links {
+                justify-content: center;
+                margin-top: 1rem;
+            }
+
+            .social-links a {
+                margin: 0.2rem;
+            }
+
+            .copyright {
+                font-size: 0.85rem;
+                padding-top: 1rem;
+            }
+
+            /* Mobile dropdowns */
             .dropdown-menu {
                 position: static;
                 float: none;
@@ -694,6 +863,147 @@
 
             .dropdown-item {
                 padding: 0.5rem 1rem;
+                text-align: center;
+                border-radius: 6px;
+                margin: 0.2rem 0;
+            }
+
+            /* Mobile tables */
+            .table-responsive {
+                font-size: 0.85rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .table th, .table td {
+                padding: 0.5rem;
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                vertical-align: middle;
+            }
+
+            .table th {
+                font-weight: 600;
+                border-bottom: 2px solid var(--primary-blue);
+            }
+
+            /* Table text truncation for very long content */
+            .table .text-truncate {
+                max-width: 150px;
+            }
+
+            /* Mobile forms */
+            .form-control, .form-select {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Mobile alerts */
+            .alert {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Mobile breadcrumb */
+            .breadcrumb {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            /* Mobile FAB */
+            .fab {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            /* Mobile particles */
+            .particle {
+                display: none;
+            }
+
+            /* Mobile animations - reduce motion for better performance */
+            @media (prefers-reduced-motion: reduce) {
+                *, *::before, *::after {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .navbar-toggler {
+                padding: 0.25rem 0.5rem;
+                font-size: 1.25rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-brand img {
+                width: 25px;
+                height: 25px;
+                margin-right: 4px;
+            }
+
+            .btn-group .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .card-body p {
+                font-size: 0.9rem;
+            }
+
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .social-links a {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .footer h5 {
+                font-size: 1rem;
+            }
+
+            .footer-links li {
+                padding-left: 15px;
+            }
+
+            .copyright {
+                font-size: 0.8rem;
+            }
+
+            /* Stack columns on very small screens */
+            .col-12, .col-sm-6, .col-md-4, .col-lg-3, .col-xl-2 {
+                margin-bottom: 1rem;
+            }
+
+            /* Hide less important elements on very small screens */
+            .nav-badge {
+                display: none;
+            }
+
+            .breadcrumb-item:not(.active) {
+                display: none;
+            }
+
+            .breadcrumb-item.active::before {
+                content: "📍 ";
             }
         }
 
@@ -731,7 +1041,7 @@
             <!-- Logo and Brand -->
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" style="width: 60px; height: 60px; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">
-                Ramat Library
+                Ramat Library - University of Maiduguri
                 <span class="nav-badge">UNIMAID</span>
             </a>
 
@@ -749,39 +1059,51 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-book me-2"></i>Catalog
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           title="Physical books and print materials you can borrow from the library" data-bs-toggle="tooltip">
+                            <i class="bi bi-book me-2"></i>Physical Library
+                            <span class="badge bg-warning text-dark ms-2" style="font-size: 0.6rem;">BORROW</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/catalog/">
+                            <li><a class="dropdown-item" href="/catalog/" title="Browse and search our physical book collection">
                                 <i class="bi bi-search me-2"></i>Browse Books
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/catalog/authors/">
+                            <li><a class="dropdown-item" href="/catalog/authors/" title="Find books by specific authors">
                                 <i class="bi bi-person-badge me-2"></i>Authors
                             </a></li>
-                            <li><a class="dropdown-item" href="/catalog/genres/">
+                            <li><a class="dropdown-item" href="/catalog/genres/" title="Browse books by subject categories">
                                 <i class="bi bi-tags me-2"></i>Genres
                             </a></li>
-                            <li><a class="dropdown-item" href="/catalog/publishers/">
+                            <li><a class="dropdown-item" href="/catalog/publishers/" title="Books from different publishers">
                                 <i class="bi bi-building me-2"></i>Publishers
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/accounts/library-resources/" title="Compare all library resources">
+                                <i class="bi bi-collection me-2"></i>All Resources
                             </a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-file-earmark-text me-2"></i>Repository
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           title="Digital repository with theses, dissertations, and research documents - available 24/7" data-bs-toggle="tooltip">
+                            <i class="bi bi-file-earmark-text me-2"></i>Digital Repository
+                            <span class="badge bg-success ms-2" style="font-size: 0.6rem;">24/7</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/repository/">
+                            <li><a class="dropdown-item" href="/repository/" title="Browse our digital document collection">
                                 <i class="bi bi-archive me-2"></i>Browse Documents
                             </a></li>
-                            <li><a class="dropdown-item" href="/repository/collections/">
+                            <li><a class="dropdown-item" href="/repository/collections/" title="Organized collections of digital materials">
                                 <i class="bi bi-folder2-open me-2"></i>Collections
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/accounts/library-resources/" title="Access premium academic databases">
+                                <i class="bi bi-database me-2"></i>Online Databases
                             </a></li>
                             {% if user.is_staff %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/repository/upload/">
+                            <li><a class="dropdown-item" href="/repository/upload/" title="Upload your research documents">
                                 <i class="bi bi-upload me-2"></i>Upload Document
                             </a></li>
                             {% endif %}
@@ -991,7 +1313,8 @@
                     <h5>Quick Access</h5>
                     <ul class="footer-links">
                         <li><a href="/catalog/"><i class="bi bi-chevron-right me-1"></i>Browse Catalog</a></li>
-                        <li><a href="/repository/"><i class="bi bi-chevron-right me-1"></i>Institutional Repository</a></li>
+                        <li><a href="/repository/"><i class="bi bi-chevron-right me-1"></i>Digital Library</a></li>
+                        <li><a href="/accounts/library-resources/"><i class="bi bi-chevron-right me-1"></i>All Resources</a></li>
                         <li><a href="/blog/"><i class="bi bi-chevron-right me-1"></i>Library News</a></li>
                         <li><a href="/events/"><i class="bi bi-chevron-right me-1"></i>Upcoming Events</a></li>
                         <li><a href="/accounts/staff_directory/"><i class="bi bi-chevron-right me-1"></i>Meet Our Staff</a></li>
@@ -1006,7 +1329,7 @@
                         <li><a href="{% url 'accounts:research_assistance' %}"><i class="bi bi-chevron-right me-1"></i>Research Assistance</a></li>
                         <li><a href="{% url 'accounts:interlibrary_loan' %}"><i class="bi bi-chevron-right me-1"></i>Interlibrary Loan</a></li>
                         <li><a href="{% url 'accounts:study_room_booking' %}"><i class="bi bi-chevron-right me-1"></i>Study Room Booking</a></li>
-                        <li><a href="{% url 'accounts:digital_resources' %}"><i class="bi bi-chevron-right me-1"></i>Digital Resources</a></li>
+                        <li><a href="{% url 'accounts:library_resources' %}"><i class="bi bi-chevron-right me-1"></i>Digital Resources</a></li>
                     </ul>
                 </div>
 

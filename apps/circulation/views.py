@@ -14,6 +14,14 @@ def is_staff_user(user):
 
 
 @login_required
+def circulation_home(request):
+    if is_staff_user(request.user):
+        return redirect('circulation:staff_dashboard')
+    else:
+        return redirect('circulation:patron_dashboard')
+
+
+@login_required
 @user_passes_test(is_staff_user)
 def staff_dashboard(request):
     pending_loans = Loan.objects.filter(status='active').select_related('user', 'book_copy__book')

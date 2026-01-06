@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -401,6 +402,56 @@ def digital_resources_view(request):
     return render(request, 'accounts/digital_resources.html', context)
 
 
+def library_resources_view(request):
+    """Unified library resources overview page explaining physical vs digital libraries."""
+    context = {
+        'page_title': 'Library Resources',
+        'physical_resources': {
+            'title': 'Physical Library Collection',
+            'description': 'Browse and borrow physical books from our extensive collection',
+            'features': [
+                '50,000+ physical books across all disciplines',
+                'Current loans and reservations system',
+                'Study rooms and reading areas',
+                'Reference and research assistance',
+                'Interlibrary loan services'
+            ],
+            'icon': 'bi-book',
+            'url': '/catalog/',
+            'color': 'primary'
+        },
+        'digital_resources': {
+            'title': 'Digital Library & Repository',
+            'description': 'Access digital documents, theses, and research papers online 24/7',
+            'features': [
+                '10,000+ digital documents and theses',
+                'Open access research repository',
+                'Institutional research outputs',
+                '24/7 online access from anywhere',
+                'Download and citation tools'
+            ],
+            'icon': 'bi-file-earmark-text',
+            'url': '/repository/',
+            'color': 'success'
+        },
+        'external_databases': {
+            'title': 'Online Databases & Journals',
+            'description': 'Premium academic databases and research tools',
+            'features': [
+                'JSTOR, IEEE Xplore, PubMed, and more',
+                'Full-text academic journals',
+                'Research databases and archives',
+                'Citation and reference tools',
+                'On-campus and VPN access'
+            ],
+            'icon': 'bi-globe',
+            'url': '/accounts/digital-resources/',
+            'color': 'info'
+        }
+    }
+    return render(request, 'accounts/library_resources.html', context)
+
+
 def privacy_policy_view(request):
     """Privacy policy page."""
     context = {
@@ -430,3 +481,17 @@ def virtual_tour_view(request):
         ]
     }
     return render(request, 'accounts/virtual_tour.html', context)
+
+
+def download_user_qr(request, user_id):
+    """Download QR code for a user."""
+    user = get_object_or_404(LibraryUser, id=user_id)
+    if not user.qr_code:
+        # Generate QR code if it doesn't exist
+        user.generate_qr_code()
+        user.save()
+
+    # Return the QR code file
+    response = HttpResponse(user.qr_code, content_type='image/png')
+    response['Content-Disposition'] = f'attachment; filename="user_{user.id}_qr.png"'
+    return response

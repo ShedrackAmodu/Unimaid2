@@ -1,0 +1,130 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Bulk Upload Book Files{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label %}">{{ opts.app_label|title }}</a>
+    &rsaquo; <a href="{% url 'admin:catalog_book_changelist' %}">{{ opts.verbose_name_plural|title }}</a>
+    &rsaquo; Bulk Upload
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Bulk Upload Book Files</h2>
+
+    <div class="form-row">
+        <p>Select multiple book files from your computer to upload them to the eLibrary. Each file will be automatically processed and a book record will be created.</p>
+        <p><strong>Supported formats:</strong> PDF, EPUB, DOC, DOCX, TXT, and other common book file formats.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <label for="book_files">Select book files (you can select multiple):</label>
+            <input type="file" name="book_files" id="book_files" multiple accept=".pdf,.epub,.doc,.docx,.txt,.rtf,.mobi,.azw,.azw3,.fb2,.djvu,.xps,.cbz,.cbr" required>
+            <p style="margin-top: 5px; color: #666; font-size: 12px;">Hold Ctrl (Cmd on Mac) to select multiple files</p>
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="Upload Book Files" class="default">
+            <a href="{% url 'admin:catalog_book_changelist' %}" class="cancel-link">Cancel</a>
+        </div>
+    </form>
+
+    <div class="form-row">
+        <h3>How it works</h3>
+        <ul>
+            <li>The filename (without extension) will be used as the book title</li>
+            <li>A unique ISBN will be automatically generated for each book</li>
+            <li>All uploaded books will be assigned to "Bulk Upload Publisher"</li>
+            <li>QR codes will be automatically generated for each book</li>
+            <li>You can edit each book later to add more details like authors, description, etc.</li>
+        </ul>
+    </div>
+
+    <div class="form-row">
+        <h3>Tips</h3>
+        <ul>
+            <li>You can upload up to 100 book files at once</li>
+            <li>Make sure filenames are descriptive (e.g., "Introduction to Algorithms - Cormen.pdf")</li>
+            <li>The system will show you exactly which files were uploaded successfully</li>
+            <li>If any files fail to upload, you'll see specific error messages</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.submit-row {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.cancel-link {
+    color: #999;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.cancel-link:hover {
+    color: #333;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-row input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-row ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.form-row ul li {
+    margin-bottom: 3px;
+}
+
+.form-row h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+}
+</style>
+
+<script>
+// Show selected files count
+document.getElementById('book_files').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const count = files.length;
+    if (count > 0) {
+        let message = `${count} file${count > 1 ? 's' : ''} selected`;
+        if (count > 100) {
+            message += ' (Warning: More than 100 files selected. Consider uploading in batches.)';
+        }
+        // You could add a status message here if needed
+        console.log(message);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-collection fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Explore our comprehensive library resources - from physical books to digital collections</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="library-resources-page">
+    <div class="container-fluid">
+        <!-- Introduction -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-4">Choose Your Library Experience</h2>
+                <p class="lead text-muted">
+                    Ramat Library offers multiple ways to access academic resources. Whether you prefer
+                    browsing physical books or accessing digital materials online, we have options for every learning style.
+                </p>
+            </div>
+        </div>
+
+        <!-- Resource Types -->
+        <div class="row g-4 mb-5">
+            <!-- Physical Resources -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-card h-100 border-0 shadow-hover">
+                    <div class="card-header bg-{{ physical_resources.color }} text-white text-center py-4">
+                        <div class="resource-icon mb-3">
+                            <i class="bi {{ physical_resources.icon }} fs-1"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">{{ physical_resources.title }}</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-4">{{ physical_resources.description }}</p>
+
+                        <div class="features-list mb-4">
+                            {% for feature in physical_resources.features %}
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-check-circle-fill text-{{ physical_resources.color }} mt-1 me-3"></i>
+                                <span class="small">{{ feature }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="access-info mb-4">
+                            <div class="alert alert-{{ physical_resources.color }} border-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Access:</strong> Visit the library in person during operating hours
+                            </div>
+                        </div>
+
+                        <a href="{{ physical_resources.url }}" class="btn btn-{{ physical_resources.color }} w-100">
+                            <i class="bi {{ physical_resources.icon }} me-2"></i>Browse Physical Collection
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Digital Resources -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-card h-100 border-0 shadow-hover">
+                    <div class="card-header bg-{{ digital_resources.color }} text-white text-center py-4">
+                        <div class="resource-icon mb-3">
+                            <i class="bi {{ digital_resources.icon }} fs-1"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">{{ digital_resources.title }}</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-4">{{ digital_resources.description }}</p>
+
+                        <div class="features-list mb-4">
+                            {% for feature in digital_resources.features %}
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-check-circle-fill text-{{ digital_resources.color }} mt-1 me-3"></i>
+                                <span class="small">{{ feature }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="access-info mb-4">
+                            <div class="alert alert-{{ digital_resources.color }} border-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Access:</strong> Available 24/7 from any internet-connected device
+                            </div>
+                        </div>
+
+                        <a href="{{ digital_resources.url }}" class="btn btn-{{ digital_resources.color }} w-100">
+                            <i class="bi {{ digital_resources.icon }} me-2"></i>Explore Digital Library
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- External Databases -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card resource-card h-100 border-0 shadow-hover">
+                    <div class="card-header bg-{{ external_databases.color }} text-white text-center py-4">
+                        <div class="resource-icon mb-3">
+                            <i class="bi {{ external_databases.icon }} fs-1"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">{{ external_databases.title }}</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-4">{{ external_databases.description }}</p>
+
+                        <div class="features-list mb-4">
+                            {% for feature in external_databases.features %}
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-check-circle-fill text-{{ external_databases.color }} mt-1 me-3"></i>
+                                <span class="small">{{ feature }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="access-info mb-4">
+                            <div class="alert alert-{{ external_databases.color }} border-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Access:</strong> On-campus or via university VPN
+                            </div>
+                        </div>
+
+                        <a href="{{ external_databases.url }}" class="btn btn-{{ external_databases.color }} w-100">
+                            <i class="bi {{ external_databases.icon }} me-2"></i>Access Databases
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-light py-4">
+                        <h3 class="fw-bold mb-0 text-center">
+                            <i class="bi bi-table me-2"></i>Resource Comparison
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th class="ps-4">Feature</th>
+                                        <th class="text-center">Physical Books</th>
+                                        <th class="text-center">Digital Library</th>
+                                        <th class="text-center">Online Databases</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Access Location</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">Library Building Only</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">Anywhere Online</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info">Campus/VPN</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Available Hours</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-warning text-dark">Library Hours</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">24/7</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">24/7</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Borrowing Required</td>
+                                        <td class="text-center">
+                                            <i class="bi bi-check-circle-fill text-primary fs-5"></i>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="bi bi-x-circle-fill text-muted fs-5"></i>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="bi bi-x-circle-fill text-muted fs-5"></i>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Return Required</td>
+                                        <td class="text-center">
+                                            <i class="bi bi-check-circle-fill text-primary fs-5"></i>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="bi bi-x-circle-fill text-muted fs-5"></i>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="bi bi-x-circle-fill text-muted fs-5"></i>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Content Type</td>
+                                        <td class="text-center">Books & Media</td>
+                                        <td class="text-center">Theses & Documents</td>
+                                        <td class="text-center">Journals & Articles</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold ps-4">Best For</td>
+                                        <td class="text-center small">In-depth reading, leisure</td>
+                                        <td class="text-center small">Research papers, theses</td>
+                                        <td class="text-center small">Scholarly articles, reviews</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Guide -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="fw-bold mb-0 text-center">
+                            <i class="bi bi-rocket-takeoff me-2"></i>Getting Started
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="text-center mb-4">
+                                    <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                                        1
+                                    </div>
+                                    <h5 class="fw-bold mt-3">Choose Your Resource Type</h5>
+                                    <p class="text-muted">Decide whether you need physical books, digital documents, or online databases based on your research needs.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center mb-4">
+                                    <div class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                                        2
+                                    </div>
+                                    <h5 class="fw-bold mt-3">Access the Resource</h5>
+                                    <p class="text-muted">Visit the library for physical books, log in online for digital resources, or use VPN for external databases.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center mb-4">
+                                    <div class="step-number bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                                        3
+                                    </div>
+                                    <h5 class="fw-bold mt-3">Get Help When Needed</h5>
+                                    <p class="text-muted">Contact our librarians for research assistance, technical support, or guidance with any library resource.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact for Help -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="fw-bold mb-4">Need Help Choosing the Right Resource?</h3>
+                        <p class="text-muted mb-4">
+                            Our library staff is here to help you navigate all our resources and find exactly what you need for your research or studies.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="/accounts/staff_directory/" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-people me-2"></i>Meet Our Librarians
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/accounts/contact/" class="btn btn-primary w-100">
+                                    <i class="bi bi-envelope me-2"></i>Contact for Assistance
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .resource-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .resource-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 31, 63, 0.15) !important;
+    }
+
+    .resource-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .resource-card:hover .resource-icon {
+        transform: scale(1.1);
+    }
+
+    .features-list .bi-check-circle-fill {
+        transition: transform 0.2s ease;
+    }
+
+    .resource-card:hover .features-list .bi-check-circle-fill {
+        transform: scale(1.2);
+    }
+
+    .step-number {
+        transition: all 0.3s ease;
+    }
+
+    .step-number:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(var(--primary-rgb), 0.03) !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .resource-card .card-header {
+            padding: 1.5rem !important;
+        }
+
+        .resource-card .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .step-number {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 1.2rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to resource cards
+        const resourceCards = document.querySelectorAll('.resource-card');
+        resourceCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate__animated', 'animate__fadeInUp');
+        });
+
+        // Add hover effects to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.01)';
+            });
+
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Animate step numbers on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const stepNumber = entry.target;
+                    stepNumber.style.animation = 'bounceIn 0.6s ease';
+                    observer.unobserve(stepNumber);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.step-number').forEach(step => {
+            observer.observe(step);
+        });
+
+        // Add click tracking for resource buttons
+        const resourceButtons = document.querySelectorAll('.resource-card .btn');
+        resourceButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Add loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading...';
+                this.disabled = true;
+
+                // Reset after a short delay (simulating navigation)
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 1000);
+            });
+        });
+    });
+</script>
+{% endblock %}

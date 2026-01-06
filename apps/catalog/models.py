@@ -1,4 +1,8 @@
 from django.db import models
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+import qrcode
+from io import BytesIO
 from config.models import BaseModel
 
 
@@ -96,6 +100,9 @@ class Book(BaseModel):
     edition = models.CharField(max_length=50, blank=True, help_text="Edition of the book")
     pages = models.PositiveIntegerField(help_text="Number of pages")
     language = models.CharField(max_length=50, default='English', help_text="Language of the book")
+    book_file = models.FileField(upload_to='books/', blank=True, null=True, help_text="Digital book file (PDF, EPUB, etc.)")
+    cover_image = models.ImageField(upload_to='book_covers/', blank=True, null=True, help_text="Book cover image")
+    qr_code = models.ImageField(upload_to='qr_codes/books/', blank=True, null=True, help_text="QR code image for the book")
 
     objects = models.Manager()  # Default manager
 
@@ -109,6 +116,41 @@ class Book(BaseModel):
     def is_available(self):
         """Check if the book has any available copies."""
         return self.copies.filter(status='available').exists()
+
+    def generate_qr_code(self):
+        """Generate QR code containing book information."""
+        # Create data string with book details
+        authors_str = ", ".join([author.name for author in self.authors.all()]) if self.authors.exists() else "Unknown"
+        data = f"Book: {self.title}\nISBN: {self.isbn}\nAuthors: {authors_str}\nPublisher: {self.publisher.name}"
+
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save to BytesIO
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+
+        # Save to model field
+        filename = f"book_{self.id}_qr.png"
+        self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Generate QR code if not exists
+        if not self.qr_code:
+            self.generate_qr_code()
+            super().save(update_fields=['qr_code'])
 
     def __str__(self):
         return self.title
@@ -139,12 +181,47 @@ class BookCopy(BaseModel):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available', help_text="Current status of the copy")
     acquisition_date = models.DateField(help_text="Date the copy was acquired")
     location = models.CharField(max_length=100, help_text="Shelf location or storage location")
+    qr_code = models.ImageField(upload_to='qr_codes/copies/', blank=True, null=True, help_text="QR code image for the book copy")
 
     class BookCopyManager(models.Manager):
         def available(self):
             return self.filter(status='available')
 
     objects = BookCopyManager()
+
+    def generate_qr_code(self):
+        """Generate QR code containing copy-specific information."""
+        # Create data string with copy details
+        data = f"Copy: {self.barcode}\nBook: {self.book.title}\nISBN: {self.book.isbn}\nLocation: {self.location}\nStatus: {self.get_status_display()}"
+
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Save to BytesIO
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+
+        # Save to model field
+        filename = f"copy_{self.id}_qr.png"
+        self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Generate QR code if not exists
+        if not self.qr_code:
+            self.generate_qr_code()
+            super().save(update_fields=['qr_code'])
 
     def __str__(self):
         return f"{self.book.title} - Copy {self.barcode}"

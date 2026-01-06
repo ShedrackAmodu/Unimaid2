@@ -62,7 +62,7 @@ class BookForm(forms.ModelForm):
     class Meta:
         model = Book
         fields = ['title', 'isbn', 'authors', 'publisher', 'faculty', 'department', 'topic', 'genre',
-                 'description', 'publication_date', 'edition', 'pages', 'language']
+                 'description', 'publication_date', 'edition', 'pages', 'language', 'book_file', 'cover_image']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'isbn': forms.TextInput(attrs={'class': 'form-control'}),
@@ -76,6 +76,8 @@ class BookForm(forms.ModelForm):
             'edition': forms.TextInput(attrs={'class': 'form-control'}),
             'pages': forms.NumberInput(attrs={'class': 'form-control'}),
             'language': forms.TextInput(attrs={'class': 'form-control'}),
+            'book_file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.epub,.doc,.docx,.txt'}),
+            'cover_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
 
     def __init__(self, *args, **kwargs):

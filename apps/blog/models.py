@@ -32,3 +32,34 @@ class BlogPost(BaseModel):
         verbose_name = "Blog Post"
         verbose_name_plural = "Blog Posts"
         ordering = ['-published_date', '-created_at']
+
+
+class StaticPage(BaseModel):
+    title = models.CharField(max_length=500, help_text="Title of the static page")
+    slug = models.SlugField(unique=True, help_text="URL slug for the page")
+    content = models.TextField(help_text="Content of the static page")
+    is_active = models.BooleanField(default=True, help_text="Whether the page is active")
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Static Page"
+        verbose_name_plural = "Static Pages"
+
+
+class FeaturedContent(BaseModel):
+    title = models.CharField(max_length=500, help_text="Title of the featured content")
+    content = models.TextField(blank=True, help_text="Short description")
+    image = models.ImageField(upload_to='featured/', blank=True, null=True, help_text="Featured image")
+    link = models.URLField(blank=True, help_text="Link URL")
+    is_active = models.BooleanField(default=True, help_text="Whether the content is active")
+    order = models.PositiveIntegerField(default=0, help_text="Display order")
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Featured Content"
+        verbose_name_plural = "Featured Content"
+        ordering = ['order', '-created_at']
