@@ -90,13 +90,12 @@
 <div class="row mb-5">
     <!-- Topic Sidebar -->
     <div class="col-lg-4 mb-5 mb-lg-0">
-        <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
+        <div class="card border-0 shadow-lg sticky-top sticky-top-offset-100">
             <div class="card-body p-4">
                 <!-- Topic Portrait -->
                 <div class="topic-portrait mb-4">
                     <div class="portrait-container rounded-4 overflow-hidden position-relative">
-                        <div class="portrait-placeholder d-flex align-items-center justify-content-center"
-                             style="height: 300px; background: linear-gradient(135deg, #0a2472, #3a86ff);">
+                            <div class="portrait-placeholder h-300 placeholder-gradient-primary d-flex align-items-center justify-content-center">
                             <div class="text-center text-white">
                                 <span class="display-1 fw-bold d-block">{{ topic.name|first|upper }}</span>
                                 <span class="fs-5">{{ topic.name }}</span>
@@ -363,7 +362,7 @@
                                     <span class="fw-bold">{{ year_data.year }}</span>
                                     <span class="text-muted">{{ year_data.count }} books</span>
                                 </div>
-                                <div class="progress" style="height: 8px;">
+                                <div class="progress progress-md">
                                     <div class="progress-bar bg-primary"
                                          style="width: {% widthratio year_data.count topic.books.count 100 %}%;">
                                     </div>
@@ -392,7 +391,7 @@
                                     <span class="fw-bold">{{ genre_data.name }}</span>
                                     <span class="text-muted">{{ genre_data.count }} books</span>
                                 </div>
-                                <div class="progress" style="height: 8px;">
+                                <div class="progress progress-md">
                                     <div class="progress-bar bg-success"
                                          style="width: {% widthratio genre_data.count topic.books.count 100 %}%;">
                                     </div>

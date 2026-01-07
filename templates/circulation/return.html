@@ -94,7 +94,7 @@
                                             {% if loan.book_copy.book.cover_image %}
                                             <img src="{{ loan.book_copy.book.cover_image.url }}" alt="{{ loan.book_copy.book.title }}" class="img-fluid rounded thumb-60x80">
                                             {% else %}
-                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 80px;">
+                                            <div class="thumb-60x80 bg-light rounded d-flex align-items-center justify-content-center">
                                                 <i class="bi bi-book text-muted fs-4"></i>
                                             </div>
                                             {% endif %}
@@ -248,7 +248,7 @@
     
     <!-- Right Column: Return Processing -->
     <div class="col-lg-4">
-        <div class="sticky-top" style="top: 100px;">
+        <div class="sticky-top sticky-top-offset-100">
             <!-- Return Processing Card -->
             <div class="card border-0 shadow-lg mb-4">
                 <div class="card-header bg-white border-0 py-4">
@@ -273,7 +273,7 @@
                     <!-- Selected Loans -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Selected Loans</label>
-                        <div id="selectedLoans" class="border rounded p-3" style="min-height: 150px; max-height: 300px; overflow-y: auto;">
+                        <div id="selectedLoans" class="border rounded p-3 min-h-150 max-h-300">
                             <div class="text-center text-muted py-4">
                                 <i class="bi bi-cart fs-1 mb-2"></i>
                                 <p class="mb-0">No loans selected</p>

@@ -69,8 +69,8 @@
         <div class="card event-card h-100 border-0 shadow-hover overflow-hidden">
             <div class="position-relative">
                 <!-- Event Image - You can add images to your Event model later -->
-                <div class="event-image-placeholder" style="height: 200px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-calendar-event text-white" style="font-size: 4rem; opacity: 0.8;"></i>
+                <div class="event-image-placeholder h-200 placeholder-gradient-primary d-flex align-items-center justify-content-center">
+                    <i class="bi bi-calendar-event text-white icon-4rem icon-faded"></i>
                 </div>
                 <div class="position-absolute top-0 end-0 m-3">
                     <span class="badge bg-primary px-3 py-2">
@@ -110,7 +110,7 @@
                 <!-- Registration Info -->
                 <div class="registration-info mb-4">
                     {% if event.max_attendees %}
-                    <div class="progress mb-2" style="height: 8px;">
+                    <div class="progress mb-2 progress-md">
                         <div class="progress-bar bg-primary" role="progressbar" 
                              style="width: {% widthratio event.registrations.count event.max_attendees 100 %}%">
                         </div>

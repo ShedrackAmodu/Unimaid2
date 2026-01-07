@@ -186,3 +186,52 @@
 .chart-h-200 { height: 200px !important; }
 .chart-h-300 { height: 300px !important; }
 
+/* Profile picture utilities */
+.profile-picture-180 {
+  width: 180px !important;
+  height: 180px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  border: 5px solid var(--light-blue);
+  display: inline-block;
+}
+
+.profile-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-2);
+}
+
+/* Small circular action button used near avatars */
+.btn-icon-sm { width: 40px !important; height: 40px !important; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Placeholder and square utilities used across templates */
+.placeholder-gradient-primary { background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); }
+.placeholder-light-gradient { background: linear-gradient(45deg, #f8f9fa, #e9ecef); }
+
+.sq-80 { width: 80px !important; height: 80px !important; display: inline-flex; align-items: center; justify-content: center; }
+.sq-100 { width: 100px !important; height: 100px !important; display: inline-flex; align-items: center; justify-content: center; }
+.sq-120 { width: 120px !important; height: 120px !important; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Large icon sizing helpers */
+.icon-4rem { font-size: 4rem !important; }
+.icon-5rem { font-size: 5rem !important; }
+.icon-6rem { font-size: 6rem !important; }
+.icon-faded { opacity: 0.8 !important; }
+
+/* Sticky offsets used where templates set explicit top values */
+.sticky-top-offset-20 { top: 20px !important; }
+.sticky-top-offset-100 { top: 100px !important; }
+
+/* Barcode/scanner background helper (re-usable pattern) */
+.bg-dashed-grid { background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 50%, #f0f0f0 50%, #f0f0f0 75%, transparent 75%, transparent); background-size: 20px 20px; }
+
+/* Min/max height helpers commonly used in templates */
+.min-h-150 { min-height: 150px !important; }
+.max-h-200 { max-height: 200px !important; }
+.max-h-300 { max-height: 300px !important; overflow-y: auto; }
+.min-h-200 { min-height: 200px !important; }
+

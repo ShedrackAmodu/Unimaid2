@@ -437,7 +437,7 @@
                                     <span class="fw-bold">{{ department.name|truncatechars:20 }}</span>
                                     <span class="text-muted">{{ department.books.count }} books</span>
                                 </div>
-                                <div class="progress" style="height: 8px;">
+                                <div class="progress progress-md">
                                     <div class="progress-bar bg-primary"
                                          style="width: {% widthratio department.books.count faculty.books.count 100 %}%;">
                                     </div>
@@ -465,7 +465,7 @@
                                     <span class="fw-bold">{{ genre_data.name }}</span>
                                     <span class="text-muted">{{ genre_data.count }} books</span>
                                 </div>
-                                <div class="progress" style="height: 8px;">
+                                <div class="progress progress-md">
                                     <div class="progress-bar bg-success"
                                          style="width: {% widthratio genre_data.count faculty.books.count 100 %}%;">
                                     </div>

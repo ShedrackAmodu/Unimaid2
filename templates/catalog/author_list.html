@@ -498,7 +498,7 @@
                                 <span class="small">{{ genre.name }}</span>
                                 <span class="small fw-bold">{{ genre.author_count }} authors</span>
                             </div>
-                            <div class="progress" style="height: 8px;">
+                            <div class="progress progress-md">
                                 <div class="progress-bar {% if forloop.first %}bg-primary{% elif forloop.counter == 2 %}bg-success{% else %}bg-warning{% endif %}" style="width: {% widthratio genre.author_count top_genres.0.author_count 100 %}%"></div>
                             </div>
                         </div>
