@@ -13,6 +13,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Site-wide responsive overrides -->
+    <link rel="stylesheet" href="{% static 'css/site-responsive.css' %}">
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
@@ -685,366 +687,13 @@
             box-shadow: 0 10px 30px rgba(58, 134, 255, 0.6);
         }
 
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .container {
-                max-width: 100%;
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
 
-            .main-content .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-        }
 
-        @media (max-width: 992px) {
-            .navbar-nav .nav-link {
-                padding: 0.6rem 0.8rem !important;
-                font-size: 0.9rem;
-                margin: 0 0.1rem;
-            }
 
-            .navbar-brand {
-                font-size: 1.2rem;
-            }
 
-            .navbar-brand img {
-                width: 40px !important;
-                height: 40px !important;
-                margin-right: 10px !important;
-            }
 
-            .theme-toggle {
-                width: 45px;
-                height: 45px;
-                font-size: 1.2rem;
-            }
 
-            .user-dropdown .dropdown-toggle {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
 
-            .user-dropdown .dropdown-toggle .me-2 {
-                display: none;
-            }
-
-            .navbar-toggler {
-                border: none;
-                padding: 0.5rem;
-            }
-
-            .navbar-toggler:focus {
-                box-shadow: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                font-size: 0.9rem;
-                overflow-x: hidden;
-            }
-
-            .navbar {
-                padding: 0.5rem 0;
-            }
-
-            .navbar-brand {
-                font-size: 1.05rem;
-            }
-
-            .navbar-brand img {
-                width: 30px;
-                height: 30px;
-                margin-right: 6px;
-            }
-
-            .navbar-nav .nav-link {
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.85rem;
-                margin: 0 0.2rem;
-            }
-
-            .theme-toggle {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-                margin-right: 0.5rem;
-            }
-
-            .theme-toggle-container {
-                margin-right: 0.5rem;
-            }
-
-            .user-dropdown .dropdown-toggle {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.85rem;
-            }
-
-            .user-dropdown .dropdown-toggle .me-2 {
-                display: none;
-            }
-
-            .hero-section {
-                padding: 2rem 0 !important;
-            }
-
-            .hero-section h1 {
-                font-size: 1.5rem !important;
-            }
-
-            .hero-section p {
-                font-size: 1rem !important;
-            }
-
-            .main-content {
-                padding: 2rem 0;
-                overflow-x: auto;
-            }
-
-            .page-header {
-                text-align: center;
-            }
-
-            .page-header .d-flex {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .page-header .me-3 {
-                margin-right: 0 !important;
-                margin-bottom: 1rem;
-            }
-
-            .card {
-                margin-bottom: 1rem;
-            }
-
-            .card-body {
-                padding: 1rem;
-            }
-
-            .btn {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
-            }
-
-            .btn-lg {
-                padding: 0.8rem 1.6rem;
-                font-size: 1rem;
-            }
-
-            .display-4 {
-                font-size: 2rem;
-            }
-
-            .display-5 {
-                font-size: 1.8rem;
-            }
-
-            .display-6 {
-                font-size: 1.5rem;
-            }
-
-            .h1, h1 { font-size: 1.35rem; }
-            .h2, h2 { font-size: 1.2rem; }
-            .h3, h3 { font-size: 1.05rem; }
-            .h4, h4 { font-size: 0.9rem; }
-            .h5, h5 { font-size: 0.825rem; }
-            .h6, h6 { font-size: 0.75rem; }
-
-            .footer {
-                padding: 3rem 0 1rem;
-                text-align: center;
-            }
-
-            .footer h5::after {
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .footer-links {
-                text-align: left;
-                margin-bottom: 2rem;
-            }
-
-            .social-links {
-                justify-content: center;
-                margin-top: 1rem;
-            }
-
-            .social-links a {
-                margin: 0.2rem;
-            }
-
-            .copyright {
-                font-size: 0.85rem;
-                padding-top: 1rem;
-            }
-
-            /* Mobile dropdowns */
-            .dropdown-menu {
-                position: static;
-                float: none;
-                width: auto;
-                margin-top: 0;
-                background-color: transparent;
-                border: none;
-                box-shadow: none;
-                padding: 0;
-            }
-
-            .dropdown-menu.show {
-                display: block;
-            }
-
-            .dropdown-item {
-                padding: 0.5rem 1rem;
-                text-align: center;
-                border-radius: 6px;
-                margin: 0.2rem 0;
-            }
-
-            /* Mobile tables */
-            .table-responsive {
-                font-size: 0.85rem;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-
-            .table th, .table td {
-                padding: 0.5rem;
-                white-space: normal;
-                word-break: break-word;
-                overflow-wrap: anywhere;
-                vertical-align: middle;
-            }
-
-            .table th {
-                font-weight: 600;
-                border-bottom: 2px solid var(--primary-blue);
-            }
-
-            /* Table text truncation for very long content */
-            .table .text-truncate {
-                max-width: 150px;
-            }
-
-            /* Mobile forms */
-            .form-control, .form-select {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            /* Mobile alerts */
-            .alert {
-                padding: 0.8rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            /* Mobile breadcrumb */
-            .breadcrumb {
-                padding: 0.5rem 1rem;
-                font-size: 0.85rem;
-            }
-
-            /* Mobile FAB */
-            .fab {
-                bottom: 1rem;
-                right: 1rem;
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-
-            /* Mobile particles */
-            .particle {
-                display: none;
-            }
-
-            /* Mobile animations - reduce motion for better performance */
-            @media (prefers-reduced-motion: reduce) {
-                *, *::before, *::after {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                }
-            }
-        }
-
-        @media (max-width: 576px) {
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-
-            .navbar-toggler {
-                padding: 0.25rem 0.5rem;
-                font-size: 1.25rem;
-            }
-
-            .navbar-brand {
-                font-size: 0.9rem;
-            }
-
-            .navbar-brand img {
-                width: 25px;
-                height: 25px;
-                margin-right: 4px;
-            }
-
-            .btn-group .btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
-            }
-
-            .card-body p {
-                font-size: 0.9rem;
-            }
-
-            .badge {
-                font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
-            }
-
-            .social-links a {
-                width: 35px;
-                height: 35px;
-                font-size: 0.9rem;
-            }
-
-            .footer h5 {
-                font-size: 1rem;
-            }
-
-            .footer-links li {
-                padding-left: 15px;
-            }
-
-            .copyright {
-                font-size: 0.8rem;
-            }
-
-            /* Stack columns on very small screens */
-            .col-12, .col-sm-6, .col-md-4, .col-lg-3, .col-xl-2 {
-                margin-bottom: 1rem;
-            }
-
-            /* Hide less important elements on very small screens */
-            .nav-badge {
-                display: none;
-            }
-
-            .breadcrumb-item:not(.active) {
-                display: none;
-            }
-
-            .breadcrumb-item.active::before {
-                content: "📍 ";
-            }
-        }
 
         /* Print Styles */
         @media print {
@@ -1055,15 +704,6 @@
             .card {
                 box-shadow: none !important;
                 border: 1px solid #dee2e6;
-            }
-        }
-
-        /* Full Width Content on Desktop */
-        @media (min-width: 1200px) {
-            .main-content .container {
-                max-width: 100%;
-                padding-left: 2rem;
-                padding-right: 2rem;
             }
         }
     </style>
@@ -1079,7 +719,7 @@
         <div class="container-fluid">
             <!-- Logo and Brand -->
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" style="width: 60px; height: 60px; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">
+                <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" class="brand-logo">
                  University of Maiduguri
                 <span class="nav-badge">Ramat Library</span>
             </a>
@@ -1101,7 +741,7 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                            title="Physical books and print materials you can borrow from the library" data-bs-toggle="tooltip">
                             <i class="bi bi-book me-2"></i>Physical Library
-                            <span class="badge bg-warning text-dark ms-2" style="font-size: 0.6rem;">BORROW</span>
+                            <span class="badge bg-warning text-dark ms-2 badge-small">BORROW</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/catalog/" title="Browse and search our physical book collection">
@@ -1127,7 +767,7 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                            title="Digital repository with theses, dissertations, and research documents - available 24/7" data-bs-toggle="tooltip">
                             <i class="bi bi-file-earmark-text me-2"></i>Digital Repository
-                            <span class="badge bg-success ms-2" style="font-size: 0.6rem;">24/7</span>
+                            <span class="badge bg-success ms-2 badge-small">24/7</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/repository/" title="Browse our digital document collection">
@@ -1305,7 +945,7 @@
                 <div class="col">
                     <div class="d-flex align-items-center mb-3">
                         <div class="me-3">
-                            <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <div class="icon-60 icon-60--gradient">
                                 <i class="bi bi-book fs-3 text-white"></i>
                             </div>
                         </div>
@@ -1338,7 +978,7 @@
                         <h5>Ramat Library</h5>
                         <p class="mb-3">Supporting teaching, learning and research by providing timely access to quality print and electronic resources, information services, and skills training.</p>
                         <div class="d-flex align-items-center">
-                            <img src="{% static 'images/logo.png' %}" alt="Library Seal" class="img-fluid me-3" style="max-height: 80px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                            <img src="{% static 'images/logo.png' %}" alt="Library Seal" class="img-fluid me-3 logo-seal">
                             <div>
                                 <h6 class="text-gold mb-1">University of Maiduguri</h6>
                                 <small>Established 1975</small>
@@ -1592,11 +1232,11 @@
         function animateParticles() {
             const particles = document.querySelectorAll('.particle');
             particles.forEach(particle => {
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
+                const x = Math.random() * 1920;
+                const y = Math.random() * 1080;
                 particle.style.left = `${x}px`;
                 particle.style.top = `${y}px`;
-                
+
                 // Random animation
                 particle.animate([
                     { transform: 'scale(1) rotate(0deg)', opacity: 0.1 },
@@ -1655,8 +1295,4 @@
             }
         });
 
-        // Performance optimization
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
+        // Performance optimization removed

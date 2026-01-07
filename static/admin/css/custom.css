@@ -258,29 +258,3 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    #header {
-        padding: 10px !important;
-    }
-
-    #branding h1 {
-        font-size: 1.4rem;
-    }
-
-    #content {
-        padding: 15px !important;
-    }
-
-    .object-tools {
-        float: none !important;
-        margin-bottom: 15px;
-    }
-
-    .object-tools a {
-        display: block;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-}

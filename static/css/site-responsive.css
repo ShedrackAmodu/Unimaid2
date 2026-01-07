@@ -1,0 +1,188 @@
+/* Centralized responsive and card layout overrides for the site
+   This file contains mobile-first adjustments and overrides to
+   ensure consistent card spacing, grid behavior and image handling.
+*/
+
+:root {
+  --site-container-pad: 1rem;
+}
+
+/* Ensure container padding is comfortable on small screens */
+.container, .container-fluid {
+  padding-left: var(--site-container-pad);
+  padding-right: var(--site-container-pad);
+}
+
+/* Navbar: allow items to wrap and keep toggle accessible */
+.navbar .navbar-nav {
+  flex-wrap: wrap;
+}
+
+/* Collapse area should stack on small screens */
+@media (max-width: 991.98px) {
+  .navbar .collapse {
+    display: block !important;
+  }
+  .navbar .navbar-nav {
+    justify-content: flex-start;
+    gap: .25rem;
+  }
+}
+
+/* Card consistency */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card .card-body {
+  flex: 1 1 auto;
+}
+
+/* Make sure card images cover and have consistent heights */
+.card img, .card .card-img-top {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Reduce image height on smaller devices */
+@media (max-width: 576px) {
+  .card img, .card .card-img-top {
+    height: 160px;
+  }
+}
+
+/* Ensure small stat/feature cards stay readable */
+.card h5, .card h6, .card p {
+  margin-bottom: .5rem;
+}
+
+/* Ensure card groups align and equalize height using bootstrap utilities fallback */
+.row.g-4 > [class*="col-"] {
+  display: flex;
+}
+.row.g-4 > [class*="col-"] .card {
+  flex: 1 1 auto;
+}
+
+/* Make form controls and buttons full width on small viewports where appropriate */
+@media (max-width: 576px) {
+  .form-control, .form-select, .btn {
+    width: 100% !important;
+  }
+  .navbar .dropdown-menu {
+    position: static !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-top: .5rem;
+  }
+}
+
+/* Footer social icons spacing */
+.social-links a {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: .5rem;
+}
+
+/* Improve spacing for grid columns on extra-small devices */
+@media (max-width: 767.98px) {
+  .container { padding-left: .75rem; padding-right: .75rem; }
+  .main-content { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .card { margin-bottom: 1rem; }
+}
+
+/* Ensure media inside cards cannot overflow */
+.card img, .card video, .card iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Document & Collection specific classes (fallbacks if templates use them) */
+.document-card, .collection-card {
+  min-height: 100%;
+}
+
+/* Tidy up small utility cards often used on landing sections */
+.card.shadow-sm { padding: 0; }
+.card.shadow-sm .card-body { padding: 1rem; }
+
+/* Accessibility: ensure focus outlines visible on small devices */
+:focus { outline: 3px solid rgba(58,134,255,0.2); outline-offset: 2px; }
+
+/* Minor spacing normalization for buttons inside card footers */
+.card .card-footer .btn { margin-right: .5rem; margin-bottom: .5rem; }
+
+/* Final responsive tweak for wide desktops to prevent extremely long line lengths */
+@media (min-width: 1400px) {
+  .container { max-width: 1280px; }
+}
+
+/* Utility classes to replace common inline patterns */
+.brand-logo {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  object-fit: cover;
+}
+
+.logo-seal {
+  max-height: 80px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.badge-small { font-size: 0.6rem; }
+
+.icon-60 {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-60--gradient { background: var(--gradient-2); }
+.icon-80 { width: 80px; height: 80px; }
+.icon-circle-80 { width: 80px; height: 80px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+
+.progress-sm { height: 6px; }
+.progress-md { height: 8px; }
+.progress-lg { height: 10px; }
+
+/* Image sizing utilities */
+.img-max-150 { max-height: 150px !important; }
+.img-max-200 { max-height: 200px !important; }
+.img-max-300 { max-height: 300px !important; }
+.img-max-400 { max-height: 400px !important; }
+
+/* Fixed height helpers with cover behavior */
+.h-80 { height: 80px !important; }
+.h-150 { height: 150px !important; }
+.h-200 { height: 200px !important; }
+.h-250 { height: 250px !important; }
+.h-300 { height: 300px !important; }
+.h-368 { height: 368px !important; }
+.w-368 { width: 368px !important; }
+.h-400 { height: 400px !important; }
+.h-600 { height: 600px !important; }
+
+.img-cover { object-fit: cover !important; width: 100%; height: auto; display:block; }
+.img-cover--fixed { object-fit: cover !important; }
+
+/* Common thumbnail size used in multiple templates */
+.thumb-60x80 { width: 60px !important; height: 80px !important; object-fit: cover !important; }
+
+/* Chart / container heights */
+.chart-h-200 { height: 200px !important; }
+.chart-h-300 { height: 300px !important; }
+

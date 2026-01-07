@@ -14,7 +14,7 @@
     <div class="col">
         <div class="d-flex align-items-center mb-3">
             <div class="me-3">
-                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div class="icon-60 icon-60--gradient">
                     <i class="bi bi-clock-history fs-3 text-white"></i>
                 </div>
             </div>
@@ -36,9 +36,9 @@
                 <div class="row mb-5">
                     <div class="col-md-4">
                         {% if book.cover_image %}
-                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid rounded shadow" style="max-height: 300px; object-fit: cover;">
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid rounded shadow img-max-300 img-cover--fixed">
                         {% else %}
-                        <div class="bg-light rounded d-flex align-items-center justify-content-center shadow" style="height: 300px;">
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center shadow h-300">
                             <i class="bi bi-book text-muted" style="font-size: 8rem;"></i>
                         </div>
                         {% endif %}

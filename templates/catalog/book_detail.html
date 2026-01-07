@@ -67,13 +67,13 @@
 <div class="row mb-5">
     <!-- Book Cover & Actions -->
     <div class="col-lg-4 mb-5 mb-lg-0">
-        <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
+            <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
             <div class="card-body p-4">
                 <!-- Book Cover -->
                 <div class="book-cover-container mb-4">
                     <div class="book-cover-main position-relative rounded-4 overflow-hidden">
-                        <img src="images/librarybooks.jfif" alt="{{ book.title }}" 
-                             class="img-fluid w-100" style="height: 400px; object-fit: cover;">
+                            <img src="images/librarybooks.jfif" alt="{{ book.title }}" 
+                                class="img-fluid w-100 h-400 img-cover--fixed">
                         <div class="position-absolute top-0 end-0 m-3">
                             {% if book.publication_date.year >= 2023 %}
                             <span class="badge bg-danger px-3 py-2 fs-6">NEW</span>
@@ -483,9 +483,8 @@
                         <div class="similar-book-card">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="position-relative">
-                                    <img src="images/librarybooks.jfif" class="card-img-top" 
-                                         alt="{{ similar_book.title }}" 
-                                         style="height: 150px; object-fit: cover;">
+                                     <img src="images/librarybooks.jfif" class="card-img-top h-150 img-cover--fixed" 
+                                         alt="{{ similar_book.title }}">
                                     {% if similar_book.is_available %}
                                     <span class="position-absolute top-0 start-0 m-2 badge bg-success">
                                         Available

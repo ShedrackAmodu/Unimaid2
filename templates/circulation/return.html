@@ -13,7 +13,7 @@
     <div class="col">
         <div class="d-flex align-items-center mb-3">
             <div class="me-3">
-                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div class="icon-60 icon-60--gradient">
                     <i class="bi bi-arrow-return-left fs-3 text-white"></i>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                                     <div class="d-flex">
                                         <div class="me-3">
                                             {% if loan.book_copy.book.cover_image %}
-                                            <img src="{{ loan.book_copy.book.cover_image.url }}" alt="{{ loan.book_copy.book.title }}" class="img-fluid rounded" style="width: 60px; height: 80px; object-fit: cover;">
+                                            <img src="{{ loan.book_copy.book.cover_image.url }}" alt="{{ loan.book_copy.book.title }}" class="img-fluid rounded thumb-60x80">
                                             {% else %}
                                             <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 80px;">
                                                 <i class="bi bi-book text-muted fs-4"></i>

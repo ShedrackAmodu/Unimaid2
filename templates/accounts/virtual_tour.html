@@ -15,7 +15,7 @@
     <div class="col">
         <div class="d-flex align-items-center mb-3">
             <div class="me-3">
-                <div style="width: 60px; height: 60px; background: var(--gradient-2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div class="icon-60 icon-60--gradient">
                     <i class="bi bi-camera-video fs-3 text-white"></i>
                 </div>
             </div>
@@ -111,10 +111,10 @@
                     </div>
                     <div class="card-body p-0">
                         <!-- Tour Viewer Container -->
-                        <div class="tour-viewer" style="height: 600px; position: relative;">
+                        <div class="tour-viewer h-600" style="position: relative;">
                             <!-- 360 Viewer Placeholder -->
-                            <div id="tourViewer" class="w-100 h-100 d-flex align-items-center justify-content-center" 
-                                 style="background: linear-gradient(rgba(10, 36, 114, 0.1), rgba(10, 36, 114, 0.2)), url('{% static "images/frontview.png" %}') center/cover;">
+                               <div id="tourViewer" class="w-100 h-100 d-flex align-items-center justify-content-center" 
+                                   style="background: linear-gradient(rgba(10, 36, 114, 0.1), rgba(10, 36, 114, 0.2)), url('{% static "images/frontview.png" %}') center/cover;">
                                 <div class="text-center text-white p-4 rounded" style="background: rgba(0, 0, 0, 0.7); max-width: 500px;">
                                     <i class="bi bi-camera-video-fill fs-1 mb-3"></i>
                                     <h4>Interactive Tour Viewer</h4>
@@ -200,10 +200,9 @@
                                 <div class="location-card" data-target="entrance">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/frontview.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Main Entrance"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/frontview.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Main Entrance">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-primary">1</span>
                                             </div>
@@ -226,10 +225,9 @@
                                 <div class="location-card" data-target="reading-room">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/students_reading.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Reading Room"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/students_reading.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Reading Room">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-success">2</span>
                                             </div>
@@ -252,10 +250,9 @@
                                 <div class="location-card" data-target="digital-lab">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/ramat_ai5.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Digital Lab"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/ramat_ai5.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Digital Lab">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-warning">3</span>
                                             </div>
@@ -278,10 +275,9 @@
                                 <div class="location-card" data-target="book-stacks">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/librarybooks.jfif' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Book Stacks"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/librarybooks.jfif' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Book Stacks">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-info">4</span>
                                             </div>
@@ -304,10 +300,9 @@
                                 <div class="location-card" data-target="circulation">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/staff.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Circulation Desk"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/staff.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Circulation Desk">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-danger">5</span>
                                             </div>
@@ -330,10 +325,9 @@
                                 <div class="location-card" data-target="group-study">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/ramat_a4i.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Group Study Rooms"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/ramat_a4i.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Group Study Rooms">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-purple">6</span>
                                             </div>
@@ -356,10 +350,9 @@
                                 <div class="location-card" data-target="special-collections">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/ramat_ai2.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Special Collections"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/ramat_ai2.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Special Collections">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-brown">7</span>
                                             </div>
@@ -382,10 +375,9 @@
                                 <div class="location-card" data-target="auditorium">
                                     <div class="card h-100 border-0 shadow-hover">
                                         <div class="position-relative">
-                                            <img src="{% static 'images/ramat_ai3.png' %}" 
-                                                 class="card-img-top" 
-                                                 alt="Auditorium"
-                                                 style="height: 200px; object-fit: cover;">
+                                                <img src="{% static 'images/ramat_ai3.png' %}" 
+                                                    class="card-img-top h-200 img-cover--fixed" 
+                                                    alt="Auditorium">
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-teal">8</span>
                                             </div>
