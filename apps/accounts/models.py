@@ -58,11 +58,62 @@ class LibraryUser(AbstractUser, BaseModel):
         self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_membership = None
+        if not is_new:
+            old_user = LibraryUser.objects.get(pk=self.pk)
+            old_membership = old_user.membership_type
+
         super().save(*args, **kwargs)
+
+        # Assign group based on membership_type if changed
+        if is_new or old_membership != self.membership_type:
+            self.assign_group_based_on_membership()
+            # Save again to persist group and is_staff changes
+            super().save(update_fields=['is_staff'])
+
         # Generate QR code if not exists
         if not self.qr_code:
             self.generate_qr_code()
             super().save(update_fields=['qr_code'])
+
+    def assign_group_based_on_membership(self):
+        """Assign user to appropriate group based on membership_type."""
+        from django.contrib.auth.models import Group
+
+        # Clear existing groups (except for superusers who stay in Admin)
+        if not self.is_superuser:
+            self.groups.clear()
+
+        # Map membership_type to group
+        group_mapping = {
+            'student': 'Patron',
+            'faculty': 'Patron',
+            'staff': 'Staff',
+            'public': 'Patron',
+        }
+
+        group_name = group_mapping.get(self.membership_type)
+        if group_name:
+            try:
+                group = Group.objects.get(name=group_name)
+                self.groups.add(group)
+            except Group.DoesNotExist:
+                pass  # Group not created yet
+
+        # Superusers get Admin group
+        if self.is_superuser:
+            try:
+                admin_group = Group.objects.get(name='Admin')
+                self.groups.add(admin_group)
+            except Group.DoesNotExist:
+                pass
+
+        # Set is_staff for Staff membership (don't save here to avoid recursion)
+        if self.membership_type == 'staff':
+            self.is_staff = True
+        elif not self.is_superuser:
+            self.is_staff = False
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.username})"

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
@@ -146,6 +146,7 @@ def return_book(request):
 
 
 @login_required
+@permission_required('circulation.add_reservation')
 def reserve_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     user = request.user
@@ -172,6 +173,7 @@ def reserve_book(request, book_id):
 
 
 @login_required
+@permission_required('circulation.change_loan')
 def renew_loan(request, loan_id):
     loan = get_object_or_404(Loan, id=loan_id, user=request.user, status='active')
 
@@ -189,6 +191,7 @@ def renew_loan(request, loan_id):
 
 
 @login_required
+@permission_required('circulation.view_fine')
 def pay_fine(request, fine_id):
     fine = get_object_or_404(Fine, id=fine_id, loan__user=request.user, status='unpaid')
 
