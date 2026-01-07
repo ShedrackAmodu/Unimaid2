@@ -73,10 +73,7 @@
                     <!-- Faculty Avatar -->
                     <div class="faculty-avatar-container mb-4">
                         <div class="faculty-avatar mx-auto">
-                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width: 100px; height: 100px; background: linear-gradient(135deg,
-                                        {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
-                                        {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                            <div class="sq-100 rounded-circle d-flex align-items-center justify-content-center placeholder-gradient-primary avatar-placeholder">
                                 <span class="text-white fs-2 fw-bold">{{ faculty.name|first|upper }}</span>
                             </div>
                         </div>
@@ -121,7 +118,7 @@
             <div class="card border-0 shadow-lg">
                 <div class="card-body p-5 text-center">
                     <div class="mb-4">
-                        <i class="bi bi-building-x text-muted" style="font-size: 5rem;"></i>
+                        <i class="bi bi-building-x text-muted icon-5rem"></i>
                     </div>
                     <h3 class="fw-bold text-muted mb-3">No Faculties Found</h3>
                     <p class="text-muted mb-4">
@@ -164,10 +161,7 @@
                         {% for faculty in faculties %}
                         <tr class="faculty-list-row">
                             <td>
-                                <div class="list-avatar rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 50px; height: 50px; background: linear-gradient(135deg,
-                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
-                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <div class="sq-50 rounded-circle d-flex align-items-center justify-content-center placeholder-gradient-primary list-avatar">
                                     <span class="text-white fw-bold">{{ faculty.name|first|upper }}</span>
                                 </div>
                             </td>
@@ -274,10 +268,7 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="faculty-overview-card text-center">
                             <div class="overview-avatar mb-3 mx-auto">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 80px; height: 80px; background: linear-gradient(135deg,
-                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
-                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <div class="sq-80 rounded-circle d-flex align-items-center justify-content-center placeholder-gradient-primary">
                                     <span class="text-white fs-4 fw-bold">{{ faculty.name|first|upper }}</span>
                                 </div>
                             </div>

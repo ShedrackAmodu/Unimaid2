@@ -25,6 +25,14 @@ def main():
         print(f"Error running migrate: {e}")
         return
 
+    print("Running collectstatic...")
+    try:
+        call_command('collectstatic', '--noinput')
+        print("Collectstatic completed successfully.")
+    except Exception as e:
+        print(f"Error running collectstatic: {e}")
+        return
+
     print("Creating superuser...")
     try:
         if not LibraryUser.objects.filter(username='drmk').exists():

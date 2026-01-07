@@ -151,24 +151,55 @@
 <div class="welcome-message mb-5 animate__animated animate__fadeIn">
     <div class="container-fluid">
         <div class="card border-0 shadow-lg overflow-hidden">
-            <!-- Leadership Images Section -->
+            <!-- Leadership Images Carousel -->
             <div class="leadership-images p-4 bg-light">
-                <div class="row g-3 text-center">
-                    <div class="col-md-4 text-center">
-                        <img src="{% static 'images/Registrar.jpeg' %}" alt="Registrar" class="img-fluid rounded mb-3 shadow h-368 w-368 img-cover--fixed">
-                        <h6 class="fw-bold mb-1">Ahmed Alhaji Lawan</h6>
-                        <small class="text-muted">Registrar, University of Maiduguri</small>
+                <div id="leadershipCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                    <!-- Carousel Indicators -->
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#leadershipCarousel" data-bs-slide-to="0" class="active"></button>
+                        <button type="button" data-bs-target="#leadershipCarousel" data-bs-slide-to="1"></button>
+                        <button type="button" data-bs-target="#leadershipCarousel" data-bs-slide-to="2"></button>
                     </div>
-                    <div class="col-md-4 text-center">
-                        <img src="{% static 'images/school-Vc.jpeg' %}" alt="Vice Chancellor" class="img-fluid rounded mb-3 shadow h-368 w-368 img-cover--fixed">
-                        <h6 class="fw-bold mb-1">Prof. Mohammed Laminu Mele</h6>
-                        <small class="text-muted">Vice-Chancellor, University of Maiduguri</small>
+
+                    <!-- Carousel Items -->
+                    <div class="carousel-inner">
+                        <!-- Slide 1: Registrar -->
+                        <div class="carousel-item active">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-4">
+                                <img src="{% static 'images/Registrar.jpeg' %}" alt="Registrar" class="img-fluid rounded mb-4 shadow" style="width: 300px; height: 300px; object-fit: cover;">
+                                <h5 class="fw-bold mb-2">Ahmed Alhaji Lawan</h5>
+                                <p class="text-muted mb-0">Registrar, University of Maiduguri</p>
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: Vice Chancellor -->
+                        <div class="carousel-item">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-4">
+                                <img src="{% static 'images/school-Vc.jpeg' %}" alt="Vice Chancellor" class="img-fluid rounded mb-4 shadow" style="width: 300px; height: 300px; object-fit: cover;">
+                                <h5 class="fw-bold mb-2">Prof. Mohammed Laminu Mele</h5>
+                                <p class="text-muted mb-0">Vice-Chancellor, University of Maiduguri</p>
+                            </div>
+                        </div>
+
+                        <!-- Slide 3: University Librarian -->
+                        <div class="carousel-item">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-4">
+                                <img src="{% static 'images/librarian.jpg' %}" alt="University Librarian" class="img-fluid rounded mb-4 shadow" style="width: 300px; height: 300px; object-fit: cover;">
+                                <h5 class="fw-bold mb-2">Dr. Talatu Adamu Rabasa</h5>
+                                <p class="text-muted mb-0">University Librarian, Ramat Library</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4 text-center">
-                        <img src="{% static 'images/librarian.jpg' %}" alt="University Librarian" class="img-fluid rounded mb-3 shadow h-368 w-368 img-cover--fixed">
-                        <h6 class="fw-bold mb-1">Dr. Talatu Adamu Rabasa</h6>
-                        <small class="text-muted">University Librarian, Ramat Library</small>
-                    </div>
+
+                    <!-- Carousel Controls -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#leadershipCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#leadershipCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
             </div>
 
@@ -414,8 +445,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
                     <div class="position-relative">
-                        <img src="{% static 'images/librarybooks.jfif' %}" class="card-img-top" alt="Science & Technology"
-                             style="height: 200px; object-fit: cover;">
+                            <img src="{% static 'images/librarybooks.jfif' %}" class="card-img-top h-200 img-cover" alt="Science & Technology">
                         <div class="position-absolute top-0 start-0 m-3">
                             <span class="badge bg-primary px-3 py-2">Science</span>
                         </div>
@@ -439,8 +469,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
                     <div class="position-relative">
-                        <img src="{% static 'images/frontview.png' %}" class="card-img-top" alt="Humanities & Arts"
-                             style="height: 200px; object-fit: cover;">
+                            <img src="{% static 'images/frontview.png' %}" class="card-img-top h-200 img-cover" alt="Humanities & Arts">
                         <div class="position-absolute top-0 start-0 m-3">
                             <span class="badge bg-success px-3 py-2">Humanities</span>
                         </div>
@@ -464,8 +493,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card collection-card h-100 border-0 shadow-hover overflow-hidden">
                     <div class="position-relative">
-                        <img src="{% static 'images/students_reading.png' %}" class="card-img-top" alt="Social Sciences"
-                             style="height: 200px; object-fit: cover;">
+                            <img src="{% static 'images/students_reading.png' %}" class="card-img-top h-200 img-cover" alt="Social Sciences">
                         <div class="position-absolute top-0 start-0 m-3">
                             <span class="badge bg-warning px-3 py-2">Social Sciences</span>
                         </div>
@@ -597,8 +625,8 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="gallery-item position-relative overflow-hidden rounded-4">
-                            <img src="{% static 'images/frontview.png' %}" alt="Library Entrance"
-                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                               <img src="{% static 'images/frontview.png' %}" alt="Library Entrance"
+                                   class="img-fluid w-100 h-300 img-cover">
                             <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
                                 <div>
                                     <h5 class="text-white fw-bold mb-2">Main Entrance</h5>
@@ -609,8 +637,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="gallery-item position-relative overflow-hidden rounded-4">
-                            <img src="{% static 'images/students_reading.png' %}" alt="Reading Area"
-                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                               <img src="{% static 'images/students_reading.png' %}" alt="Reading Area"
+                                   class="img-fluid w-100 h-300 img-cover">
                             <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
                                 <div>
                                     <h5 class="text-white fw-bold mb-2">Reading Room</h5>
@@ -621,8 +649,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="gallery-item position-relative overflow-hidden rounded-4">
-                            <img src="{% static 'images/librarybooks.jfif' %}" alt="Book Stacks"
-                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                               <img src="{% static 'images/librarybooks.jfif' %}" alt="Book Stacks"
+                                   class="img-fluid w-100 h-300 img-cover">
                             <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
                                 <div>
                                     <h5 class="text-white fw-bold mb-2">Book Stacks</h5>
@@ -633,8 +661,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="gallery-item position-relative overflow-hidden rounded-4">
-                            <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Lab"
-                                 class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                               <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Lab"
+                                   class="img-fluid w-100 h-300 img-cover">
                             <div class="gallery-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end p-4">
                                 <div>
                                     <h5 class="text-white fw-bold mb-2">Digital Lab</h5>
@@ -887,8 +915,8 @@
                         </div>
                         <div class="col-lg-6 d-none d-lg-block">
                             <div class="h-100 position-relative">
-                                <img src="{% static 'images/students_reading.png' %}" alt="Library Community"
-                                     class="img-fluid h-100" style="object-fit: cover;">
+                                  <img src="{% static 'images/students_reading.png' %}" alt="Library Community"
+                                      class="img-fluid h-100 img-cover">
                                 <div class="position-absolute bottom-0 start-0 w-100 p-4 bg-gradient"
                                      style="background: linear-gradient(transparent, rgba(0, 31, 63, 0.8));">
                                     <h5 class="text-white fw-bold mb-2">Join 5,000+ Active Members</h5>
@@ -903,7 +931,7 @@
     </div>
 </section>
 
-<!-- Quick Stats Section -->
+{% comment %} <!-- Quick Stats Section -->
 <section id="quick-stats" class="py-5 animate__animated animate__fadeIn">
     <div class="container-fluid">
         <div class="row g-4">
@@ -937,7 +965,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> {% endcomment %}
 {% endblock %}
 
 {% block scripts %}
@@ -947,14 +975,14 @@
     #heroCarousel .carousel-item {
         height: 600px;
     }
-    
+
     #heroCarousel .carousel-caption {
         background: linear-gradient(90deg, rgba(10, 36, 114, 0.8) 0%, rgba(10, 36, 114, 0.6) 100%);
         padding: 3rem;
         border-radius: 20px;
         margin: 2rem;
     }
-    
+
     #heroCarousel .carousel-indicators button {
         width: 12px;
         height: 12px;
@@ -963,11 +991,11 @@
         border: 2px solid white;
         background: transparent;
     }
-    
+
     #heroCarousel .carousel-indicators button.active {
         background: white;
     }
-    
+
     #heroCarousel .carousel-control-prev,
     #heroCarousel .carousel-control-next {
         width: 60px;
@@ -978,10 +1006,50 @@
         transform: translateY(-50%);
         margin: 0 2rem;
     }
-    
+
     #heroCarousel .carousel-control-prev:hover,
     #heroCarousel .carousel-control-next:hover {
         background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Leadership Carousel Styles */
+    #leadershipCarousel .carousel-item {
+        min-height: 450px;
+    }
+
+    #leadershipCarousel .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin: 0 5px;
+        border: 2px solid var(--primary-blue);
+        background: transparent;
+    }
+
+    #leadershipCarousel .carousel-indicators button.active {
+        background: var(--primary-blue);
+    }
+
+    #leadershipCarousel .carousel-control-prev,
+    #leadershipCarousel .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background: rgba(10, 36, 114, 0.1);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0 1rem;
+        border: none;
+    }
+
+    #leadershipCarousel .carousel-control-prev:hover,
+    #leadershipCarousel .carousel-control-next:hover {
+        background: rgba(10, 36, 114, 0.2);
+    }
+
+    #leadershipCarousel .carousel-control-prev-icon,
+    #leadershipCarousel .carousel-control-next-icon {
+        filter: invert(0.3);
     }
     
     /* Welcome Message Styles */
@@ -1196,6 +1264,14 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize hero carousel
         const heroCarousel = new bootstrap.Carousel('#heroCarousel', {
+            interval: 5000,
+            wrap: true,
+            touch: true,
+            pause: 'hover'
+        });
+
+        // Initialize leadership carousel
+        const leadershipCarousel = new bootstrap.Carousel('#leadershipCarousel', {
             interval: 5000,
             wrap: true,
             touch: true,

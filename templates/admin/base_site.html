@@ -474,7 +474,7 @@ select:focus {
 {% block branding %}
 <h1 id="site-name">
     <a href="{% url 'admin:index' %}">
-        <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" style="height: 35px; margin-right: 10px; vertical-align: middle;">
+        <img src="{% static 'images/logo.png' %}" alt="Ramat Library Logo" class="img-h-35 me-3 align-middle">
         Ramat Library
     </a>
 </h1>
@@ -483,8 +483,8 @@ select:focus {
 {% block nav-global %}{% endblock %}
 
 {% block footer %}
-<div id="footer" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid rgba(0, 31, 63, 0.1); color: var(--primary-blue);">
-    <p style="margin: 0;">
+<div id="footer" class="admin-footer">
+    <p class="m-0">
         <strong>Ramat Library Management System</strong> • University of Maiduguri<br>
         <small>&copy; {% now "Y" %} All rights reserved.</small>
     </p>

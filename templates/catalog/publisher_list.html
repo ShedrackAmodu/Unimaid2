@@ -209,10 +209,9 @@
                     <!-- Publisher Logo -->
                     <div class="publisher-logo-container mb-4">
                         <div class="publisher-logo mx-auto">
-                            <div class="logo-placeholder rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width: 100px; height: 100px; background: linear-gradient(135deg, 
-                                        {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
-                                        {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <div class="sq-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, 
+                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
+                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
                                 <span class="text-white fs-2 fw-bold">{{ publisher.name|first|upper }}</span>
                             </div>
                         </div>
@@ -260,7 +259,7 @@
             <div class="card border-0 shadow-lg">
                 <div class="card-body p-5 text-center">
                     <div class="mb-4">
-                        <i class="bi bi-building text-muted" style="font-size: 5rem;"></i>
+                        <i class="bi bi-building text-muted icon-5rem"></i>
                     </div>
                     <h3 class="fw-bold text-muted mb-3">No Publishers Found</h3>
                     <p class="text-muted mb-4">
@@ -305,10 +304,7 @@
                         {% for publisher in publishers %}
                         <tr class="publisher-list-row">
                             <td>
-                                <div class="list-logo rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 50px; height: 50px; background: linear-gradient(135deg, 
-                                            {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %}, 
-                                            {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
+                                <div class="sq-50 rounded-circle d-flex align-items-center justify-content-center placeholder-gradient-primary list-logo">
                                     <span class="text-white fw-bold">{{ publisher.name|first|upper }}</span>
                                 </div>
                             </td>
@@ -530,8 +526,7 @@
                 <div class="row text-center">
                     <div class="col-md-4 mb-4">
                         <div class="stat-circle mx-auto mb-3">
-                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
-                                 style="width: 80px; height: 80px;">
+                            <div class="icon-circle-80 bg-primary d-flex align-items-center justify-content-center">
                                 <i class="bi bi-building text-white fs-3"></i>
                             </div>
                         </div>
@@ -540,8 +535,7 @@
                     </div>
                     <div class="col-md-4 mb-4">
                         <div class="stat-circle mx-auto mb-3">
-                            <div class="rounded-circle bg-success d-flex align-items-center justify-content-center"
-                                 style="width: 80px; height: 80px;">
+                            <div class="icon-circle-80 bg-success d-flex align-items-center justify-content-center">
                                 <i class="bi bi-book text-white fs-3"></i>
                             </div>
                         </div>
@@ -550,8 +544,7 @@
                     </div>
                     <div class="col-md-4 mb-4">
                         <div class="stat-circle mx-auto mb-3">
-                            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center"
-                                 style="width: 80px; height: 80px;">
+                            <div class="icon-circle-80 bg-warning d-flex align-items-center justify-content-center">
                                 <i class="bi bi-graph-up text-white fs-3"></i>
                             </div>
                         </div>

@@ -16,8 +16,7 @@
             <div class="d-flex align-items-start">
                 <!-- Topic Avatar -->
                 <div class="topic-header-avatar me-4 d-none d-md-block">
-                    <div class="avatar-container rounded-circle d-flex align-items-center justify-content-center"
-                         style="width: 120px; height: 120px; background: linear-gradient(135deg, #0a2472, #3a86ff);">
+                    <div class="sq-120 rounded-circle d-flex align-items-center justify-content-center placeholder-gradient-primary avatar-container">
                         <span class="text-white fs-1 fw-bold">{{ topic.name|first|upper }}</span>
                     </div>
                 </div>
@@ -423,8 +422,7 @@
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-body p-3 text-center">
                                     <div class="related-topic-avatar mb-3 mx-auto">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                             style="width: 80px; height: 80px; background: linear-gradient(135deg,
+                                        <div class="icon-circle-80" style="background: linear-gradient(135deg,
                                                     {% cycle '#0a2472' '#001f3f' '#3a86ff' '#4361ee' as bgcolor %},
                                                     {% cycle '#3a86ff' '#4361ee' '#0a2472' '#001f3f' as bgcolor2 %});">
                                             <span class="text-white fw-bold">{{ related_topic.name|first|upper }}</span>

@@ -127,9 +127,15 @@
         .navbar .collapse {
             flex: 1 1 auto;
             min-width: 0; /* prevents flex children from overflowing */
-            display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* Only apply display: flex on desktop where navbar is expanded */
+        @media (min-width: 992px) {
+            .navbar .collapse {
+                display: flex;
+            }
         }
 
         /* Center the nav items but let them wrap naturally if space is tight. */
@@ -143,6 +149,30 @@
 
         .navbar .d-flex:last-child {
             flex-shrink: 0;
+        }
+
+        /* Hamburger Menu Animation */
+        .hamburger-line {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background-color: white;
+            margin: 3px 0;
+            transition: all 0.3s ease;
+            border-radius: 1px;
+            transform-origin: center;
+        }
+
+        .navbar-toggler.open .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .navbar-toggler.open .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .navbar-toggler.open .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
         }
 
         .navbar.scrolled {
@@ -725,8 +755,10 @@
             </a>
 
             <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
             </button>
 
             <!-- Navigation Links -->
@@ -849,7 +881,7 @@
                             </div>
                             <div class="text-start">
                                 <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
-                                <small class="text-white-50" style="font-size: 0.8rem;">
+                                <small class="text-white-50 text-0_8rem">
                                     {{ user.membership_type|default:"Member" }}
                                 </small>
                             </div>
@@ -1020,21 +1052,21 @@
                             <i class="bi bi-geo-alt fs-5 me-3 text-gold"></i>
                             <div>
                                 <h6 class="text-white mb-1">Location</h6>
-                                <p class="mb-0" style="opacity: 0.9;">University of Maiduguri, Borno State, Nigeria</p>
+                                <p class="mb-0 opacity-90">University of Maiduguri, Borno State, Nigeria</p>
                             </div>
                         </div>
                         <div class="d-flex align-items-start mb-3">
                             <i class="bi bi-telephone fs-5 me-3 text-gold"></i>
                             <div>
                                 <h6 class="text-white mb-1">Phone</h6>
-                                <p class="mb-0" style="opacity: 0.9;">+234 80166 253 232</p>
+                                <p class="mb-0 opacity-90">+234 80166 253 232</p>
                             </div>
                         </div>
                         <div class="d-flex align-items-start">
                             <i class="bi bi-envelope fs-5 me-3 text-gold"></i>
                             <div>
                                 <h6 class="text-white mb-1">Email</h6>
-                                <p class="mb-0" style="opacity: 0.9;">ramatlibrary@unimaid.edu.ng</p>
+                                <p class="mb-0 opacity-90">ramatlibrary@unimaid.edu.ng</p>
                             </div>
                         </div>
                     </div>
@@ -1076,7 +1108,7 @@
 
     <!-- Enhanced JavaScript -->
     <script>
-        // Enhanced Theme Toggle (robust)
+        // Theme Toggle Functionality
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
         const root = document.documentElement;
@@ -1085,94 +1117,38 @@
         const getPreferredTheme = () => {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) return savedTheme;
-
             return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         };
 
-        // Apply theme on the document root to match other handlers
+        // Apply theme
         const applyTheme = (theme) => {
             root.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            if (themeIcon) updateThemeIcon(theme);
-            dispatchThemeChangeEvent(theme);
-        };
-
-        // Update icon based on theme (guarded)
-        function updateThemeIcon(theme) {
-            if (!themeIcon) return;
-            if (theme === 'dark') {
-                themeIcon.className = 'bi bi-sun-fill';
-                themeIcon.title = 'Switch to light mode';
-                themeToggle.setAttribute('aria-label', 'Switch to light mode');
-            } else {
-                themeIcon.className = 'bi bi-moon-fill';
-                themeIcon.title = 'Switch to dark mode';
-                themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+            if (themeIcon) {
+                if (theme === 'dark') {
+                    themeIcon.className = 'bi bi-sun-fill';
+                    themeToggle.setAttribute('aria-label', 'Switch to light mode');
+                } else {
+                    themeIcon.className = 'bi bi-moon-fill';
+                    themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+                }
             }
-        }
-
-        // Dispatch custom event for theme change
-        function dispatchThemeChangeEvent(theme) {
-            const event = new CustomEvent('themeChange', { detail: { theme } });
-            window.dispatchEvent(event);
-        }
+        };
 
         // Initialize theme
         applyTheme(getPreferredTheme());
 
-        // Debug: log theme handler initialization
-        try {
-            console.log('Theme handler initialized:', {
-                themeToggleExists: !!themeToggle,
-                initialTheme: root.getAttribute('data-theme')
-            });
-        } catch (e) {
-            console.log('Theme init log error', e);
-        }
+        console.log('Theme toggle initialized');
 
-        // Expose convenient handlers for other scripts and other toggle buttons
-        window.setTheme = (theme) => applyTheme(theme);
-        window.cycleTheme = () => {
-            const current = root.getAttribute('data-theme');
-            applyTheme(current === 'light' ? 'dark' : 'light');
-        };
-        window.__themeHandlerPresent = true;
-
-        // Bind any other buttons with class `theme-toggle` (guard against double-binding)
-        Array.from(document.getElementsByClassName('theme-toggle')).forEach((btn) => {
-            if (btn === themeToggle) return; // already bound explicitly
-            if (btn.dataset.themeBound) return;
-            btn.addEventListener('click', () => {
-                window.cycleTheme();
-            });
-            btn.dataset.themeBound = '1';
-        });
-
-        // Toggle theme on button click (only if the button exists)
+        // Toggle theme on button click
         if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                console.log('themeToggle: click event fired');
-            });
-
-            themeToggle.addEventListener('pointerdown', (e) => {
-                console.log('themeToggle: pointerdown', { pointerType: e.pointerType, x: e.clientX, y: e.clientY });
-            }, { capture: true });
-
-            // actual theme toggle handler
             themeToggle.addEventListener('click', () => {
                 const currentTheme = root.getAttribute('data-theme');
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-                // Add click animation
-                themeToggle.style.transform = 'rotate(360deg) scale(0.8)';
-                setTimeout(() => {
-                    themeToggle.style.transform = '';
-                }, 300);
-
                 applyTheme(newTheme);
             });
         }
-        
+
         // Listen for system theme changes
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
             if (!localStorage.getItem('theme')) {
@@ -1202,91 +1178,44 @@
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 if (targetId === '#') return;
-                
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     window.scrollTo({
                         top: targetElement.offsetTop - 80,
                         behavior: 'smooth'
                     });
-                    
-                    // Update URL without page reload
-                    history.pushState(null, null, targetId);
                 }
             });
         });
 
-        // Auto-hide alerts with fade-out animation
+        // Auto-hide alerts
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
-                alert.classList.add('animate__fadeOut');
-                setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }, 500);
+                alert.style.display = 'none';
             });
         }, 5000);
 
-        // Floating particles animation
-        function animateParticles() {
-            const particles = document.querySelectorAll('.particle');
-            particles.forEach(particle => {
-                const x = Math.random() * 1920;
-                const y = Math.random() * 1080;
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-
-                // Random animation
-                particle.animate([
-                    { transform: 'scale(1) rotate(0deg)', opacity: 0.1 },
-                    { transform: `scale(${1 + Math.random()}) rotate(${Math.random() * 360}deg)`, opacity: 0.2 },
-                    { transform: 'scale(1) rotate(0deg)', opacity: 0.1 }
-                ], {
-                    duration: Math.random() * 10000 + 5000,
-                    iterations: Infinity,
-                    easing: 'ease-in-out'
-                });
-            });
-        }
-        
-        // Animate particles on load
-        window.addEventListener('load', animateParticles);
-
         // FAB visibility
         const fab = document.querySelector('.fab');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                fab.style.opacity = '1';
-                fab.style.transform = 'translateY(0)';
-            } else {
-                fab.style.opacity = '0';
-                fab.style.transform = 'translateY(20px)';
-            }
-        });
-
-        // Page load animation
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.add('loaded');
-            
-            // Animate elements with delay
-            const animatedElements = document.querySelectorAll('.animate__animated');
-            animatedElements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                }, index * 100);
+        if (fab) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    fab.style.opacity = '1';
+                    fab.style.transform = 'translateY(0)';
+                } else {
+                    fab.style.opacity = '0';
+                    fab.style.transform = 'translateY(20px)';
+                }
             });
-        });
+        }
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + T to toggle theme
             if ((e.ctrlKey || e.metaKey) && e.key === 't') {
                 e.preventDefault();
-                if (typeof themeToggle !== 'undefined' && themeToggle) themeToggle.click();
+                if (themeToggle) themeToggle.click();
             }
-            
-            // Escape to close dropdowns
             if (e.key === 'Escape') {
                 const openDropdowns = document.querySelectorAll('.dropdown.show');
                 openDropdowns.forEach(dropdown => {
@@ -1295,4 +1224,37 @@
             }
         });
 
-        // Performance optimization removed
+        // Hamburger Menu Animation
+        const mainNav = document.getElementById('mainNav');
+        const navbarToggler = document.querySelector('.navbar-toggler');
+
+        console.log('Hamburger menu elements:', { mainNav, navbarToggler });
+
+        if (mainNav && navbarToggler) {
+            // Add click event listener as backup
+            navbarToggler.addEventListener('click', function() {
+                console.log('Hamburger toggler clicked');
+            });
+
+            // Bootstrap collapse events for animation
+            mainNav.addEventListener('show.bs.collapse', function () {
+                console.log('Menu showing');
+                navbarToggler.classList.add('open');
+                navbarToggler.classList.remove('collapsed');
+            });
+            mainNav.addEventListener('shown.bs.collapse', function () {
+                console.log('Menu shown');
+            });
+            mainNav.addEventListener('hide.bs.collapse', function () {
+                console.log('Menu hiding');
+                navbarToggler.classList.remove('open');
+                navbarToggler.classList.add('collapsed');
+            });
+            mainNav.addEventListener('hidden.bs.collapse', function () {
+                console.log('Menu hidden');
+            });
+
+            console.log('Hamburger menu event listeners attached');
+        } else {
+            console.error('Hamburger menu elements not found');
+        }

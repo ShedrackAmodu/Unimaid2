@@ -19,9 +19,10 @@
 }
 
 /* Collapse area should stack on small screens */
+/* Collapse area should stack on small screens without disabling Bootstrap's collapse JS */
 @media (max-width: 991.98px) {
-  .navbar .collapse {
-    display: block !important;
+  .navbar-collapse {
+    width: 100%;
   }
   .navbar .navbar-nav {
     justify-content: flex-start;
@@ -216,6 +217,20 @@
 .sq-100 { width: 100px !important; height: 100px !important; display: inline-flex; align-items: center; justify-content: center; }
 .sq-120 { width: 120px !important; height: 120px !important; display: inline-flex; align-items: center; justify-content: center; }
 
+/* Additional square helpers */
+.sq-50 { width: 50px !important; height: 50px !important; display: inline-flex; align-items: center; justify-content: center; }
+.sq-60 { width: 60px !important; height: 60px !important; display: inline-flex; align-items: center; justify-content: center; }
+.sq-40 { width: 40px !important; height: 40px !important; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Extra icon sizes */
+.icon-8rem { font-size: 8rem !important; }
+
+/* Additional icon/text sizes for small variations */
+.icon-3rem { font-size: 3rem !important; }
+.icon-2rem { font-size: 2rem !important; }
+.text-0_8rem { font-size: 0.8rem !important; }
+.lead-lg { font-size: 1.25rem !important; line-height: 1.7; }
+
 /* Large icon sizing helpers */
 .icon-4rem { font-size: 4rem !important; }
 .icon-5rem { font-size: 5rem !important; }
@@ -234,4 +249,9 @@
 .max-h-200 { max-height: 200px !important; }
 .max-h-300 { max-height: 300px !important; overflow-y: auto; }
 .min-h-200 { min-height: 200px !important; }
+
+/* Small utility helpers */
+.opacity-90 { opacity: 0.9 !important; }
+.img-h-35 { height: 35px !important; }
+.admin-footer { text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid rgba(0, 31, 63, 0.1); color: var(--primary-blue); }
 

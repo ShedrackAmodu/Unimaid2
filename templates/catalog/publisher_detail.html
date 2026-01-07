@@ -14,9 +14,8 @@
         <div class="d-flex justify-content-between align-items-start flex-wrap">
             <div class="d-flex align-items-center">
                 <!-- Publisher Logo -->
-                <div class="publisher-detail-logo me-4">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-lg"
-                         style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                    <div class="publisher-detail-logo me-4">
+                    <div class="sq-120 rounded-circle d-flex align-items-center justify-content-center shadow-lg placeholder-gradient-primary">
                         <span class="text-white fw-bold fs-2">{{ publisher.name|first|upper }}</span>
                     </div>
                 </div>
@@ -264,7 +263,7 @@
                 
                 {% else %}
                 <div class="text-center py-5">
-                    <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+                    <i class="bi bi-book text-muted icon-4rem"></i>
                     <h4 class="text-muted mt-3">No Books Found</h4>
                     <p class="text-muted">This publisher doesn't have any books in our collection yet.</p>
                 </div>
@@ -333,7 +332,7 @@
                     </a>
                     {% empty %}
                     <div class="text-center py-4">
-                        <i class="bi bi-person text-muted" style="font-size: 2rem;"></i>
+                        <i class="bi bi-person text-muted icon-2rem"></i>
                         <p class="text-muted mt-2 mb-0">No authors found</p>
                     </div>
                     {% endfor %}
@@ -434,8 +433,7 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="similar-publisher-card text-center">
                             <div class="similar-logo mb-3 mx-auto">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 80px; height: 80px; background: linear-gradient(135deg, 
+                                <div class="icon-circle-80 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, 
                                             var(--primary-blue), var(--accent-blue));">
                                     <span class="text-white fw-bold fs-4">{{ similar_publisher.name|first|upper }}</span>
                                 </div>
