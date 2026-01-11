@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BlogPost, StaticPage, FeaturedContent
+from .models import BlogPost, StaticPage, FeaturedContent, News
 
 
 @admin.register(BlogPost)
@@ -23,3 +23,10 @@ class FeaturedContentAdmin(admin.ModelAdmin):
     list_filter = ['is_active']
     search_fields = ['title']
     list_editable = ['order']
+
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ['title', 'author', 'status', 'published_date']
+    list_filter = ['status', 'published_date']
+    search_fields = ['title', 'author__username']

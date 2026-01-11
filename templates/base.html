@@ -324,12 +324,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: pointer !important;
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 2001; /* above container */
-            pointer-events: auto; /* ensure clickable */
+            z-index: 9999 !important; /* ensure it's above everything */
+            pointer-events: auto !important; /* ensure clickable */
         }
 
         .theme-toggle::before {
@@ -797,20 +797,19 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                           title="Digital repository with theses, dissertations, and research documents - available 24/7" data-bs-toggle="tooltip">
-                            <i class="bi bi-file-earmark-text me-2"></i>Digital Repository
+                           title="E-Library with digital collections, open access resources, and educational materials" data-bs-toggle="tooltip">
+                            <i class="bi bi-book me-2"></i>E-Library
                             <span class="badge bg-success ms-2 badge-small">24/7</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/repository/" title="Browse our digital document collection">
-                                <i class="bi bi-archive me-2"></i>Browse Documents
+                            <li><a class="dropdown-item" href="/repository/" title="Browse our institutional digital document collection">
+                                <i class="bi bi-archive me-2"></i>Digital Library
                             </a></li>
-                            <li><a class="dropdown-item" href="/repository/collections/" title="Organized collections of digital materials">
-                                <i class="bi bi-folder2-open me-2"></i>Collections
+                            <li><a class="dropdown-item" href="/accounts/open-access/" title="Free academic databases and research resources">
+                                <i class="bi bi-globe me-2"></i>Open Access
                             </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/accounts/library-resources/" title="Access premium academic databases">
-                                <i class="bi bi-database me-2"></i>Online Databases
+                            <li><a class="dropdown-item" href="/accounts/open-resources/" title="Free e-books, textbooks, and educational materials">
+                                <i class="bi bi-bookshelf me-2"></i>Open Resources
                             </a></li>
                             {% if user.is_staff %}
                             <li><hr class="dropdown-divider"></li>
@@ -865,7 +864,7 @@
             <div class="d-flex align-items-center">
                 <!-- Theme Toggle -->
                 <div class="theme-toggle-container">
-                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme" onclick="toggleTheme()">
                         <i class="bi bi-moon-fill"></i>
                     </button>
                 </div>
@@ -887,26 +886,38 @@
                             </div>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/accounts/dashboard/">
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'accounts:admin_dashboard' %}">
+                                <i class="bi bi-shield-check me-2"></i>Admin Dashboard
                             </a></li>
+                            {% elif user.membership_type == 'staff' and user.is_staff_approved %}
+                            <li><a class="dropdown-item" href="{% url 'circulation:staff_dashboard' %}">
+                                <i class="bi bi-clipboard-data me-2"></i>Staff Dashboard
+                            </a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
+                                <i class="bi bi-speedometer2 me-2"></i>My Dashboard
+                            </a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="/accounts/profile/">
                                 <i class="bi bi-person me-2"></i>My Profile
                             </a></li>
-                            <li><a class="dropdown-item" href="/circulation/patron_dashboard/">
+                            <li><a class="dropdown-item" href="{% url 'circulation:patron_dashboard' %}">
                                 <i class="bi bi-book me-2"></i>My Loans
                                 <span class="badge bg-primary ms-2">{{ user.loans.filter|length }}</span>
                             </a></li>
-                            <li><a class="dropdown-item" href="/circulation/patron_dashboard/">
+                            <li><a class="dropdown-item" href="{% url 'circulation:patron_dashboard' %}">
                                 <i class="bi bi-bell me-2"></i>Notifications
                                 <span class="badge bg-danger ms-2">3</span>
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            {% if user.is_staff %}
+                            {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="/admin/">
                                 <i class="bi bi-gear me-2"></i>Admin Panel
                             </a></li>
-                            <li><a class="dropdown-item" href="/circulation/staff-dashboard/">
+                            {% endif %}
+                            {% if user.is_staff and user.is_staff_approved %}
+                            <li><a class="dropdown-item" href="{% url 'circulation:staff_dashboard' %}">
                                 <i class="bi bi-clipboard-data me-2"></i>Staff Dashboard
                             </a></li>
                             {% endif %}
@@ -1074,7 +1085,6 @@
                     <!-- Social Links -->
                     <div class="social-links d-flex flex-wrap">
                         <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
                         <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                         <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
                         <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
@@ -1088,7 +1098,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6 text-md-start mb-3 mb-md-0">
                         <p class="mb-0">
-                            &copy; 2024 <strong>Ramat Library</strong>, University of Maiduguri. 
+                            &copy; 2026 <strong>Ramat Library</strong>, University of Maiduguri. 
                             <span class="d-md-inline d-none">|</span> 
                             <span class="d-block d-md-inline mt-1 mt-md-0">All rights reserved.</span>
                         </p>
@@ -1135,6 +1145,15 @@
             }
         };
 
+        // Toggle theme function for onclick backup
+        window.toggleTheme = function() {
+            console.log('Theme toggle clicked via onclick!');
+            const currentTheme = root.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            console.log('Switching from', currentTheme, 'to', newTheme);
+            applyTheme(newTheme);
+        };
+
         // Initialize theme
         applyTheme(getPreferredTheme());
 
@@ -1142,11 +1161,18 @@
 
         // Toggle theme on button click
         if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
+            themeToggle.addEventListener('click', (e) => {
+                console.log('Theme toggle clicked!');
+                e.preventDefault();
+                e.stopPropagation();
                 const currentTheme = root.getAttribute('data-theme');
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                console.log('Switching from', currentTheme, 'to', newTheme);
                 applyTheme(newTheme);
+                return false;
             });
+        } else {
+            console.error('Theme toggle button not found!');
         }
 
         // Listen for system theme changes

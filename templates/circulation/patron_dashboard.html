@@ -4,7 +4,7 @@
 {% block title %}My Library Dashboard - Ramat Library{% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="/circulation/dashboard/">My Library</a></li>
+<li class="breadcrumb-item"><a href="{% url 'circulation:patron_dashboard' %}">My Library</a></li>
 <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
 {% endblock %}
 

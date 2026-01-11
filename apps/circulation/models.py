@@ -161,3 +161,45 @@ class Fine(BaseModel):
         verbose_name = "Fine"
         verbose_name_plural = "Fines"
         ordering = ['-created_at']
+
+
+class Attendance(BaseModel):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+    ]
+
+    user = models.ForeignKey(LibraryUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='attendances', help_text="Registered library user (null for visitors)")
+    registration_number = models.CharField(max_length=50, blank=True, help_text="Student/Staff registration number")
+    full_name = models.CharField(max_length=200, help_text="Full name of the visitor")
+    department = models.CharField(max_length=100, blank=True, help_text="Department")
+    faculty = models.CharField(max_length=100, blank=True, help_text="Faculty")
+    phone = models.CharField(max_length=20, blank=True, help_text="Phone number")
+    purpose = models.TextField(blank=True, help_text="What did you come to the library with")
+    check_in = models.DateTimeField(default=timezone.now, help_text="Check-in date and time")
+    check_out = models.DateTimeField(null=True, blank=True, help_text="Check-out date and time")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', help_text="Current attendance status")
+
+    def check_out_visitor(self):
+        """Mark the visitor as checked out."""
+        if self.status == 'active':
+            self.check_out = timezone.now()
+            self.status = 'completed'
+            self.save()
+
+    def save(self, *args, **kwargs):
+        # Auto-populate fields from user if linked
+        if self.user:
+            self.registration_number = self.registration_number or (self.user.student_id or self.user.faculty_id or '')
+            self.full_name = self.full_name or self.user.get_full_name()
+            self.department = self.department or self.user.department
+            self.phone = self.phone or self.user.phone
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.check_in.date()}"
+
+    class Meta:
+        verbose_name = "Attendance"
+        verbose_name_plural = "Attendances"
+        ordering = ['-check_in']

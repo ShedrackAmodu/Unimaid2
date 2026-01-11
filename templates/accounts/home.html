@@ -280,6 +280,40 @@
 
 {% block content %}
 
+<!-- User Dashboard Access (for authenticated users) -->
+{% if user.is_authenticated %}
+<section class="py-4 bg-primary text-white">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-speedometer2 fs-2 me-3"></i>
+                    <div>
+                        <h4 class="mb-1">Welcome back, {{ user.first_name|default:user.username }}!</h4>
+                        <p class="mb-0 opacity-75">Access your personalized dashboard and library services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                {% if user.is_superuser %}
+                <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-shield-check me-2"></i>Admin Dashboard
+                </a>
+                {% elif user.membership_type == 'staff' and user.is_staff_approved %}
+                <a href="{% url 'circulation:staff_dashboard' %}" class="btn btn-warning btn-lg text-dark">
+                    <i class="bi bi-clipboard-data me-2"></i>Staff Dashboard
+                </a>
+                {% else %}
+                <a href="{% url 'accounts:dashboard' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-speedometer2 me-2"></i>My Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Resource Type Guide -->
 <section class="py-5 bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
     <div class="container-fluid">
@@ -899,9 +933,6 @@
                                 
                                 <div class="d-grid gap-3">
                                     {% if user.is_authenticated %}
-                                    <a href="/circulation/dashboard/" class="btn btn-primary btn-lg">
-                                        <i class="bi bi-speedometer2 me-2"></i>Go to Your Dashboard
-                                    </a>
                                     {% else %}
                                     <a href="/accounts/register/" class="btn btn-primary btn-lg">
                                         <i class="bi bi-person-plus me-2"></i>Register Now - It's Free!
@@ -931,41 +962,7 @@
     </div>
 </section>
 
-{% comment %} <!-- Quick Stats Section -->
-<section id="quick-stats" class="py-5 animate__animated animate__fadeIn">
-    <div class="container-fluid">
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ total_books|default:"50,000+" }}</div>
-                    <div class="stat-label">Books & E-Books</div>
-                    <img src="{% static 'images/librarybooks.jfif' %}" alt="Books Collection" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ total_documents|default:"10,000+" }}</div>
-                    <div class="stat-label">Research Documents</div>
-                    <img src="{% static 'images/ramat_a4i.png' %}" alt="Research Documents" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">24/7</div>
-                    <div class="stat-label">Digital Access</div>
-                    <img src="{% static 'images/ramat_ai5.png' %}" alt="Digital Access" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card text-center p-4 h-100">
-                    <div class="stat-number mb-2">{{ user_count|default:"5,000+" }}</div>
-                    <div class="stat-label">Active Members</div>
-                    <img src="{% static 'images/staff.png' %}" alt="Library Staff" class="img-fluid rounded mt-3" style="height: 80px; object-fit: cover;">
-                </div>
-            </div>
-        </div>
-    </div>
-</section> {% endcomment %}
+
 {% endblock %}
 
 {% block scripts %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import ListView
@@ -49,9 +49,36 @@ def register_view(request):
         form = LibraryUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            messages.success(request, 'Registration successful!')
-            return redirect('accounts:dashboard')
+            if user.membership_type == 'staff':
+                # Staff registration requires approval
+                user.is_active = False  # Deactivate until approved
+                user.save()
+                # Send email to admin
+                try:
+                    send_mail(
+                        subject=f"New Staff Registration Requires Approval: {user.get_full_name()}",
+                        message=f"A new staff member has registered and requires approval.\n\n"
+                               f"Name: {user.get_full_name()}\n"
+                               f"Username: {user.username}\n"
+                               f"Email: {user.email}\n"
+                               f"Department: {user.department or 'Not specified'}\n"
+                               f"Faculty ID: {user.faculty_id or 'Not specified'}\n\n"
+                               f"Please review and approve/reject this registration in the admin dashboard.",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Send to admin email
+                        fail_silently=False,
+                    )
+                except Exception as e:
+                    # Log error but don't fail registration
+                    print(f"Failed to send admin notification email: {e}")
+
+                messages.info(request, 'Registration submitted for approval. You will receive an email once your account is approved.')
+                return redirect('accounts:login')
+            else:
+                # Non-staff users are active immediately
+                login(request, user)
+                messages.success(request, 'Registration successful!')
+                return redirect('accounts:dashboard')
     else:
         form = LibraryUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -60,13 +87,128 @@ def register_view(request):
 @login_required
 def dashboard_view(request):
     user = request.user
+
+    # Redirect based on user role
+    if user.is_superuser:
+        return redirect('accounts:admin_dashboard')
+    elif user.membership_type == 'staff' and user.is_staff_approved:
+        return redirect('circulation:staff_dashboard')
+    else:
+        # Patron dashboard
+        context = {
+            'user': user,
+            'current_loans': user.loans.filter(status='active')[:5],  # Show recent loans
+            'reservations': user.reservations.filter(status='active')[:5],
+            'recent_fines': user.loans.filter(fines__status='unpaid').distinct()[:5],
+        }
+        return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_dashboard(request):
+    """Admin dashboard for user management and approvals."""
+    # Pending staff approvals
+    pending_staff = LibraryUser.objects.filter(
+        membership_type='staff',
+        is_staff_approved=False,
+        is_active=False
+    )
+
+    # Recent user registrations
+    recent_users = LibraryUser.objects.order_by('-date_joined')[:10]
+
+    # User statistics
+    total_users = LibraryUser.objects.count()
+    active_users = LibraryUser.objects.filter(is_active=True).count()
+    staff_users = LibraryUser.objects.filter(membership_type='staff', is_staff_approved=True).count()
+    faculty_users = LibraryUser.objects.filter(membership_type='faculty').count()
+    student_users = LibraryUser.objects.filter(membership_type='student').count()
+
+    # System stats (simplified)
+    from apps.catalog.models import Book
+    from apps.circulation.models import Loan
+    total_books = Book.objects.active().count()
+    active_loans = Loan.objects.filter(status='active').count()
+
     context = {
-        'user': user,
-        'current_loans': user.loans.filter(status='active')[:5],  # Show recent loans
-        'reservations': user.reservations.filter(status='active')[:5],
-        'recent_fines': user.loans.filter(fines__status='unpaid').distinct()[:5],
+        'pending_staff': pending_staff,
+        'recent_users': recent_users,
+        'total_users': total_users,
+        'active_users': active_users,
+        'staff_users': staff_users,
+        'faculty_users': faculty_users,
+        'student_users': student_users,
+        'total_books': total_books,
+        'active_loans': active_loans,
     }
-    return render(request, 'accounts/dashboard.html', context)
+    return render(request, 'accounts/admin_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def approve_staff(request, user_id):
+    """Approve staff registration."""
+    user = get_object_or_404(LibraryUser, id=user_id, membership_type='staff', is_staff_approved=False)
+
+    if request.method == 'POST':
+        user.is_staff_approved = True
+        user.is_active = True
+        user.save()
+
+        # Send approval email
+        try:
+            send_mail(
+                subject="Staff Registration Approved",
+                message=f"Dear {user.get_full_name()},\n\n"
+                       f"Your staff registration has been approved. You can now log in to your account.\n\n"
+                       f"Username: {user.username}\n\n"
+                       f"Best regards,\nRamat Library Administration",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send approval email: {e}")
+
+        messages.success(request, f'Staff registration for {user.get_full_name()} has been approved.')
+        return redirect('accounts:admin_dashboard')
+
+    return render(request, 'accounts/approve_staff.html', {'user': user})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def reject_staff(request, user_id):
+    """Reject staff registration."""
+    user = get_object_or_404(LibraryUser, id=user_id, membership_type='staff', is_staff_approved=False)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Registration rejected by administrator')
+
+        # Send rejection email
+        try:
+            send_mail(
+                subject="Staff Registration Update",
+                message=f"Dear {user.get_full_name()},\n\n"
+                       f"We regret to inform you that your staff registration has been rejected.\n\n"
+                       f"Reason: {reason}\n\n"
+                       f"If you have questions, please contact the library administration.\n\n"
+                       f"Best regards,\nRamat Library Administration",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send rejection email: {e}")
+
+        # Delete the user account
+        user.delete()
+
+        messages.info(request, f'Staff registration for {user.get_full_name()} has been rejected and removed.')
+        return redirect('accounts:admin_dashboard')
+
+    return render(request, 'accounts/reject_staff.html', {'user': user})
 
 
 @login_required
@@ -466,6 +608,84 @@ def terms_of_use_view(request):
         'page_title': 'Terms of Use'
     }
     return render(request, 'accounts/terms_of_use.html', context)
+
+
+def open_access_view(request):
+    """Open access resources and academic databases page."""
+    context = {
+        'page_title': 'Open Access Resources',
+        'academic_databases': [
+            {'name': 'Google Scholar', 'url': 'https://scholar.google.com/', 'description': 'Search across scholarly literature'},
+            {'name': 'National Academies', 'url': 'https://www.nationalacademies.org/', 'description': 'Research and publications'},
+            {'name': 'Scientific Research Publishing', 'url': 'https://www.scirp.org/', 'description': 'Open access journals'},
+            {'name': 'SpringerOpen', 'url': 'https://www.springernature.com/gp/open-science/journals-books/journals', 'description': 'Open access journals'},
+            {'name': 'ScienceDirect', 'url': 'https://www.sciencedirect.com/', 'description': 'Scientific database'},
+            {'name': 'Jstor', 'url': 'https://www.jstor.org/action/showLogin', 'description': 'Digital library'},
+            {'name': 'Omics International', 'url': 'https://www.omicsonline.org/', 'description': 'Open access publishing'},
+            {'name': 'Oxford Academics', 'url': 'https://academic.oup.com/', 'description': 'Academic publishing'},
+            {'name': 'Wiley', 'url': 'https://onlinelibrary.wiley.com/', 'description': 'Scientific publishing'},
+            {'name': 'National Virtual Library Of Nigeria', 'url': 'https://virtuall.nln.gov.ng/accounts/login', 'description': 'National library resources'},
+            {'name': 'OARE', 'url': 'https://www.unep.org/topics/environment-under-review/digital-library/online-access-research-environment-oare', 'description': 'Environmental research'},
+            {'name': 'Ebrary', 'url': 'https://ebrary.net/', 'description': 'E-book platform'},
+            {'name': 'Project Muse', 'url': 'https://muse.jhu.edu/', 'description': 'Humanities and social sciences'},
+            {'name': 'Legalpedia', 'url': 'https://legalpediaonline.com/', 'description': 'Legal research'},
+            {'name': 'Emerald Insight', 'url': 'http://library.cusat.ac.in/index.php/emerald-list-of-journals', 'description': 'Business and management'},
+        ],
+        'additional_databases': [
+            {'name': 'World Bank e-Library', 'url': 'https://elibrary.worldbank.org', 'description': 'World Bank publications'},
+            {'name': 'MathSciNet', 'url': 'https://mathscinet.ams.org', 'description': 'Mathematics research (subscription required)'},
+            {'name': 'EconBiz', 'url': 'https://www.econbiz.de', 'description': 'Economics research'},
+            {'name': 'African Journals Online (AJOL)', 'url': 'https://www.ajol.info', 'description': 'African scholarly journals'},
+            {'name': 'Annual Reviews', 'url': 'https://www.annualreviews.org', 'description': 'Review articles (some free)'},
+            {'name': 'Aluka', 'url': 'https://www.jstor.org', 'description': 'African cultural heritage'},
+            {'name': 'BioOne', 'url': 'https://bioone.org', 'description': 'Biological sciences (subscription)'},
+            {'name': 'DATAD', 'url': 'https://datad.org', 'description': 'African theses and dissertations'},
+            {'name': 'Oxford English Dictionary', 'url': 'https://www.oed.com', 'description': 'Dictionary (subscription)'},
+            {'name': 'Oxford Reference Online', 'url': 'https://www.oxfordreference.com', 'description': 'Reference works (subscription)'},
+            {'name': 'APS Journals', 'url': 'https://journals.aps.org', 'description': 'Physics journals'},
+            {'name': 'GEM Portal', 'url': 'https://www.gemconsortium.org', 'description': 'Entrepreneurship research'},
+            {'name': 'World Bank Publications', 'url': 'https://openknowledge.worldbank.org', 'description': 'Development research'},
+            {'name': 'Directory of Open Access Journals (DOAJ)', 'url': 'https://doaj.org', 'description': 'Open access journals directory'},
+            {'name': 'SAGE Journals', 'url': 'https://journals.sagepub.com', 'description': 'Social sciences (mixed access)'},
+            {'name': 'Directory of Open Access Books (DOAB)', 'url': 'https://www.doabooks.org', 'description': 'Open access books'},
+            {'name': 'Bentham Open', 'url': 'https://benthamopen.com', 'description': 'Open access publishing'},
+            {'name': 'The Journal of Research Practice', 'url': 'https://jrp.icaap.org', 'description': 'Research methodology'},
+            {'name': 'edX', 'url': 'https://www.edx.org', 'description': 'Online courses'},
+            {'name': 'The WomanStats Project', 'url': 'https://www.womanstats.org', 'description': 'Gender research'},
+            {'name': 'Strategies for Online Teaching', 'url': 'https://teachonline.ca', 'description': 'Educational resources'},
+            {'name': 'MedlinePlus', 'url': 'https://medlineplus.gov', 'description': 'Health information'},
+            {'name': 'The NTS Library', 'url': 'https://www.ntsb.gov/investigations/Pages/library.aspx', 'description': 'Transportation safety'},
+            {'name': 'World eBook Library', 'url': 'https://www.worldebooklibrary.org', 'description': 'E-book collection (subscription)'},
+            {'name': 'J-Gate Medical / PubMed', 'url': 'J-Gate: https://jgateplus.com, PubMed: https://pubmed.ncbi.nlm.nih.gov', 'description': 'Medical literature'},
+            {'name': 'Wiley Online Library', 'url': 'https://onlinelibrary.wiley.com', 'description': 'Scientific publishing (mixed access)'},
+        ]
+    }
+    return render(request, 'accounts/open_access.html', context)
+
+
+def open_resources_view(request):
+    """Open educational resources and free e-book sites."""
+    context = {
+        'page_title': 'Open Resources',
+        'ebook_sites': [
+            {'name': 'American Institute of Mathematics (AIM)', 'url': 'https://aimath.org/textbooks', 'description': 'Mathematics textbooks'},
+            {'name': 'Booksee', 'url': 'https://booksee.org', 'description': 'Book collection (availability varies)'},
+            {'name': 'Bookboon', 'url': 'https://bookboon.com', 'description': 'Free textbooks'},
+            {'name': 'Connexions (OpenStax CNX)', 'url': 'https://cnx.org', 'description': 'Open textbooks'},
+            {'name': 'FreeBooks4Doctors', 'url': 'https://www.freebooks4doctors.com', 'description': 'Medical books'},
+            {'name': 'Free Book Center', 'url': 'https://www.freebookcentre.net', 'description': 'Book collection'},
+            {'name': 'IntechOpen (INTECH)', 'url': 'https://www.intechopen.com', 'description': 'Open access books'},
+            {'name': 'IT eBooks', 'url': 'https://it-ebooks.info', 'description': 'Technology books'},
+            {'name': 'Living Books About Life', 'url': 'https://www.livingbooksaboutlife.org', 'description': 'Biology books'},
+            {'name': 'National Academies Press', 'url': 'https://nap.nationalacademies.org', 'description': 'Research publications'},
+            {'name': 'NCBI Bookshelf', 'url': 'https://www.ncbi.nlm.nih.gov/books', 'description': 'Biomedical books'},
+            {'name': 'Open Access Textbooks', 'url': 'https://openaccesstextbooks.org', 'description': 'Textbook collection'},
+            {'name': 'Open Textbook Library', 'url': 'https://open.umn.edu/opentextbooks', 'description': 'Peer-reviewed textbooks'},
+            {'name': 'Oxfam Digital Library', 'url': 'https://policy-practice.oxfam.org/resources', 'description': 'Development resources'},
+            {'name': 'Project Gutenberg', 'url': 'https://www.gutenberg.org', 'description': 'Classic literature'},
+        ]
+    }
+    return render(request, 'accounts/open_resources.html', context)
 
 
 def virtual_tour_view(request):

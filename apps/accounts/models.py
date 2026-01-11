@@ -20,6 +20,10 @@ class LibraryUser(AbstractUser, BaseModel):
         default='public',
         help_text="Type of library membership"
     )
+    is_staff_approved = models.BooleanField(
+        default=True,
+        help_text="Whether staff membership has been approved by admin"
+    )
     department = models.CharField(max_length=100, blank=True, help_text="Department or faculty for students/staff")
     student_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Student ID number")
     faculty_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Faculty/Staff ID number")
@@ -64,11 +68,21 @@ class LibraryUser(AbstractUser, BaseModel):
             old_user = LibraryUser.objects.get(pk=self.pk)
             old_membership = old_user.membership_type
 
+        # Set is_staff_approved for new staff users
+        if is_new and self.membership_type == 'staff':
+            self.is_staff_approved = False
+
+        # Set is_active based on approval status for staff
+        if self.membership_type == 'staff':
+            self.is_active = self.is_staff_approved
+        elif not self.is_superuser:
+            self.is_active = True
+
         super().save(*args, **kwargs)
 
         # Assign group based on membership_type if changed
         if is_new or old_membership != self.membership_type:
-            self.assign_group_based_on_membership()
+            self.assign_group_based_on_membership(is_new)
             # Save again to persist group and is_staff changes
             super().save(update_fields=['is_staff'])
 
@@ -112,6 +126,9 @@ class LibraryUser(AbstractUser, BaseModel):
         # Set is_staff for Staff membership (don't save here to avoid recursion)
         if self.membership_type == 'staff':
             self.is_staff = True
+            # Set approval status for staff
+            if is_new:
+                self.is_staff_approved = False
         elif not self.is_superuser:
             self.is_staff = False
 

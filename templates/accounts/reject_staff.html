@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reject Staff Registration - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-x-circle me-2"></i>Reject Staff Registration
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-x fs-1 text-danger mb-3"></i>
+                        <h5>Confirm Staff Rejection</h5>
+                    </div>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Staff Details</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Name:</dt>
+                                <dd class="col-sm-8">{{ user.get_full_name|default:user.username }}</dd>
+
+                                <dt class="col-sm-4">Username:</dt>
+                                <dd class="col-sm-8">{{ user.username }}</dd>
+
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8">{{ user.email }}</dd>
+
+                                <dt class="col-sm-4">Membership Type:</dt>
+                                <dd class="col-sm-8">{{ user.get_membership_type_display }}</dd>
+
+                                {% if user.department %}
+                                <dt class="col-sm-4">Department:</dt>
+                                <dd class="col-sm-8">{{ user.department }}</dd>
+                                {% endif %}
+
+                                {% if user.faculty_id %}
+                                <dt class="col-sm-4">Faculty ID:</dt>
+                                <dd class="col-sm-8">{{ user.faculty_id }}</dd>
+                                {% endif %}
+
+                                <dt class="col-sm-4">Registration Date:</dt>
+                                <dd class="col-sm-8">{{ user.date_joined|date:"M d, Y H:i" }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. The user's registration will be permanently rejected and their account will be deleted.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label fw-bold">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="reason" name="reason" rows="4" required
+                                      placeholder="Please provide a detailed reason for rejecting this staff registration...">{{ reason|default:"Registration does not meet staff requirements" }}</textarea>
+                            <div class="form-text">This reason will be included in the email sent to the applicant.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-2"></i>Reject Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

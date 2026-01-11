@@ -4,8 +4,8 @@
 {% block title %}Pay Fine - Ramat Library{% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="/circulation/patron_dashboard/">My Dashboard</a></li>
-<li class="breadcrumb-item"><a href="/circulation/patron_dashboard/#fines">My Fines</a></li>
+<li class="breadcrumb-item"><a href="{% url 'circulation:patron_dashboard' %}">My Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'circulation:patron_dashboard' %}#fines">My Fines</a></li>
 <li class="breadcrumb-item active" aria-current="page">Pay Fine</li>
 {% endblock %}
 

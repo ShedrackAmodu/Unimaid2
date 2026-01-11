@@ -17,4 +17,8 @@ urlpatterns = [
     path('reject-request/<int:request_id>/', views.reject_borrow_request, name='reject_borrow_request'),
     path('renew/<int:loan_id>/', views.renew_loan, name='renew_loan'),
     path('pay-fine/<int:fine_id>/', views.pay_fine, name='pay_fine'),
+    path('register-attendance/', views.register_attendance, name='register_attendance'),
+    path('attendance-list/', views.attendance_list, name='attendance_list'),
+    path('checkout-attendance/<int:attendance_id>/', views.checkout_attendance, name='checkout_attendance'),
+    path('export-attendance-excel/', views.export_attendance_excel, name='export_attendance_excel'),
 ]

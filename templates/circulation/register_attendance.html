@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register Attendance - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Register Attendance</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-person-plus fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Register Library Attendance</h1>
+                <p class="lead text-muted">Record student/library entry with details</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h5 class="fw-bold mb-0">Attendance Registration Form</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" id="attendanceForm">
+                    {% csrf_token %}
+
+                    <!-- User Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Registered User (Optional)</label>
+                        <select class="form-select" id="userSelect" name="user_id">
+                            <option value="">-- Select a registered user --</option>
+                            {% for user in recent_users %}
+                            <option value="{{ user.id }}" data-name="{{ user.get_full_name }}"
+                                    data-id="{{ user.student_id|default:user.faculty_id }}"
+                                    data-dept="{{ user.department }}"
+                                    data-phone="{{ user.phone }}">
+                                {{ user.get_full_name }} ({{ user.student_id|default:user.faculty_id }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">If the visitor is not a registered user, leave this blank and fill in the details below.</div>
+                    </div>
+
+                    <!-- Visitor Details -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Registration Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="registrationNumber" name="registration_number" required>
+                            <div class="form-text">Student ID or Staff ID number</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="fullName" name="full_name" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Department</label>
+                            <input type="text" class="form-control" id="department" name="department">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Faculty</label>
+                            <input type="text" class="form-control" id="faculty" name="faculty">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">What did you come to the library with? <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="purpose" name="purpose" rows="4" required
+                                  placeholder="Describe the purpose of your visit, materials brought, etc."></textarea>
+                        <div class="form-text">Please provide details about your visit purpose and any materials brought to the library.</div>
+                    </div>
+
+                    <!-- Current Date/Time Display -->
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-clock me-2"></i>
+                        <strong>Check-in Time:</strong> <span id="currentDateTime"></span>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Register Attendance
+                        </button>
+                        <a href="{% url 'circulation:attendance_list' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-list me-2"></i>View Attendance Records
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-door-open text-success fs-1 mb-2"></i>
+                        <h6 class="fw-bold mb-2">Quick Check-out</h6>
+                        <p class="text-muted mb-3 small">Mark active visitors as checked out</p>
+                        <a href="{% url 'circulation:attendance_list' %}?status=active" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-1"></i>Check Out Visitors
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-file-earmark-spreadsheet text-info fs-1 mb-2"></i>
+                        <h6 class="fw-bold mb-2">Export Reports</h6>
+                        <p class="text-muted mb-3 small">Download attendance reports</p>
+                        <a href="{% url 'circulation:export_attendance_excel' %}" class="btn btn-info w-100 text-white">
+                            <i class="bi bi-download me-1"></i>Export Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userSelect = document.getElementById('userSelect');
+    const registrationNumber = document.getElementById('registrationNumber');
+    const fullName = document.getElementById('fullName');
+    const department = document.getElementById('department');
+    const faculty = document.getElementById('faculty');
+    const phone = document.getElementById('phone');
+    const currentDateTime = document.getElementById('currentDateTime');
+
+    // Update current date/time
+    function updateDateTime() {
+        const now = new Date();
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        currentDateTime.textContent = now.toLocaleDateString('en-US', options);
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Auto-fill form when user is selected
+    userSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (this.value) {
+            registrationNumber.value = selectedOption.getAttribute('data-id') || '';
+            fullName.value = selectedOption.getAttribute('data-name') || '';
+            department.value = selectedOption.getAttribute('data-dept') || '';
+            phone.value = selectedOption.getAttribute('data-phone') || '';
+            faculty.value = ''; // Clear faculty as it's not stored in user
+        } else {
+            // Clear fields if no user selected
+            registrationNumber.value = '';
+            fullName.value = '';
+            department.value = '';
+            phone.value = '';
+            faculty.value = '';
+        }
+    });
+
+    // Form validation
+    const form = document.getElementById('attendanceForm');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = ['registration_number', 'full_name', 'purpose'];
+        let isValid = true;
+
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementsByName(fieldName)[0];
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields marked with *');
+        }
+    });
+
+    // Remove validation styling on input
+    const inputs = form.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + Enter to submit form
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit'));
+        }
+
+        // Ctrl + U to focus user select
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            userSelect.focus();
+        }
+    });
+});
+</script>
+
+<style>
+.icon-60 {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.icon-60--gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.btn-purple {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-purple:hover {
+    background-color: #5a359a;
+    border-color: #5a359a;
+}
+
+.form-label {
+    color: #495057;
+    font-weight: 600;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+</style>
+{% endblock %}

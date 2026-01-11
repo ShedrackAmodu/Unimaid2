@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-book fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
+                <p class="lead text-muted">Free e-books, textbooks, and open educational resources from around the world</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="open-resources-page">
+    <div class="container-fluid">
+        <!-- Introduction -->
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto text-center">
+                <h2 class="fw-bold mb-4">Free Books & Educational Materials</h2>
+                <p class="lead text-muted">
+                    Access thousands of free e-books, textbooks, and educational resources from reputable publishers
+                    and institutions worldwide. These open resources cover academic subjects, research materials,
+                    and classic literature available for download and online reading.
+                </p>
+            </div>
+        </div>
+
+        <!-- E-book Sites Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-bookshelf me-2"></i>Free E-book Collections
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            {% for resource in ebook_sites %}
+                            <div class="col-lg-6 col-xl-4">
+                                <div class="resource-card card h-100 border">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <div class="resource-icon me-3">
+                                                <i class="bi bi-book fs-4 text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-2">{{ resource.name }}</h6>
+                                                <p class="text-muted small mb-3">{{ resource.description }}</p>
+                                                <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Visit Collection
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Overview -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-light py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-grid me-2"></i>Resource Categories
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-6 col-lg-3">
+                                <div class="category-card text-center p-4 bg-light rounded">
+                                    <i class="bi bi-calculator fs-2 text-primary mb-3"></i>
+                                    <h6 class="fw-bold">Mathematics</h6>
+                                    <p class="text-muted small">Textbooks and resources for math education</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="category-card text-center p-4 bg-light rounded">
+                                    <i class="bi bi-heart-pulse fs-2 text-danger mb-3"></i>
+                                    <h6 class="fw-bold">Medical</h6>
+                                    <p class="text-muted small">Healthcare and medical textbooks</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="category-card text-center p-4 bg-light rounded">
+                                    <i class="bi bi-code-slash fs-2 text-success mb-3"></i>
+                                    <h6 class="fw-bold">Technology</h6>
+                                    <p class="text-muted small">Programming and tech resources</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="category-card text-center p-4 bg-light rounded">
+                                    <i class="bi bi-tree fs-2 text-info mb-3"></i>
+                                    <h6 class="fw-bold">Science</h6>
+                                    <p class="text-muted small">Biology, physics, and research materials</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Guidelines -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-info-circle me-2"></i>Usage Guidelines
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="alert alert-success border-0">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-check-circle-fill me-2"></i>Free Access</h6>
+                                    <p class="mb-0 small">All resources listed are completely free to access and download.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info border-0">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-download me-2"></i>Download Options</h6>
+                                    <p class="mb-0 small">Most sites offer PDF downloads, online reading, or both options.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="alert alert-warning border-0">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Availability</h6>
+                                    <p class="mb-0 small">Some resources may have limited availability or require registration.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-primary border-0">
+                                    <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb me-2"></i>Educational Use</h6>
+                                    <p class="mb-0 small">These materials are intended for educational and research purposes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="fw-bold mb-4">Need Help Finding Resources?</h3>
+                        <p class="text-muted mb-4">
+                            Our librarians can help you find specific textbooks or educational materials for your studies.
+                        </p>
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-md-6">
+                                <a href="{% url 'accounts:research_assistance' %}" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-search me-2"></i>Research Assistance
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'accounts:contact' %}" class="btn btn-primary w-100">
+                                    <i class="bi bi-envelope me-2"></i>Contact Librarian
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .resource-card {
+        transition: all 0.3s ease;
+    }
+
+    .resource-card:hover {
+        border-color: var(--accent-blue) !important;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .resource-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .resource-card:hover .resource-icon {
+        transform: scale(1.1);
+    }
+
+    .category-card {
+        transition: all 0.3s ease;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

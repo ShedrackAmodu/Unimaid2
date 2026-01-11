@@ -28,3 +28,21 @@ def remove_param(query_string, param_to_remove):
 
     # Reconstruct the query string
     return urlencode(params, doseq=True)
+
+
+@register.filter
+def sub(value, arg):
+    """Subtract the arg from the value."""
+    try:
+        return value - arg
+    except (ValueError, TypeError):
+        return value
+
+
+@register.filter
+def multiply(value, arg):
+    """Multiply the value by the arg."""
+    try:
+        return value * arg
+    except (ValueError, TypeError):
+        return value

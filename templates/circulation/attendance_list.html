@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Records - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/circulation/staff-dashboard/">Circulation</a></li>
+<li class="breadcrumb-item active" aria-current="page">Attendance Records</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-list-check fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Attendance Records</h1>
+                <p class="lead text-muted">View and manage library attendance records</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filters and Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Date Filter</label>
+                        <select class="form-select" id="dateFilter" onchange="updateFilters()">
+                            <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                            <option value="week" {% if date_filter == 'week' %}selected{% endif %}>This Week</option>
+                            <option value="month" {% if date_filter == 'month' %}selected{% endif %}>This Month</option>
+                            <option value="custom" {% if date_filter == 'custom' %}selected{% endif %}>Custom Range</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2" id="startDateContainer" style="display: {% if date_filter == 'custom' %}block{% else %}none{% endif %}">
+                        <label class="form-label fw-bold">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" onchange="updateFilters()">
+                    </div>
+
+                    <div class="col-md-2" id="endDateContainer" style="display: {% if date_filter == 'custom' %}block{% else %}none{% endif %}">
+                        <label class="form-label fw-bold">End Date</label>
+                        <input type="date" class="form-control" id="endDate" onchange="updateFilters()">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Status</label>
+                        <select class="form-select" id="statusFilter" onchange="updateFilters()">
+                            <option value="">All Status</option>
+                            <option value="active" {% if status == 'active' %}selected{% endif %}>Active (In Library)</option>
+                            <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed (Checked Out)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'circulation:register_attendance' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>New Entry
+                            </a>
+                            <a href="{% url 'circulation:export_attendance_excel' %}?date_filter={{ date_filter }}{% if status %}&status={{ status }}{% endif %}" class="btn btn-success">
+                                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-people text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ attendances|length }}</h3>
+                        <p class="text-muted mb-0">Total Records</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-door-open text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ attendances|length|add:"0" }}</h3>
+                        <p class="text-muted mb-0">Active Visitors</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-check-circle text-info fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ attendances|length|add:"0" }}</h3>
+                        <p class="text-muted mb-0">Completed Visits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-clock text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">--</h3>
+                        <p class="text-muted mb-0">Avg. Visit Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h5 class="fw-bold mb-0">Attendance Records</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Visitor</th>
+                                <th>Registration #</th>
+                                <th>Department</th>
+                                <th>Purpose</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendance in attendances %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ attendance.full_name }}</h6>
+                                            {% if attendance.user %}
+                                            <small class="text-primary">{{ attendance.user.membership_type|title }}</small>
+                                            {% else %}
+                                            <small class="text-muted">Visitor</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ attendance.registration_number }}</span>
+                                </td>
+                                <td>
+                                    {{ attendance.department }}
+                                    {% if attendance.faculty %}
+                                    <br><small class="text-muted">{{ attendance.faculty }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="max-width: 200px;">
+                                        <small class="text-truncate d-block" title="{{ attendance.purpose }}">
+                                            {{ attendance.purpose|truncatechars:50 }}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ attendance.check_in|date:"M d, Y" }}</strong><br>
+                                        <small class="text-muted">{{ attendance.check_in|time:"H:i:s" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if attendance.check_out %}
+                                    <div>
+                                        <strong>{{ attendance.check_out|date:"M d, Y" }}</strong><br>
+                                        <small class="text-muted">{{ attendance.check_out|time:"H:i:s" }}</small>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.check_out %}
+                                        {% with duration=attendance.check_out|timesince:attendance.check_in %}
+                                        <span class="badge bg-info">{{ duration }}</span>
+                                        {% endwith %}
+                                    {% else %}
+                                        {% with duration=attendance.check_in|timesince %}
+                                        <span class="badge bg-warning">Active: {{ duration }}</span>
+                                        {% endwith %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attendance.status == 'active' %}
+                                    <button class="btn btn-sm btn-success" onclick="checkoutVisitor({{ attendance.id }}, '{{ attendance.full_name }}')">
+                                        <i class="bi bi-check-circle me-1"></i>Check Out
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="bi bi-check-circle me-1"></i>Completed
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-calendar-x fs-1 mb-3"></i>
+                                        <p class="mb-2">No attendance records found</p>
+                                        <p class="mb-0 small">Try adjusting your filters or register a new visitor.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Check Out Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Check Out Visitor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Confirm check-out for <strong id="checkoutName"></strong>?</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-clock me-2"></i>
+                    <strong>Check-out Time:</strong> <span id="checkoutTime"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmCheckout">
+                    <i class="bi bi-check-circle me-2"></i>Confirm Check Out
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+let currentAttendanceId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Update date/time in checkout modal
+    function updateCheckoutTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        document.getElementById('checkoutTime').textContent = timeStr;
+    }
+
+    // Update filters function
+    window.updateFilters = function() {
+        const dateFilter = document.getElementById('dateFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let url = `{% url 'circulation:attendance_list' %}?date_filter=${dateFilter}`;
+
+        if (statusFilter) {
+            url += `&status=${statusFilter}`;
+        }
+
+        if (dateFilter === 'custom') {
+            if (startDate) url += `&start_date=${startDate}`;
+            if (endDate) url += `&end_date=${endDate}`;
+        }
+
+        // Show/hide custom date inputs
+        const startContainer = document.getElementById('startDateContainer');
+        const endContainer = document.getElementById('endDateContainer');
+
+        if (dateFilter === 'custom') {
+            startContainer.style.display = 'block';
+            endContainer.style.display = 'block';
+        } else {
+            startContainer.style.display = 'none';
+            endContainer.style.display = 'none';
+        }
+
+        // Reload page with new filters
+        window.location.href = url;
+    };
+
+    // Checkout visitor function
+    window.checkoutVisitor = function(attendanceId, visitorName) {
+        currentAttendanceId = attendanceId;
+        document.getElementById('checkoutName').textContent = visitorName;
+        updateCheckoutTime();
+
+        const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+        modal.show();
+    };
+
+    // Confirm checkout
+    document.getElementById('confirmCheckout').addEventListener('click', function() {
+        if (currentAttendanceId) {
+            // Redirect to checkout URL
+            window.location.href = `{% url 'circulation:checkout_attendance' 0 %}`.replace('0', currentAttendanceId);
+        }
+    });
+
+    // Auto-refresh checkout time every second
+    setInterval(updateCheckoutTime, 1000);
+
+    // Set initial date values if custom range
+    {% if date_filter == 'custom' %}
+    document.getElementById('startDate').value = '{{ request.GET.start_date|default:"" }}';
+    document.getElementById('endDate').value = '{{ request.GET.end_date|default:"" }}';
+    {% endif %}
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + R to refresh
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            window.location.reload();
+        }
+
+        // Ctrl + N for new entry
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = '{% url 'circulation:register_attendance' %}';
+        }
+    });
+});
+</script>
+
+<style>
+.icon-60 {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.icon-60--gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.stat-card {
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 10px 20px rgba(58, 134, 255, 0.15);
+}
+
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    transform: translateX(5px);
+    background-color: rgba(var(--primary-rgb), 0.03);
+}
+
+.form-label {
+    color: #495057;
+    font-weight: 600;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

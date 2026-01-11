@@ -48,6 +48,37 @@ class StaticPage(BaseModel):
         verbose_name_plural = "Static Pages"
 
 
+class News(BaseModel):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('published', 'Published'),
+    ]
+
+    title = models.CharField(max_length=500, help_text="Title of the news article")
+    content = models.TextField(help_text="Content of the news article")
+    author = models.ForeignKey(
+        LibraryUser,
+        on_delete=models.CASCADE,
+        related_name='news_articles',
+        help_text="Author of the news article"
+    )
+    published_date = models.DateTimeField(null=True, blank=True, help_text="Date the news was published")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+        help_text="Publication status of the news"
+    )
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "News"
+        verbose_name_plural = "News"
+        ordering = ['-published_date', '-created_at']
+
+
 class FeaturedContent(BaseModel):
     title = models.CharField(max_length=500, help_text="Title of the featured content")
     content = models.TextField(blank=True, help_text="Short description")

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
 from datetime import timedelta
-from .models import Loan, Reservation, Fine, LoanRequest
+from .models import Loan, Reservation, Fine, LoanRequest, Attendance
 from apps.catalog.models import Book, BookCopy
 from apps.accounts.models import LibraryUser
 
@@ -30,12 +30,19 @@ def staff_dashboard(request):
     overdue_loans = Loan.objects.filter(status='active', due_date__lt=timezone.now()).select_related('user', 'book_copy__book')
     recent_returns = Loan.objects.filter(status='returned').order_by('-return_date')[:10]
 
+    # Attendance stats
+    today = timezone.now().date()
+    active_attendances = Attendance.objects.filter(status='active')
+    today_attendances = Attendance.objects.filter(check_in__date=today)
+
     context = {
         'pending_loans': pending_loans,
         'pending_reservations': pending_reservations,
         'pending_borrow_requests': pending_borrow_requests,
         'overdue_loans': overdue_loans,
         'recent_returns': recent_returns,
+        'active_attendances': active_attendances,
+        'today_attendances': today_attendances,
     }
     return render(request, 'circulation/staff_dashboard.html', context)
 
@@ -337,3 +344,164 @@ def analytics_dashboard(request):
         'days': days,
     }
     return render(request, 'circulation/analytics.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def register_attendance(request):
+    """Register attendance for a visitor."""
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        registration_number = request.POST.get('registration_number')
+        full_name = request.POST.get('full_name')
+        department = request.POST.get('department')
+        faculty = request.POST.get('faculty')
+        phone = request.POST.get('phone')
+        purpose = request.POST.get('purpose')
+
+        user = None
+        if user_id:
+            try:
+                user = LibraryUser.objects.get(id=user_id)
+            except LibraryUser.DoesNotExist:
+                pass
+
+        attendance = Attendance.objects.create(
+            user=user,
+            registration_number=registration_number,
+            full_name=full_name,
+            department=department,
+            faculty=faculty,
+            phone=phone,
+            purpose=purpose,
+        )
+
+        messages.success(request, f'Attendance registered for {full_name}.')
+        return redirect('circulation:staff_dashboard')
+
+    # Get recent users for quick selection
+    recent_users = LibraryUser.objects.filter(
+        membership_type__in=['student', 'faculty', 'staff']
+    ).order_by('-last_login')[:20]
+
+    context = {
+        'recent_users': recent_users,
+    }
+    return render(request, 'circulation/register_attendance.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def checkout_attendance(request, attendance_id):
+    """Mark attendance as checked out."""
+    attendance = get_object_or_404(Attendance, id=attendance_id, status='active')
+    attendance.check_out_visitor()
+    messages.success(request, f'{attendance.full_name} checked out successfully.')
+    return redirect('circulation:attendance_list')
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def attendance_list(request):
+    """List attendance records with filtering."""
+    attendances = Attendance.objects.all()
+
+    # Filter by date range
+    date_filter = request.GET.get('date_filter', 'today')
+    if date_filter == 'today':
+        start_date = timezone.now().date()
+        attendances = attendances.filter(check_in__date=start_date)
+    elif date_filter == 'week':
+        start_date = timezone.now() - timedelta(days=7)
+        attendances = attendances.filter(check_in__gte=start_date)
+    elif date_filter == 'month':
+        start_date = timezone.now() - timedelta(days=30)
+        attendances = attendances.filter(check_in__gte=start_date)
+    elif date_filter == 'custom':
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date:
+            attendances = attendances.filter(check_in__date__gte=start_date)
+        if end_date:
+            attendances = attendances.filter(check_in__date__lte=end_date)
+
+    # Filter by status
+    status = request.GET.get('status')
+    if status:
+        attendances = attendances.filter(status=status)
+
+    context = {
+        'attendances': attendances,
+        'date_filter': date_filter,
+        'status': status,
+    }
+    return render(request, 'circulation/attendance_list.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def export_attendance_excel(request):
+    """Export attendance records to Excel."""
+    from openpyxl import Workbook
+    from django.http import HttpResponse
+    from django.utils import timezone
+
+    # Get filtered attendances
+    attendances = Attendance.objects.all()
+
+    date_filter = request.GET.get('date_filter', 'today')
+    if date_filter == 'today':
+        start_date = timezone.now().date()
+        attendances = attendances.filter(check_in__date=start_date)
+    elif date_filter == 'week':
+        start_date = timezone.now() - timedelta(days=7)
+        attendances = attendances.filter(check_in__gte=start_date)
+    elif date_filter == 'month':
+        start_date = timezone.now() - timedelta(days=30)
+        attendances = attendances.filter(check_in__gte=start_date)
+    elif date_filter == 'custom':
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date:
+            attendances = attendances.filter(check_in__date__gte=start_date)
+        if end_date:
+            attendances = attendances.filter(check_in__date__lte=end_date)
+
+    status = request.GET.get('status')
+    if status:
+        attendances = attendances.filter(status=status)
+
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Attendance Report"
+
+    # Headers
+    headers = [
+        'Registration Number', 'Full Name', 'Department', 'Faculty', 'Phone',
+        'Purpose', 'Check In', 'Check Out', 'Status'
+    ]
+    for col_num, header in enumerate(headers, 1):
+        ws.cell(row=1, column=col_num, value=header)
+
+    # Data
+    for row_num, attendance in enumerate(attendances, 2):
+        ws.cell(row=row_num, column=1, value=attendance.registration_number)
+        ws.cell(row=row_num, column=2, value=attendance.full_name)
+        ws.cell(row=row_num, column=3, value=attendance.department)
+        ws.cell(row=row_num, column=4, value=attendance.faculty)
+        ws.cell(row=row_num, column=5, value=attendance.phone)
+        ws.cell(row=row_num, column=6, value=attendance.purpose)
+        ws.cell(row=row_num, column=7, value=attendance.check_in.strftime('%Y-%m-%d %H:%M:%S'))
+        ws.cell(row=row_num, column=8, value=attendance.check_out.strftime('%Y-%m-%d %H:%M:%S') if attendance.check_out else '')
+        ws.cell(row=row_num, column=9, value=attendance.get_status_display())
+
+    # Response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"attendance_{date_filter}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response
