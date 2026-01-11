@@ -91,7 +91,7 @@ class LibraryUser(AbstractUser, BaseModel):
             self.generate_qr_code()
             super().save(update_fields=['qr_code'])
 
-    def assign_group_based_on_membership(self):
+    def assign_group_based_on_membership(self, is_new=False):
         """Assign user to appropriate group based on membership_type."""
         from django.contrib.auth.models import Group
 
