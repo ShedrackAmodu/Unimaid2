@@ -48,7 +48,19 @@ def register_view(request):
     if request.method == 'POST':
         form = LibraryUserCreationForm(request.POST)
         if form.is_valid():
+            # Handle additional form fields that aren't in the model
+            extra_data = {
+                'academic_year': form.cleaned_data.get('academic_year'),
+                'alternate_phone': form.cleaned_data.get('alternate_phone'),
+                'address': form.cleaned_data.get('address'),
+                'emergency_phone': form.cleaned_data.get('emergency_phone'),
+                'emergency_relation': form.cleaned_data.get('emergency_relation'),
+                'newsletter': form.cleaned_data.get('newsletter'),
+            }
+
             user = form.save()
+
+            # For staff, use staff_id instead of faculty_id in QR code generation
             if user.membership_type == 'staff':
                 # Staff registration requires approval
                 user.is_active = False  # Deactivate until approved
@@ -62,7 +74,7 @@ def register_view(request):
                                f"Username: {user.username}\n"
                                f"Email: {user.email}\n"
                                f"Department: {user.department or 'Not specified'}\n"
-                               f"Faculty ID: {user.faculty_id or 'Not specified'}\n\n"
+                               f"Staff ID: {user.staff_id or 'Not specified'}\n\n"
                                f"Please review and approve/reject this registration in the admin dashboard.",
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Send to admin email

@@ -55,7 +55,7 @@
                                                 <i class="bi bi-person-badge me-2"></i>Select Membership Type
                                             </h6>
                                             <div class="row g-3 membership-cards">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="membership-option" data-type="student">
                                                         <div class="card h-100 border-2 {% if form.membership_type.value == 'student' %}border-primary selected{% else %}border-light{% endif %}">
                                                             <div class="card-body text-center p-4">
@@ -86,8 +86,8 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
-                                                <div class="col-md-6">
+
+                                                <div class="col-md-4">
                                                     <div class="membership-option" data-type="faculty">
                                                         <div class="card h-100 border-2 {% if form.membership_type.value == 'faculty' %}border-primary selected{% else %}border-light{% endif %}">
                                                             <div class="card-body text-center p-4">
@@ -112,6 +112,38 @@
                                                                     <li>
                                                                         <i class="bi bi-check-circle text-success me-2"></i>
                                                                         Course reserve management
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="membership-option" data-type="staff">
+                                                        <div class="card h-100 border-2 {% if form.membership_type.value == 'staff' %}border-primary selected{% else %}border-light{% endif %}">
+                                                            <div class="card-body text-center p-4">
+                                                                <div class="mb-3">
+                                                                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #fd7e14, #ff922b); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                                                        <i class="bi bi-person-badge text-white fs-4"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <h5 class="fw-bold mb-2">Staff</h5>
+                                                                <p class="text-muted small mb-3">
+                                                                    For University administrative staff
+                                                                </p>
+                                                                <ul class="list-unstyled small text-start mb-0">
+                                                                    <li class="mb-2">
+                                                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                                                        Administrative privileges
+                                                                    </li>
+                                                                    <li class="mb-2">
+                                                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                                                        Library management access
+                                                                    </li>
+                                                                    <li class="mb-2">
+                                                                        <i class="bi bi-clock text-warning me-2"></i>
+                                                                        Requires admin approval
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -355,29 +387,29 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Faculty/Staff Information -->
+                                    <!-- Faculty Information -->
                                     <div class="row mb-4" id="facultyFields" style="display: none;">
                                         <div class="col-12">
                                             <h6 class="fw-bold mb-3">
-                                                <i class="bi bi-person-workspace me-2"></i>Faculty/Staff Information
+                                                <i class="bi bi-person-workspace me-2"></i>Faculty Information
                                             </h6>
                                             <div class="row g-3">
                                                 <div class="col-md-6">
-                                                    <label for="facultyId" class="form-label">Faculty/Staff ID *</label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="facultyId" 
-                                                           name="faculty_id" 
+                                                    <label for="facultyId" class="form-label">Faculty ID *</label>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           id="facultyId"
+                                                           name="faculty_id"
                                                            value="{{ form.faculty_id.value|default:'' }}">
                                                     <div class="form-text">
-                                                        Your official university staff ID
+                                                        Your official university faculty ID
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="col-md-6">
-                                                    <label for="facultyDepartment" class="form-label">Department/Faculty *</label>
+                                                    <label for="facultyDepartment" class="form-label">Faculty *</label>
                                                     <select class="form-select" id="facultyDepartment" name="faculty_department">
-                                                        <option value="">Select Department/Faculty</option>
+                                                        <option value="">Select Faculty</option>
                                                         <option value="science" {% if form.faculty_department.value == 'science' %}selected{% endif %}>
                                                             Faculty of Science
                                                         </option>
@@ -407,15 +439,87 @@
                                                         </option>
                                                     </select>
                                                 </div>
-                                                
+
                                                 <div class="col-md-6">
                                                     <label for="position" class="form-label">Position</label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="position" 
-                                                           name="position" 
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           id="facultyPosition"
+                                                           name="position"
                                                            value="{{ form.position.value|default:'' }}"
-                                                           placeholder="e.g., Lecturer, Professor, Administrator">
+                                                           placeholder="e.g., Lecturer, Professor">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Staff Information -->
+                                    <div class="row mb-4" id="staffFields" style="display: none;">
+                                        <div class="col-12">
+                                            <h6 class="fw-bold mb-3">
+                                                <i class="bi bi-person-badge me-2"></i>Staff Information
+                                            </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="staffId" class="form-label">Staff ID *</label>
+                                                    <input type="text"
+                                                           class="form-control {% if form.staff_id.errors %}is-invalid{% endif %}"
+                                                           id="staffId"
+                                                           name="staff_id"
+                                                           value="{{ form.staff_id.value|default:'' }}">
+                                                    {% if form.staff_id.errors %}
+                                                    <div class="invalid-feedback">
+                                                        {{ form.staff_id.errors.0 }}
+                                                    </div>
+                                                    {% endif %}
+                                                    <div class="form-text">
+                                                        Your official university staff ID
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="staffDepartment" class="form-label">Department *</label>
+                                                    <select class="form-select {% if form.department.errors %}is-invalid{% endif %}"
+                                                            id="staffDepartment"
+                                                            name="department">
+                                                        <option value="">Select Department</option>
+                                                        <option value="circulation" {% if form.department.value == 'circulation' %}selected{% endif %}>
+                                                            Circulation
+                                                        </option>
+                                                        <option value="reference" {% if form.department.value == 'reference' %}selected{% endif %}>
+                                                            Reference
+                                                        </option>
+                                                        <option value="technical" {% if form.department.value == 'technical' %}selected{% endif %}>
+                                                            Technical Services
+                                                        </option>
+                                                        <option value="digital" {% if form.department.value == 'digital' %}selected{% endif %}>
+                                                            Digital Services
+                                                        </option>
+                                                        <option value="special_collections" {% if form.department.value == 'special_collections' %}selected{% endif %}>
+                                                            Special Collections
+                                                        </option>
+                                                        <option value="administration" {% if form.department.value == 'administration' %}selected{% endif %}>
+                                                            Administration
+                                                        </option>
+                                                        <option value="it" {% if form.department.value == 'it' %}selected{% endif %}>
+                                                            IT Support
+                                                        </option>
+                                                    </select>
+                                                    {% if form.department.errors %}
+                                                    <div class="invalid-feedback">
+                                                        {{ form.department.errors.0 }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="staffPosition" class="form-label">Position</label>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           id="staffPosition"
+                                                           name="position"
+                                                           value="{{ form.position.value|default:'' }}"
+                                                           placeholder="e.g., Librarian, Assistant, Manager">
                                                 </div>
                                             </div>
                                         </div>
@@ -915,45 +1019,61 @@
         const membershipTypeInput = document.getElementById('membershipType');
         const studentFields = document.getElementById('studentFields');
         const facultyFields = document.getElementById('facultyFields');
-        
+        const staffFields = document.getElementById('staffFields');
+
         membershipOptions.forEach(option => {
             option.addEventListener('click', function() {
                 const type = this.dataset.type;
-                
+
                 // Update selected card
                 membershipOptions.forEach(opt => {
                     const card = opt.querySelector('.card');
                     card.classList.remove('selected', 'border-primary');
                     card.classList.add('border-light');
                 });
-                
+
                 this.querySelector('.card').classList.add('selected', 'border-primary');
                 this.querySelector('.card').classList.remove('border-light');
-                
+
                 // Update hidden input
                 membershipTypeInput.value = type;
-                
+
                 // Show/hide relevant fields
                 if (type === 'student') {
                     studentFields.style.display = 'block';
                     facultyFields.style.display = 'none';
-                    
+                    staffFields.style.display = 'none';
+
                     // Set required fields for student
                     document.getElementById('studentId').required = true;
                     document.getElementById('department').required = true;
                     document.getElementById('facultyId').required = false;
                     document.getElementById('facultyDepartment').required = false;
+                    document.getElementById('staffId').required = false;
                 } else if (type === 'faculty') {
                     studentFields.style.display = 'none';
                     facultyFields.style.display = 'block';
-                    
+                    staffFields.style.display = 'none';
+
                     // Set required fields for faculty
                     document.getElementById('studentId').required = false;
                     document.getElementById('department').required = false;
                     document.getElementById('facultyId').required = true;
                     document.getElementById('facultyDepartment').required = true;
+                    document.getElementById('staffId').required = false;
+                } else if (type === 'staff') {
+                    studentFields.style.display = 'none';
+                    facultyFields.style.display = 'none';
+                    staffFields.style.display = 'block';
+
+                    // Set required fields for staff
+                    document.getElementById('studentId').required = false;
+                    document.getElementById('department').required = true;
+                    document.getElementById('facultyId').required = false;
+                    document.getElementById('facultyDepartment').required = false;
+                    document.getElementById('staffId').required = true;
                 }
-                
+
                 // Remove error styling
                 document.getElementById('membershipTypeError').style.display = 'none';
             });

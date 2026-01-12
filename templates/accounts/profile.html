@@ -1348,19 +1348,10 @@
             setTimeout(() => {
                 // Save to localStorage
                 localStorage.setItem('userPreferences', JSON.stringify(preferences));
-                
-                // Apply dark mode if changed
-                if (preferences.dark_mode) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                }
-                
+
                 // Show success message
                 showToast('success', 'Preferences saved successfully');
-                
+
                 // Reset button
                 button.innerHTML = originalText;
                 button.disabled = false;

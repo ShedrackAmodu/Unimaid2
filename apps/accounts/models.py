@@ -26,7 +26,8 @@ class LibraryUser(AbstractUser, BaseModel):
     )
     department = models.CharField(max_length=100, blank=True, help_text="Department or faculty for students/staff")
     student_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Student ID number")
-    faculty_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Faculty/Staff ID number")
+    faculty_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Faculty ID number")
+    staff_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Staff ID number")
     phone = models.CharField(max_length=20, blank=True, help_text="Phone number")
     emergency_contact = models.TextField(blank=True, help_text="Emergency contact information")
     qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
@@ -36,7 +37,7 @@ class LibraryUser(AbstractUser, BaseModel):
     def generate_qr_code(self):
         """Generate QR code containing user information."""
         # Create data string with user details
-        user_id = self.student_id or self.faculty_id or str(self.id)
+        user_id = self.student_id or self.faculty_id or self.staff_id or str(self.id)
         data = f"User: {self.first_name} {self.last_name}\nID: {user_id}\nUsername: {self.username}\nType: {self.get_membership_type_display()}"
 
         # Generate QR code
