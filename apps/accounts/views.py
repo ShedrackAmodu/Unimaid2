@@ -48,19 +48,9 @@ def register_view(request):
     if request.method == 'POST':
         form = LibraryUserCreationForm(request.POST)
         if form.is_valid():
-            # Handle additional form fields that aren't in the model
-            extra_data = {
-                'academic_year': form.cleaned_data.get('academic_year'),
-                'alternate_phone': form.cleaned_data.get('alternate_phone'),
-                'address': form.cleaned_data.get('address'),
-                'emergency_phone': form.cleaned_data.get('emergency_phone'),
-                'emergency_relation': form.cleaned_data.get('emergency_relation'),
-                'newsletter': form.cleaned_data.get('newsletter'),
-            }
-
             user = form.save()
 
-            # For staff, use staff_id instead of faculty_id in QR code generation
+            # For staff, registration requires approval (they can add staff_id later in profile)
             if user.membership_type == 'staff':
                 # Staff registration requires approval
                 user.is_active = False  # Deactivate until approved
@@ -72,9 +62,8 @@ def register_view(request):
                         message=f"A new staff member has registered and requires approval.\n\n"
                                f"Name: {user.get_full_name()}\n"
                                f"Username: {user.username}\n"
-                               f"Email: {user.email}\n"
-                               f"Department: {user.department or 'Not specified'}\n"
-                               f"Staff ID: {user.staff_id or 'Not specified'}\n\n"
+                               f"Email: {user.email}\n\n"
+                               f"The user will need to provide their Staff ID in their profile for verification.\n"
                                f"Please review and approve/reject this registration in the admin dashboard.",
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Send to admin email
@@ -84,7 +73,7 @@ def register_view(request):
                     # Log error but don't fail registration
                     print(f"Failed to send admin notification email: {e}")
 
-                messages.info(request, 'Registration submitted for approval. You will receive an email once your account is approved.')
+                messages.info(request, 'Registration submitted for approval. You will need to provide your Staff ID in your profile and receive approval before you can log in.')
                 return redirect('accounts:login')
             else:
                 # Non-staff users are active immediately
