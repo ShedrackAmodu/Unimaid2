@@ -25,4 +25,4 @@ class LibraryUserChangeForm(UserChangeForm):
     class Meta:
         model = LibraryUser
         fields = ('email', 'first_name', 'last_name', 'membership_type',
-                 'department', 'student_id', 'faculty_id', 'staff_id', 'phone', 'emergency_contact')
+                 'department', 'student_id', 'faculty_id', 'staff_id', 'phone', 'emergency_contact', 'profile_picture')

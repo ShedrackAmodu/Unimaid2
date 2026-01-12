@@ -30,6 +30,7 @@ class LibraryUser(AbstractUser, BaseModel):
     staff_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Staff ID number")
     phone = models.CharField(max_length=20, blank=True, help_text="Phone number")
     emergency_contact = models.TextField(blank=True, help_text="Emergency contact information")
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="User profile picture")
     qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
 
     objects = UserManager()

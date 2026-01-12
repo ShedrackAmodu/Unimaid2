@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -224,13 +224,81 @@ def reject_staff(request, user_id):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
+def user_role_management(request):
+    """Manage user roles - change between staff and student."""
+    # Get users who are either staff or students
+    users = LibraryUser.objects.filter(
+        membership_type__in=['staff', 'student']
+    ).order_by('last_name', 'first_name')
+
+    context = {
+        'users': users,
+    }
+    return render(request, 'accounts/user_role_management.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def change_user_role(request, user_id):
+    """Change a user's role between staff and student."""
+    user = get_object_or_404(LibraryUser, id=user_id, membership_type__in=['staff', 'student'])
+
+    if request.method == 'POST':
+        current_role = user.membership_type
+        new_role = 'student' if current_role == 'staff' else 'staff'
+
+        # Update the user's membership type
+        user.membership_type = new_role
+
+        # If changing to staff, ensure they are approved
+        if new_role == 'staff':
+            user.is_staff_approved = True
+
+        # If changing from staff to student, clear staff approval
+        elif current_role == 'staff':
+            user.is_staff_approved = False
+
+        user.save()
+
+        # Send notification email
+        try:
+            send_mail(
+                subject="User Role Updated",
+                message=f"Dear {user.get_full_name()},\n\n"
+                       f"Your user role has been updated from {current_role.title()} to {new_role.title()}.\n\n"
+                       f"If you have any questions, please contact the library administration.\n\n"
+                       f"Best regards,\nRamat Library Administration",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send role change email: {e}")
+
+        messages.success(request, f'{user.get_full_name()}\'s role has been changed from {current_role.title()} to {new_role.title()}.')
+        return redirect('accounts:user_role_management')
+
+    return redirect('accounts:user_role_management')
+
+
+@login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = LibraryUserChangeForm(request.POST, instance=request.user)
+        form = LibraryUserChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
-            return redirect('accounts:profile')
+
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
+            else:
+                return redirect('accounts:profile')
+        else:
+            # Handle AJAX request with errors
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': 'Please correct the errors and try again.'})
     else:
         form = LibraryUserChangeForm(instance=request.user)
     return render(request, 'accounts/profile.html', {'form': form})

@@ -259,31 +259,29 @@
                                     </div>
                                     
                                     <div class="col-lg-6">
-                                        <div class="info-section mb-4">
-                                            <h5 class="fw-bold mb-3">
-                                                <i class="bi bi-building me-2"></i>Academic Information
-                                            </h5>
-                                            <div class="info-grid">
-                                                <div class="info-row">
-                                                    <span class="info-label">Department</span>
-                                                    <span class="info-value">{{ user.department|default:"Not set" }}</span>
-                                                </div>
-                                                <div class="info-row">
-                                                    <span class="info-label">Student ID</span>
-                                                    <span class="info-value">{{ user.student_id|default:"Not applicable" }}</span>
-                                                </div>
-                                                <div class="info-row">
-                                                    <span class="info-label">Faculty ID</span>
-                                                    <span class="info-value">{{ user.faculty_id|default:"Not applicable" }}</span>
-                                                </div>
-                                                <div class="info-row">
-                                                    <span class="info-label">Academic Year</span>
-                                                    <span class="info-value">{{ user.academic_year|default:"Not set" }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="info-section mb-4">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-person-plus me-2"></i>Emergency Contact
+                                </h5>
+                                <div class="info-grid">
+                                    <div class="info-row">
+                                        <span class="info-label">Contact Person</span>
+                                        <span class="info-value">{{ user.emergency_contact_name|default:"Not set" }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Relationship</span>
+                                        <span class="info-value">{{ user.emergency_contact_relation|default:"Not set" }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Phone Number</span>
+                                        <span class="info-value">{{ user.emergency_contact_phone|default:"Not set" }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Email</span>
+                                        <span class="info-value">{{ user.emergency_contact_email|default:"Not set" }}</span>
                                     </div>
                                 </div>
+                            </div>
                                 
                                 <div class="text-end">
                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
@@ -1131,33 +1129,45 @@
         function saveProfilePicture() {
             const input = document.getElementById('profilePictureInput');
             if (!input.files[0]) return;
-            
+
             const formData = new FormData();
             formData.append('profile_picture', input.files[0]);
-            
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
             // Show loading
             const button = event.target;
             const originalText = button.innerHTML;
             button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             button.disabled = true;
-            
-            // Simulate API call
-            setTimeout(() => {
-                showToast('success', 'Profile picture updated successfully');
+
+            // Make actual API call
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Profile picture updated successfully');
+                    // Reload page to show updated picture
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', data.message || 'Failed to update profile picture');
+                }
                 button.innerHTML = '<i class="bi bi-camera"></i>';
                 button.disabled = false;
                 button.onclick = function() { document.getElementById('profilePictureInput').click(); };
-            }, 1000);
-            
-            // In real app:
-            // fetch('/api/profile/picture/', {
-            //     method: 'POST',
-            //     body: formData
-            // }).then(response => {
-            //     if (response.ok) {
-            //         showToast('success', 'Profile picture updated successfully');
-            //     }
-            // });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('error', 'Failed to update profile picture');
+                button.innerHTML = '<i class="bi bi-camera"></i>';
+                button.disabled = false;
+                button.onclick = function() { document.getElementById('profilePictureInput').click(); };
+            });
         }
         
         // Save profile changes
