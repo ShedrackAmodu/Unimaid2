@@ -1,8 +1,8 @@
-# UNI_made_library — Comprehensive Feature Set
+# UNIMAID_library — Comprehensive Feature Set
 
 ## Overview
 
-UNI_made_library is a modern, Django‑based library management system developed for the University of Maiduguri's Ramat Library. It combines traditional library operations with digital services, analytics, and an institutional repository—all within a secure, scalable, and user‑friendly platform. This document consolidates all features from the system's development and operational profiles into a single authoritative reference.
+UNIMAID LIBRARY is a modern, Django‑based library management system developed for the University of Maiduguri's Ramat Library. It combines traditional library operations with digital services, analytics, and an institutional repository—all within a secure, scalable, and user‑friendly platform. This document consolidates all features from the system's development and operational profiles into a single authoritative reference.
 
 ---
 
