@@ -108,7 +108,94 @@ def dashboard_view(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_dashboard(request):
-    """Admin dashboard for user management and approvals."""
+    """Comprehensive admin dashboard with full CRUD functionality for all models."""
+    from django.apps import apps as django_apps
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    from django.forms import modelform_factory
+
+    # Handle CRUD operations
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        app_label = request.POST.get('app_label')
+        model_name = request.POST.get('model_name')
+        item_id = request.POST.get('item_id')
+
+        try:
+            model_class = django_apps.get_model(app_label, model_name)
+
+            if action == 'delete':
+                item = get_object_or_404(model_class, id=item_id)
+                display_name = str(item)
+                item.delete()
+                messages.success(request, f'{model_class._meta.verbose_name} "{display_name}" has been deleted successfully.')
+                return redirect('accounts:admin_dashboard')
+
+            elif action == 'bulk_delete':
+                ids = request.POST.getlist('selected_items')
+                if ids:
+                    # Attempt bulk deletion - let Django handle integrity constraints
+                    try:
+                        count = model_class.objects.filter(id__in=ids).delete()[0]
+                        messages.success(request, f'{count} {model_class._meta.verbose_name_plural.lower()} deleted successfully.')
+                    except Exception as e:
+                        # Handle specific database integrity errors
+                        error_message = str(e)
+                        if 'foreign key constraint' in error_message.lower() or 'integrity constraint' in error_message.lower():
+                            messages.error(request, f'Cannot delete selected {model_class._meta.verbose_name_plural.lower()} because some are referenced by other records. Please remove the related data first.')
+                        else:
+                            messages.error(request, f'Error deleting {model_class._meta.verbose_name_plural.lower()}: {error_message}')
+                return redirect('accounts:admin_dashboard')
+
+            elif action in ['create', 'edit']:
+                # Handle create/edit forms
+                try:
+                    # Use a more flexible approach for form creation
+                    exclude_fields = []
+                    model_fields = [f.name for f in model_class._meta.get_fields() if not f.many_to_many]
+
+                    # Exclude complex fields that might cause issues
+                    for field in model_class._meta.get_fields():
+                        if field.many_to_many or field.one_to_many:
+                            exclude_fields.append(field.name)
+                        elif hasattr(field, 'related_model') and field.related_model == model_class:
+                            # Self-referencing fields can be problematic
+                            exclude_fields.append(field.name)
+
+                    # For now, use a basic set of fields to avoid complex relationships
+                    if model_name in ['LibraryUser', 'Book', 'BookCopy', 'Author', 'Publisher']:
+                        # Use specific fields for known models
+                        if model_name == 'LibraryUser':
+                            FormClass = LibraryUserChangeForm
+                        else:
+                            FormClass = modelform_factory(model_class, exclude=exclude_fields)
+                    else:
+                        # For other models, try to exclude problematic fields
+                        FormClass = modelform_factory(model_class, exclude=exclude_fields)
+
+                    if action == 'edit':
+                        instance = get_object_or_404(model_class, id=item_id)
+                        form = FormClass(request.POST, request.FILES, instance=instance)
+                    else:
+                        form = FormClass(request.POST, request.FILES)
+
+                    if form.is_valid():
+                        obj = form.save()
+                        action_text = 'created' if action == 'create' else 'updated'
+                        messages.success(request, f'{model_class._meta.verbose_name} "{str(obj)}" has been {action_text} successfully.')
+                        return redirect('accounts:admin_dashboard')
+                    else:
+                        messages.error(request, f'Error saving {model_class._meta.verbose_name}: {form.errors}')
+                        return redirect('accounts:admin_dashboard')
+
+                except Exception as form_error:
+                    messages.error(request, f'Error creating form for {model_name}: {str(form_error)}')
+                    return redirect('accounts:admin_dashboard')
+
+        except Exception as e:
+            messages.error(request, f'Error performing action: {str(e)}')
+            return redirect('accounts:admin_dashboard')
+
     # Pending staff approvals
     pending_staff = LibraryUser.objects.filter(
         membership_type='staff',
@@ -126,24 +213,463 @@ def admin_dashboard(request):
     faculty_users = LibraryUser.objects.filter(membership_type='faculty').count()
     student_users = LibraryUser.objects.filter(membership_type='student').count()
 
-    # System stats (simplified)
+    # System stats
     from apps.catalog.models import Book
-    from apps.circulation.models import Loan
+    from apps.circulation.models import Loan, Reservation, Fine
+    from apps.repository.models import Document
+    from apps.events.models import Event
     total_books = Book.objects.active().count()
+    document_count = Document.objects.count()
+    event_count = Event.objects.count()
     active_loans = Loan.objects.filter(status='active').count()
+    overdue_loans = Loan.objects.filter(status='active', due_date__lt=timezone.now().date()).count()
+    pending_reservations = Reservation.objects.filter(status='pending').count()
 
+    # System status
+    storage_usage = "65%"  # Mock value - could calculate actual storage usage
+
+    # Recent activity (enhanced with actual data)
+    recent_actions = []
+    try:
+        # Recent user registrations
+        for user in LibraryUser.objects.order_by('-date_joined')[:3]:
+            recent_actions.append({
+                'description': f'New user registered: {user.get_full_name()}',
+                'timestamp': user.date_joined,
+                'get_admin_url': reverse('admin:accounts_libraryuser_change', args=[user.id]),
+                'get_icon': 'person-plus'
+            })
+
+        # Recent loans
+        for loan in Loan.objects.order_by('-created_at')[:2]:
+            recent_actions.append({
+                'description': f'Book loan: {loan.book_copy.book.title[:30]}...',
+                'timestamp': loan.created_at,
+                'get_admin_url': reverse('admin:circulation_loan_change', args=[loan.id]),
+                'get_icon': 'book'
+            })
+
+        # Recent documents
+        for doc in Document.objects.order_by('-upload_date')[:2]:
+            recent_actions.append({
+                'description': f'Document uploaded: {doc.title[:30]}...',
+                'timestamp': doc.upload_date,
+                'get_admin_url': reverse('admin:repository_document_change', args=[doc.id]),
+                'get_icon': 'file-earmark'
+            })
+    except:
+        # Fallback to mock data
+        recent_actions = [
+            {'description': 'New user registered', 'timestamp': timezone.now() - timezone.timedelta(minutes=15), 'get_admin_url': '#', 'get_icon': 'person-plus'},
+            {'description': 'Book loan processed', 'timestamp': timezone.now() - timezone.timedelta(hours=1), 'get_admin_url': '#', 'get_icon': 'book'},
+        ]
+
+    # Import all models for comprehensive management
+    from apps.blog.models import BlogPost, StaticPage, FeaturedContent, News
+    from apps.catalog.models import Author, Publisher, Faculty, Department, Topic, Genre, BookCopy
+    from apps.circulation.models import Reservation, Fine, LoanRequest, Attendance
+    from apps.events.models import Event, EventRegistration
+    from apps.repository.models import Collection, Document
+
+    # Get search and pagination parameters
+    search_query = request.GET.get('search', '')
+    page_number = request.GET.get('page', 1)
+    items_per_page = 10
+
+    # Build app list with full CRUD data
+    app_list = []
+
+    # Helper function to get admin actions
+    def get_admin_actions(admin_class):
+        """Extract custom actions from admin class."""
+        actions = []
+        if hasattr(admin_class, 'actions'):
+            for action in admin_class.actions:
+                if action != 'delete_selected':  # Skip default delete action
+                    action_method = getattr(admin_class, action, None)
+                    if action_method and hasattr(action_method, 'short_description'):
+                        actions.append({
+                            'name': action,
+                            'description': action_method.short_description,
+                            'method': action_method
+                        })
+        return actions
+
+    # Accounts app
+    from .admin import LibraryUserAdmin, StudyRoomAdmin, StudyRoomBookingAdmin
+    accounts_models = [
+        {
+            'name': 'Library Users',
+            'object_name': 'LibraryUser',
+            'count': LibraryUser.objects.count(),
+            'admin_url': reverse('admin:accounts_libraryuser_changelist'),
+            'add_url': reverse('admin:accounts_libraryuser_add'),
+            'icon': 'people',
+            'fields': ['username', 'first_name', 'last_name', 'email', 'membership_type', 'is_active'],
+            'actions': get_admin_actions(LibraryUserAdmin),
+            'items': _get_paginated_items(LibraryUser, search_query, page_number, items_per_page, ['username', 'first_name', 'last_name', 'email'])
+        },
+        {
+            'name': 'Study Rooms',
+            'object_name': 'StudyRoom',
+            'count': StudyRoom.objects.count(),
+            'admin_url': reverse('admin:accounts_studyroom_changelist'),
+            'add_url': reverse('admin:accounts_studyroom_add'),
+            'icon': 'house-door',
+            'fields': ['name', 'room_type', 'capacity', 'is_active'],
+            'actions': get_admin_actions(StudyRoomAdmin),
+            'items': _get_paginated_items(StudyRoom, search_query, page_number, items_per_page, ['name', 'room_type'])
+        },
+        {
+            'name': 'Study Room Bookings',
+            'object_name': 'StudyRoomBooking',
+            'count': StudyRoomBooking.objects.count(),
+            'admin_url': reverse('admin:accounts_studyroombooking_changelist'),
+            'add_url': reverse('admin:accounts_studyroombooking_add'),
+            'icon': 'calendar-check',
+            'fields': ['user', 'room', 'date', 'status'],
+            'actions': get_admin_actions(StudyRoomBookingAdmin),
+            'items': _get_paginated_items(StudyRoomBooking, search_query, page_number, items_per_page, ['user__username', 'room__name'])
+        },
+    ]
+    app_list.append({'name': 'Accounts', 'app_label': 'accounts', 'models': accounts_models, 'icon': 'people'})
+
+    # Catalog app
+    from apps.catalog.admin import BookAdmin, BookCopyAdmin, AuthorAdmin, PublisherAdmin, FacultyAdmin, DepartmentAdmin, TopicAdmin, GenreAdmin
+    catalog_models = [
+        {
+            'name': 'Books',
+            'object_name': 'Book',
+            'count': Book.objects.count(),
+            'admin_url': reverse('admin:catalog_book_changelist'),
+            'add_url': reverse('admin:catalog_book_add'),
+            'icon': 'book',
+            'fields': ['title', 'isbn', 'publisher', 'publication_date', 'pages'],
+            'actions': get_admin_actions(BookAdmin),
+            'items': _get_paginated_items(Book, search_query, page_number, items_per_page, ['title', 'isbn', 'publisher__name'])
+        },
+        {
+            'name': 'Book Copies',
+            'object_name': 'BookCopy',
+            'count': BookCopy.objects.count(),
+            'admin_url': reverse('admin:catalog_bookcopy_changelist'),
+            'add_url': reverse('admin:catalog_bookcopy_add'),
+            'icon': 'book-half',
+            'fields': ['book', 'barcode', 'condition', 'status'],
+            'actions': get_admin_actions(BookCopyAdmin),
+            'items': _get_paginated_items(BookCopy, search_query, page_number, items_per_page, ['book__title', 'barcode'])
+        },
+        {
+            'name': 'Authors',
+            'object_name': 'Author',
+            'count': Author.objects.count(),
+            'admin_url': reverse('admin:catalog_author_changelist'),
+            'add_url': reverse('admin:catalog_author_add'),
+            'icon': 'person',
+            'fields': ['name', 'bio'],
+            'actions': get_admin_actions(AuthorAdmin),
+            'items': _get_paginated_items(Author, search_query, page_number, items_per_page, ['name'])
+        },
+        {
+            'name': 'Publishers',
+            'object_name': 'Publisher',
+            'count': Publisher.objects.count(),
+            'admin_url': reverse('admin:catalog_publisher_changelist'),
+            'add_url': reverse('admin:catalog_publisher_add'),
+            'icon': 'building',
+            'fields': ['name', 'address', 'website'],
+            'actions': get_admin_actions(PublisherAdmin),
+            'items': _get_paginated_items(Publisher, search_query, page_number, items_per_page, ['name'])
+        },
+        {
+            'name': 'Faculties',
+            'object_name': 'Faculty',
+            'count': Faculty.objects.count(),
+            'admin_url': reverse('admin:catalog_faculty_changelist'),
+            'add_url': reverse('admin:catalog_faculty_add'),
+            'icon': 'building',
+            'fields': ['name', 'description', 'code'],
+            'actions': get_admin_actions(FacultyAdmin),
+            'items': _get_paginated_items(Faculty, search_query, page_number, items_per_page, ['name', 'code'])
+        },
+        {
+            'name': 'Departments',
+            'object_name': 'Department',
+            'count': Department.objects.count(),
+            'admin_url': reverse('admin:catalog_department_changelist'),
+            'add_url': reverse('admin:catalog_department_add'),
+            'icon': 'diagram-3',
+            'fields': ['name', 'faculty', 'code'],
+            'actions': get_admin_actions(DepartmentAdmin),
+            'items': _get_paginated_items(Department, search_query, page_number, items_per_page, ['name', 'faculty__name'])
+        },
+        {
+            'name': 'Topics',
+            'object_name': 'Topic',
+            'count': Topic.objects.count(),
+            'admin_url': reverse('admin:catalog_topic_changelist'),
+            'add_url': reverse('admin:catalog_topic_add'),
+            'icon': 'tags',
+            'fields': ['name', 'department', 'code'],
+            'actions': get_admin_actions(TopicAdmin),
+            'items': _get_paginated_items(Topic, search_query, page_number, items_per_page, ['name', 'department__name'])
+        },
+        {
+            'name': 'Genres',
+            'object_name': 'Genre',
+            'count': Genre.objects.count(),
+            'admin_url': reverse('admin:catalog_genre_changelist'),
+            'add_url': reverse('admin:catalog_genre_add'),
+            'icon': 'tag',
+            'fields': ['name', 'description'],
+            'actions': get_admin_actions(GenreAdmin),
+            'items': _get_paginated_items(Genre, search_query, page_number, items_per_page, ['name'])
+        },
+    ]
+    app_list.append({'name': 'Catalog', 'app_label': 'catalog', 'models': catalog_models, 'icon': 'book'})
+
+    # Circulation app
+    from apps.circulation.admin import LoanAdmin, ReservationAdmin, FineAdmin, LoanRequestAdmin
+    circulation_models = [
+        {
+            'name': 'Loans',
+            'object_name': 'Loan',
+            'count': Loan.objects.count(),
+            'admin_url': reverse('admin:circulation_loan_changelist'),
+            'add_url': None,
+            'icon': 'arrow-left-right',
+            'fields': ['user', 'book_copy', 'loan_date', 'due_date', 'status'],
+            'actions': get_admin_actions(LoanAdmin),
+            'items': _get_paginated_items(Loan, search_query, page_number, items_per_page, ['user__username', 'book_copy__book__title'])
+        },
+        {
+            'name': 'Reservations',
+            'object_name': 'Reservation',
+            'count': Reservation.objects.count(),
+            'admin_url': reverse('admin:circulation_reservation_changelist'),
+            'add_url': None,
+            'icon': 'bookmark',
+            'fields': ['user', 'book', 'reservation_date', 'status'],
+            'actions': get_admin_actions(ReservationAdmin),
+            'items': _get_paginated_items(Reservation, search_query, page_number, items_per_page, ['user__username', 'book__title'])
+        },
+        {
+            'name': 'Loan Requests',
+            'object_name': 'LoanRequest',
+            'count': LoanRequest.objects.count(),
+            'admin_url': reverse('admin:circulation_loanrequest_changelist'),
+            'add_url': None,
+            'icon': 'clipboard-check',
+            'fields': ['user', 'book_copy', 'request_date', 'status'],
+            'actions': get_admin_actions(LoanRequestAdmin),
+            'items': _get_paginated_items(LoanRequest, search_query, page_number, items_per_page, ['user__username', 'book_copy__book__title'])
+        },
+        {
+            'name': 'Fines',
+            'object_name': 'Fine',
+            'count': Fine.objects.count(),
+            'admin_url': reverse('admin:circulation_fine_changelist'),
+            'add_url': None,
+            'icon': 'cash',
+            'fields': ['loan', 'amount', 'reason', 'status'],
+            'actions': get_admin_actions(FineAdmin),
+            'items': _get_paginated_items(Fine, search_query, page_number, items_per_page, ['loan__user__username', 'amount'])
+        },
+        {
+            'name': 'Attendance',
+            'object_name': 'Attendance',
+            'count': Attendance.objects.count(),
+            'admin_url': reverse('admin:circulation_attendance_changelist'),
+            'add_url': reverse('admin:circulation_attendance_add'),
+            'icon': 'person-check',
+            'fields': ['user', 'full_name', 'check_in', 'check_out', 'status'],
+            'actions': get_admin_actions(AttendanceAdmin),
+            'items': _get_paginated_items(Attendance, search_query, page_number, items_per_page, ['full_name', 'user__username'])
+        },
+    ]
+    app_list.append({'name': 'Circulation', 'app_label': 'circulation', 'models': circulation_models, 'icon': 'arrow-left-right'})
+
+    # Blog app
+    blog_models = []
+    if BlogPost:
+        blog_models.append({
+            'name': 'Blog Posts',
+            'object_name': 'BlogPost',
+            'count': BlogPost.objects.count(),
+            'admin_url': reverse('admin:blog_blogpost_changelist'),
+            'add_url': reverse('admin:blog_blogpost_add'),
+            'icon': 'newspaper',
+            'fields': ['title', 'author', 'published_date', 'status'],
+            'items': _get_paginated_items(BlogPost, search_query, page_number, items_per_page, ['title', 'author__username'])
+        })
+    blog_models.extend([
+        {
+            'name': 'Static Pages',
+            'object_name': 'StaticPage',
+            'count': StaticPage.objects.count(),
+            'admin_url': reverse('admin:blog_staticpage_changelist'),
+            'add_url': reverse('admin:blog_staticpage_add'),
+            'icon': 'file-text',
+            'fields': ['title', 'slug', 'is_active'],
+            'items': _get_paginated_items(StaticPage, search_query, page_number, items_per_page, ['title', 'slug'])
+        },
+        {
+            'name': 'Featured Content',
+            'object_name': 'FeaturedContent',
+            'count': FeaturedContent.objects.count(),
+            'admin_url': reverse('admin:blog_featuredcontent_changelist'),
+            'add_url': reverse('admin:blog_featuredcontent_add'),
+            'icon': 'star',
+            'fields': ['title', 'is_active', 'order'],
+            'items': _get_paginated_items(FeaturedContent, search_query, page_number, items_per_page, ['title'])
+        },
+        {
+            'name': 'News',
+            'object_name': 'News',
+            'count': News.objects.count(),
+            'admin_url': reverse('admin:blog_news_changelist'),
+            'add_url': reverse('admin:blog_news_add'),
+            'icon': 'megaphone',
+            'fields': ['title', 'author', 'published_date', 'status'],
+            'items': _get_paginated_items(News, search_query, page_number, items_per_page, ['title', 'author__username'])
+        },
+    ])
+    app_list.append({'name': 'Blog', 'app_label': 'blog', 'models': blog_models, 'icon': 'newspaper'})
+
+    # Events app
+    events_models = [
+        {
+            'name': 'Events',
+            'object_name': 'Event',
+            'count': Event.objects.count(),
+            'admin_url': reverse('admin:events_event_changelist'),
+            'add_url': reverse('admin:events_event_add'),
+            'icon': 'calendar-event',
+            'fields': ['title', 'date', 'time', 'location', 'organizer'],
+            'items': _get_paginated_items(Event, search_query, page_number, items_per_page, ['title', 'organizer__username'])
+        },
+        {
+            'name': 'Event Registrations',
+            'object_name': 'EventRegistration',
+            'count': EventRegistration.objects.count(),
+            'admin_url': reverse('admin:events_eventregistration_changelist'),
+            'add_url': None,
+            'icon': 'person-plus',
+            'fields': ['event', 'user'],
+            'items': _get_paginated_items(EventRegistration, search_query, page_number, items_per_page, ['event__title', 'user__username'])
+        },
+    ]
+    app_list.append({'name': 'Events', 'app_label': 'events', 'models': events_models, 'icon': 'calendar-event'})
+
+    # Repository app
+    repository_models = [
+        {
+            'name': 'Collections',
+            'object_name': 'Collection',
+            'count': Collection.objects.count(),
+            'admin_url': reverse('admin:repository_collection_changelist'),
+            'add_url': reverse('admin:repository_collection_add'),
+            'icon': 'collection',
+            'fields': ['name', 'description', 'curator'],
+            'items': _get_paginated_items(Collection, search_query, page_number, items_per_page, ['name', 'curator__username'])
+        },
+        {
+            'name': 'Documents',
+            'object_name': 'Document',
+            'count': Document.objects.count(),
+            'admin_url': reverse('admin:repository_document_changelist'),
+            'add_url': reverse('admin:repository_document_add'),
+            'icon': 'file-earmark',
+            'fields': ['title', 'authors', 'upload_date', 'access_level', 'uploaded_by'],
+            'items': _get_paginated_items(Document, search_query, page_number, items_per_page, ['title', 'uploaded_by__username'])
+        },
+    ]
+    app_list.append({'name': 'Repository', 'app_label': 'repository', 'models': repository_models, 'icon': 'file-earmark'})
+
+    # Collect data for all modules (limited for performance)
     context = {
+        # Welcome and stats
+        'user_count': total_users,
+        'book_count': total_books,
+        'document_count': document_count,
+        'event_count': event_count,
+        'active_users': active_users,
+        'overdue_loans': overdue_loans,
+        'pending_reservations': pending_reservations,
+        'storage_usage': storage_usage,
+        'recent_actions': recent_actions,
+
+        # User management
         'pending_staff': pending_staff,
         'recent_users': recent_users,
         'total_users': total_users,
-        'active_users': active_users,
+        'active_users_count': active_users,
         'staff_users': staff_users,
         'faculty_users': faculty_users,
         'student_users': student_users,
         'total_books': total_books,
         'active_loans': active_loans,
+
+        # Apps and models with full CRUD data
+        'app_list': app_list,
+        'search_query': search_query,
+
+        # Legacy data for backward compatibility
+        'study_rooms': StudyRoom.objects.all()[:20],
+        'study_room_bookings': StudyRoomBooking.objects.order_by('-created_at')[:20],
+        'blog_posts': BlogPost.objects.order_by('-created_at')[:20] if BlogPost else [],
+        'static_pages': StaticPage.objects.all()[:20],
+        'featured_content': FeaturedContent.objects.order_by('-created_at')[:20],
+        'news_items': News.objects.order_by('-created_at')[:20],
+        'authors': Author.objects.order_by('-created_at')[:20],
+        'publishers': Publisher.objects.all()[:20],
+        'faculties': Faculty.objects.all(),
+        'departments': Department.objects.all()[:20],
+        'topics': Topic.objects.all()[:20],
+        'genres': Genre.objects.all(),
+        'books': Book.objects.order_by('-created_at')[:20],
+        'book_copies': BookCopy.objects.order_by('-created_at')[:20],
+        'loans': Loan.objects.order_by('-created_at')[:20],
+        'reservations': Reservation.objects.order_by('-created_at')[:20],
+        'loan_requests': LoanRequest.objects.order_by('-created_at')[:20],
+        'fines': Fine.objects.order_by('-created_at')[:20],
+        'attendance_records': Attendance.objects.order_by('-created_at')[:20],
+        'events': Event.objects.order_by('-created_at')[:20],
+        'event_registrations': EventRegistration.objects.order_by('-created_at')[:20],
+        'collections': Collection.objects.all()[:20],
+        'documents': Document.objects.order_by('-upload_date')[:20],
     }
     return render(request, 'accounts/admin_dashboard.html', context)
+
+
+def _get_paginated_items(model_class, search_query, page_number, items_per_page, search_fields):
+    """Helper function to get paginated items with search functionality."""
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    queryset = model_class.objects.all()
+
+    # Apply search filter
+    if search_query:
+        q_objects = Q()
+        for field in search_fields:
+            q_objects |= Q(**{f"{field}__icontains": search_query})
+        queryset = queryset.filter(q_objects)
+
+    # Apply ordering
+    if hasattr(model_class, '_meta') and model_class._meta.ordering:
+        queryset = queryset.order_by(*model_class._meta.ordering)
+    else:
+        queryset = queryset.order_by('-id')
+
+    # Paginate
+    paginator = Paginator(queryset, items_per_page)
+    try:
+        page_obj = paginator.page(page_number)
+    except:
+        page_obj = paginator.page(1)
+
+    return page_obj
 
 
 @login_required
@@ -772,6 +1298,55 @@ def virtual_tour_view(request):
     return render(request, 'accounts/virtual_tour.html', context)
 
 
+def delete_item(request, app_label, model_name, item_id):
+    """Generic delete view for all models accessible through admin dashboard.
+
+    Handles AJAX requests by returning JSON and normal requests with redirects/messages.
+    """
+    # Permission check: allow only authenticated superusers
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Authentication/permission required'}, status=401)
+        return redirect(f"{reverse('accounts:login')}?next={request.path}")
+
+    if request.method != 'POST':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+        messages.error(request, 'Method not allowed')
+        return redirect('accounts:admin_dashboard')
+
+    try:
+        # Get the model class dynamically
+        model_class = django_apps.get_model(app_label, model_name)
+        item = get_object_or_404(model_class, id=item_id)
+
+        # Get display name for success message
+        display_name = str(item)
+
+        # Attempt deletion - let Django handle integrity constraints
+        item.delete()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'{model_class._meta.verbose_name} "{display_name}" deleted'})
+
+        messages.success(request, f'{model_class._meta.verbose_name} "{display_name}" has been deleted successfully.')
+        return redirect('accounts:admin_dashboard')
+
+    except Exception as e:
+        # Handle specific database integrity errors
+        error_message = str(e)
+        if 'foreign key constraint' in error_message.lower() or 'integrity constraint' in error_message.lower():
+            user_msg = f'Cannot delete {model_name} because it is referenced by other records. Please remove the related data first.'
+        else:
+            user_msg = f'Error deleting {model_name}: {error_message}'
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': user_msg}, status=400)
+
+        messages.error(request, user_msg)
+        return redirect('accounts:admin_dashboard')
+
+
 def download_user_qr(request, user_id):
     """Download QR code for a user."""
     user = get_object_or_404(LibraryUser, id=user_id)
@@ -784,3 +1359,264 @@ def download_user_qr(request, user_id):
     response = HttpResponse(user.qr_code, content_type='image/png')
     response['Content-Disposition'] = f'attachment; filename="user_{user.id}_qr.png"'
     return response
+
+
+def get_form_view(request, app_label, model_name, item_id=None):
+    """AJAX view to get form HTML for create/edit operations.
+
+    Returns JSON for AJAX clients and handles authentication/permission errors gracefully.
+    """
+    from django.forms import modelform_factory
+
+    # Permission check
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Authentication/permission required'}, status=401)
+        return redirect(f"{reverse('accounts:login')}?next={request.path}")
+
+    try:
+        model_class = django_apps.get_model(app_label, model_name)
+
+        # Use improved form creation logic
+        exclude_fields = []
+        model_fields = [f.name for f in model_class._meta.get_fields() if not f.many_to_many]
+
+        # Exclude complex fields that might cause issues
+        for field in model_class._meta.get_fields():
+            if field.many_to_many or field.one_to_many:
+                exclude_fields.append(field.name)
+            elif hasattr(field, 'related_model') and field.related_model == model_class:
+                # Self-referencing fields can be problematic
+                exclude_fields.append(field.name)
+
+        # For now, use a basic set of fields to avoid complex relationships
+        if model_name in ['LibraryUser', 'Book', 'BookCopy', 'Author', 'Publisher']:
+            # Use specific fields for known models
+            if model_name == 'LibraryUser':
+                FormClass = LibraryUserChangeForm
+            else:
+                FormClass = modelform_factory(model_class, exclude=exclude_fields)
+        else:
+            # For other models, try to exclude problematic fields
+            FormClass = modelform_factory(model_class, exclude=exclude_fields)
+
+        if item_id:
+            instance = get_object_or_404(model_class, id=item_id)
+            form = FormClass(instance=instance)
+        else:
+            form = FormClass()
+
+        # Render form to HTML
+        form_html = ''
+        for field in form:
+            form_html += f'<div class="mb-3">{field.label_tag()}{field}{field.errors}</div>'
+
+        return JsonResponse({
+            'success': True,
+            'form_html': form_html
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def execute_action(request):
+    """Execute admin actions on selected items."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    try:
+        import json
+        data = json.loads(request.body)
+        app_label = data.get('app_label')
+        model_name = data.get('model_name')
+        action_name = data.get('action_name')
+        selected_items = data.get('selected_items', [])
+
+        if not all([app_label, model_name, action_name, selected_items]):
+            return JsonResponse({'success': False, 'error': 'Missing required parameters'})
+
+        # Get the model and admin class
+        model_class = django_apps.get_model(app_label, model_name)
+
+        # Import admin classes dynamically
+        if app_label == 'accounts':
+            from .admin import LibraryUserAdmin, StudyRoomAdmin, StudyRoomBookingAdmin
+            admin_classes = {
+                'LibraryUser': LibraryUserAdmin,
+                'StudyRoom': StudyRoomAdmin,
+                'StudyRoomBooking': StudyRoomBookingAdmin,
+            }
+        elif app_label == 'catalog':
+            from apps.catalog.admin import BookAdmin, BookCopyAdmin, AuthorAdmin, PublisherAdmin, FacultyAdmin, DepartmentAdmin, TopicAdmin, GenreAdmin
+            admin_classes = {
+                'Book': BookAdmin,
+                'BookCopy': BookCopyAdmin,
+                'Author': AuthorAdmin,
+                'Publisher': PublisherAdmin,
+                'Faculty': FacultyAdmin,
+                'Department': DepartmentAdmin,
+                'Topic': TopicAdmin,
+                'Genre': GenreAdmin,
+            }
+        elif app_label == 'circulation':
+            from apps.circulation.admin import LoanAdmin, ReservationAdmin, FineAdmin, LoanRequestAdmin, AttendanceAdmin
+            admin_classes = {
+                'Loan': LoanAdmin,
+                'Reservation': ReservationAdmin,
+                'Fine': FineAdmin,
+                'LoanRequest': LoanRequestAdmin,
+                'Attendance': AttendanceAdmin,
+            }
+        else:
+            return JsonResponse({'success': False, 'error': 'Admin class not found for this model'})
+
+        admin_class = admin_classes.get(model_name)
+        if not admin_class:
+            return JsonResponse({'success': False, 'error': 'Admin class not found'})
+
+        # Get the action method
+        action_method = getattr(admin_class, action_name, None)
+        if not action_method:
+            return JsonResponse({'success': False, 'error': 'Action method not found'})
+
+        # Create a mock request and queryset
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.admin.views.main import ChangeList
+        from django.db.models import QuerySet
+
+        # Create queryset with selected items
+        queryset = model_class.objects.filter(id__in=selected_items)
+
+        # Create mock admin site and request
+        admin_site = AdminSite()
+        mock_request = request._get_raw_host()  # Create a basic request object
+        mock_request.user = request.user
+
+        # Execute the action
+        try:
+            result = action_method(mock_request, queryset)
+            # Some actions return HttpResponseRedirect, others return None
+            return JsonResponse({
+                'success': True,
+                'message': f'Action "{action_name}" executed successfully on {len(selected_items)} items.'
+            })
+        except Exception as action_error:
+            return JsonResponse({
+                'success': False,
+                'error': f'Action execution failed: {str(action_error)}'
+            })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def import_data_view(request, app_label, model_name):
+    """Import data for a specific model using django-import-export."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    try:
+        model_class = django_apps.get_model(app_label, model_name)
+
+        # Get the resource class from the admin
+        if app_label == 'catalog' and model_name == 'Book':
+            from apps.catalog.admin import BookAdmin, BookResource
+            resource_class = BookResource
+        else:
+            # For other models, try to create a basic resource
+            from import_export import resources
+            resource_class = resources.ModelResource
+            resource_class.Meta.model = model_class
+
+        # Create resource instance
+        resource = resource_class()
+
+        # Get the uploaded file
+        import_file = request.FILES.get('import_file')
+        if not import_file:
+            return JsonResponse({'success': False, 'error': 'No file uploaded'})
+
+        # Import the data
+        from import_export.results import Result
+        from io import StringIO
+        import csv
+
+        # Read file content
+        file_content = import_file.read().decode('utf-8')
+        input_format = request.POST.get('input_format', 'csv')
+
+        if input_format == 'csv':
+            dataset = resource.get_import_dataset(StringIO(file_content), 'csv')
+        else:
+            return JsonResponse({'success': False, 'error': 'Unsupported format'})
+
+        # Perform dry run first
+        result = resource.import_data(dataset, dry_run=True)
+
+        if result.has_errors():
+            errors = []
+            for error in result.base_errors:
+                errors.append(str(error))
+            for line, row_errors in result.row_errors():
+                for error in row_errors:
+                    errors.append(f'Row {line}: {error.error}')
+            return JsonResponse({'success': False, 'error': 'Import validation failed', 'details': errors})
+
+        # Perform actual import
+        result = resource.import_data(dataset, dry_run=False)
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully imported {result.totals.get("new", 0)} new records, updated {result.totals.get("update", 0)} records.'
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def export_data_view(request, app_label, model_name):
+    """Export data for a specific model using django-import-export."""
+    try:
+        model_class = django_apps.get_model(app_label, model_name)
+
+        # Get the resource class from the admin
+        if app_label == 'catalog' and model_name == 'Book':
+            from apps.catalog.admin import BookAdmin, BookResource
+            resource_class = BookResource
+        else:
+            # For other models, try to create a basic resource
+            from import_export import resources
+            resource_class = resources.ModelResource
+            resource_class.Meta.model = model_class
+
+        # Create resource instance
+        resource = resource_class()
+
+        # Get queryset (apply any filters from request)
+        queryset = model_class.objects.all()
+
+        # Export data
+        from import_export.formats import CSV
+        format_class = CSV()
+        dataset = resource.export(queryset)
+        export_data = format_class.export_data(dataset)
+
+        # Return as downloadable file
+        response = HttpResponse(export_data, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{model_name}_export.csv"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

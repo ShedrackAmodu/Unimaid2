@@ -46,3 +46,9 @@ def multiply(value, arg):
         return value * arg
     except (ValueError, TypeError):
         return value
+
+
+@register.filter(name='getattr')
+def get_attr(obj, attr):
+    """Get an attribute from an object dynamically."""
+    return getattr(obj, attr, None)

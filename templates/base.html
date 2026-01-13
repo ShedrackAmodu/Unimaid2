@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Ramat Library - University of Maiduguri{% endblock %}</title>
 
     <!-- Favicon -->
@@ -1238,3 +1239,8 @@
         } else {
             console.error('Hamburger menu elements not found');
         }
+    
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

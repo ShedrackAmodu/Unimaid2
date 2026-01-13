@@ -10,424 +10,745 @@
 {% endblock %}
 
 {% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-shield-check fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">Admin Dashboard</h1>
-                <p class="lead text-muted">Manage users, staff approvals, and system administration</p>
-            </div>
-        </div>
-    </div>
+<!-- Welcome Section -->
+<div class="dashboard-welcome animate__animated animate__fadeInUp">
+    <h1>Welcome to Ramat Library Admin</h1>
+    <p>University of Maiduguri's Library Management System</p>
+    <span class="welcome-badge">Administrator Dashboard</span>
 </div>
 {% endblock %}
 
 {% block content %}
-<!-- Quick Stats -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-people text-primary fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ total_users }}</h3>
-                        <p class="text-muted mb-0">Total Users</p>
-                    </div>
-                </div>
+<style>
+/* Custom dashboard styles */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 31, 63, 0.15);
+}
+
+.dashboard-card.stat-card {
+    text-align: center;
+}
+
+.dashboard-card.stat-card .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #007bff;
+    margin: 10px 0;
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-card.stat-card .stat-label {
+    color: #6c757d;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.dashboard-card.stat-card .stat-icon {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.dashboard-card .card-header {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+    padding: 15px 20px;
+    margin: -25px -25px 20px -25px;
+    border-radius: 15px 15px 0 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.dashboard-card .card-body {
+    padding: 0;
+}
+
+.dashboard-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-card ul li {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-card ul li:last-child {
+    border-bottom: none;
+}
+
+.dashboard-card ul li a {
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex-grow: 1;
+}
+
+.dashboard-card ul li a:hover {
+    color: #007bff;
+    transform: translateX(5px);
+}
+
+.dashboard-card ul li .badge {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.quick-action-btn {
+    background: #f8f9fa;
+    border: 2px solid #007bff;
+    color: #007bff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quick-action-btn:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+.quick-action-btn.primary {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+    border: none;
+}
+
+.module {
+    margin-bottom: 25px;
+}
+
+.module h2 {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+    padding: 15px 20px;
+    margin: 0;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+}
+
+.module table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.module table th {
+    background: #f8f9fa;
+    color: #495057;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 31, 63, 0.1);
+}
+
+.module table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0, 31, 63, 0.05);
+}
+
+.module table tr:hover td {
+    background: #f8f9fa;
+}
+
+.dashboard-welcome {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboard-welcome h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.dashboard-welcome p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.dashboard-welcome .welcome-badge {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #495057;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-welcome h1 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<!-- Statistics Cards -->
+<div class="dashboard-container">
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-people stat-icon"></i>
+        <div class="stat-number">{{ user_count }}</div>
+        <div class="stat-label">Total Users</div>
+        <a href="{% url 'admin:accounts_libraryuser_changelist' %}" class="quick-action-btn">Manage Users</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-book stat-icon"></i>
+        <div class="stat-number">{{ book_count }}</div>
+        <div class="stat-label">Books in Catalog</div>
+        <a href="{% url 'admin:catalog_book_changelist' %}" class="quick-action-btn">View Books</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-file-earmark-text stat-icon"></i>
+        <div class="stat-number">{{ document_count }}</div>
+        <div class="stat-label">Research Documents</div>
+        <a href="{% url 'admin:repository_document_changelist' %}" class="quick-action-btn">View Documents</a>
+    </div>
+
+    <div class="dashboard-card stat-card">
+        <i class="bi bi-calendar-event stat-icon"></i>
+        <div class="stat-number">{{ event_count }}</div>
+        <div class="stat-label">Upcoming Events</div>
+        <a href="{% url 'admin:events_event_changelist' %}" class="quick-action-btn">Manage Events</a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions
+        </div>
+        <div class="card-body">
+            <div class="quick-actions">
+                <a href="{% url 'admin:accounts_libraryuser_add' %}" class="quick-action-btn primary">
+                    <i class="bi bi-person-plus"></i> Add User
+                </a>
+                <a href="{% url 'admin:catalog_book_add' %}" class="quick-action-btn">
+                    <i class="bi bi-book-plus"></i> Add Book
+                </a>
+                <a href="{% url 'admin:catalog_faculty_add' %}" class="quick-action-btn">
+                    <i class="bi bi-building"></i> Add Faculty
+                </a>
+                <a href="{% url 'admin:catalog_department_add' %}" class="quick-action-btn">
+                    <i class="bi bi-diagram-3"></i> Add Department
+                </a>
+                <a href="{% url 'admin:catalog_topic_add' %}" class="quick-action-btn">
+                    <i class="bi bi-tags"></i> Add Topic
+                </a>
+                {% if BlogPost %}
+                <a href="{% url 'admin:blog_blogpost_add' %}" class="quick-action-btn">
+                    <i class="bi bi-newspaper"></i> Create Post
+                </a>
+                {% endif %}
+                <a href="{% url 'admin:repository_document_add' %}" class="quick-action-btn">
+                    <i class="bi bi-upload"></i> Upload Document
+                </a>
+                <a href="{% url 'admin:circulation_loan_changelist' %}" class="quick-action-btn">
+                    <i class="bi bi-arrow-left-right"></i> Manage Loans
+                </a>
+                <a href="{% url 'admin:events_event_add' %}" class="quick-action-btn">
+                    <i class="bi bi-calendar-plus"></i> Schedule Event
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-person-check text-success fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ active_users }}</h3>
-                        <p class="text-muted mb-0">Active Users</p>
-                    </div>
-                </div>
-            </div>
+    <!-- Recent Activity -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-clock-history me-2"></i>Recent Activity
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for action in recent_actions %}
+                <li>
+                    <a href="{{ action.get_admin_url }}">
+                        <i class="bi {{ action.get_icon }} me-2"></i>
+                        {{ action.description }}
+                    </a>
+                    <span class="badge">{{ action.timestamp|timesince }} ago</span>
+                </li>
+                {% empty %}
+                <li>No recent activity</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-person-badge text-warning fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ staff_users }}</h3>
-                        <p class="text-muted mb-0">Staff Members</p>
-                    </div>
-                </div>
-            </div>
+    <!-- System Status -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-shield-check me-2"></i>System Status
         </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-book text-info fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ total_books }}</h3>
-                        <p class="text-muted mb-0">Total Books</p>
-                    </div>
-                </div>
-            </div>
+        <div class="card-body">
+            <ul>
+                <li>
+                    <span>Database</span>
+                    <span class="badge" style="background: #28a745;">Healthy</span>
+                </li>
+                <li>
+                    <span>Storage</span>
+                    <span class="badge" style="background: #28a745;">{{ storage_usage }}</span>
+                </li>
+                <li>
+                    <span>Active Users</span>
+                    <span class="badge" style="background: #007bff;">{{ active_users }}</span>
+                </li>
+                <li>
+                    <span>Overdue Loans</span>
+                    <span class="badge" style="background: #dc3545;">{{ overdue_loans }}</span>
+                </li>
+                <li>
+                    <span>Pending Reservations</span>
+                    <span class="badge" style="background: #ffc107;">{{ pending_reservations }}</span>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
 
-<!-- Main Content -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-lg">
-            <div class="card-header bg-white border-0 py-4">
-                <ul class="nav nav-tabs nav-tabs-bordered" id="adminTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pending-staff-tab" data-bs-toggle="tab" data-bs-target="#pending-staff" type="button" role="tab">
-                            <i class="bi bi-person-plus me-2"></i>Pending Staff Approvals
-                            <span class="badge bg-danger ms-2">{{ pending_staff.count }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="recent-users-tab" data-bs-toggle="tab" data-bs-target="#recent-users" type="button" role="tab">
-                            <i class="bi bi-clock-history me-2"></i>Recent Registrations
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="user-stats-tab" data-bs-toggle="tab" data-bs-target="#user-stats" type="button" role="tab">
-                            <i class="bi bi-bar-chart me-2"></i>User Statistics
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="user-roles-tab" data-bs-toggle="tab" data-bs-target="#user-roles" type="button" role="tab">
-                            <i class="bi bi-person-gear me-2"></i>User Role Management
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="system-info-tab" data-bs-toggle="tab" data-bs-target="#system-info" type="button" role="tab">
-                            <i class="bi bi-gear me-2"></i>System Management
-                        </button>
-                    </li>
-                </ul>
+<!-- Staff Approvals Section -->
+{% if pending_staff %}
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <i class="bi bi-person-plus me-2"></i>Staff Approvals
+            <span class="badge bg-danger ms-2">{{ pending_staff.count }}</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Details</th>
+                            <th>Registration Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in pending_staff %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+                                        <small class="text-muted">{{ user.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ user.membership_type|title }}</strong><br>
+                                    <small class="text-muted">
+                                        Email: {{ user.email }}<br>
+                                        {% if user.department %}Department: {{ user.department }}<br>{% endif %}
+                                        {% if user.faculty_id %}Faculty ID: {{ user.faculty_id }}{% endif %}
+                                    </small>
+                                </div>
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'accounts:approve_staff' user.id %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check-circle me-1"></i>Approve
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" data-bs-target="#rejectModal{{ user.id }}">
+                                        <i class="bi bi-x-circle me-1"></i>Reject
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger"
+                                            onclick="deleteItem('accounts', 'LibraryUser', {{ user.id }})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
-            <div class="card-body p-0">
-                <div class="tab-content" id="adminTabsContent">
-                    <!-- Pending Staff Approvals Tab -->
-                    <div class="tab-pane fade show active" id="pending-staff" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Details</th>
-                                        <th>Registration Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for user in pending_staff %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
-                                                    <small class="text-muted">{{ user.username }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <strong>{{ user.membership_type|title }}</strong><br>
-                                                <small class="text-muted">
-                                                    Email: {{ user.email }}<br>
-                                                    {% if user.department %}Department: {{ user.department }}<br>{% endif %}
-                                                    {% if user.faculty_id %}Faculty ID: {{ user.faculty_id }}{% endif %}
-                                                </small>
-                                            </div>
-                                        </td>
-                                        <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
-                                        <td>
-                                            <span class="badge bg-warning">Pending Approval</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="{% url 'accounts:approve_staff' user.id %}" class="btn btn-sm btn-success">
-                                                    <i class="bi bi-check-circle me-1"></i>Approve
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        data-bs-toggle="modal" data-bs-target="#rejectModal{{ user.id }}">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="5" class="text-center py-5">
-                                            <div class="text-muted">
-                                                <i class="bi bi-check-circle fs-1 mb-3 text-success"></i>
-                                                <p class="mb-0">No pending staff approvals</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+<!-- Search and Filter Bar -->
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="search" class="form-control" placeholder="Search across all models..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Search
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary w-100">
+                        <i class="bi bi-x-circle me-2"></i>Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Application Models with Full CRUD -->
+{% for app in app_list %}
+<div class="module">
+    <h2><i class="bi {{ app.icon }} me-2"></i>{{ app.name }}</h2>
+    {% for model in app.models %}
+    <div class="dashboard-container">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi {{ model.icon }} me-2"></i>{{ model.name }}
+                    <span class="badge bg-primary ms-2">{{ model.items.paginator.count }}</span>
+                </div>
+                <div>
+                    {% if model.add_url %}
+                    <button type="button" class="btn btn-sm btn-success" title="Add {{ model.name }}"
+                            onclick="openCreateModal('{{ app.app_label }}', '{{ model.object_name }}', '{{ model.name }}')">
+                        <i class="bi bi-plus-circle me-2"></i>Add
+                    </button>
+                    {% endif %}
+                    {% if model.actions %}
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-lightning me-2"></i>Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for action in model.actions %}
+                            <li>
+                                <button type="button" class="dropdown-item" title="{{ action.description }}"
+                                        onclick="executeAction('{{ app.app_label }}', '{{ model.object_name }}', '{{ action.name }}', '{{ action.description }}')">
+                                    {{ action.description }}
+                                </button>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-2"></i>Import/Export
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button type="button" class="dropdown-item" title="Import {{ model.name }} data"
+                                        onclick="openImportModal('{{ app.app_label }}', '{{ model.object_name }}', '{{ model.name }}')">
+                                    <i class="bi bi-upload me-2"></i>Import CSV
+                                </button>
+                            </li>
+                            <li>
+                                <a href="{% url 'accounts:export_data' app.app_label model.object_name %}" class="dropdown-item" title="Export {{ model.name }} data">
+                                    <i class="bi bi-download me-2"></i>Export CSV
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="{{ model.admin_url }}" class="btn btn-sm btn-outline-primary" title="View in Admin">
+                        <i class="bi bi-gear me-2"></i>Admin
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if model.items %}
+                <!-- Bulk Actions Form -->
+                <form id="bulk-form-{{ app.app_label }}-{{ model.object_name }}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="app_label" value="{{ app.app_label }}">
+                    <input type="hidden" name="model_name" value="{{ model.object_name }}">
+                    <input type="hidden" name="action" value="bulk_delete">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmBulkDelete()" disabled id="bulk-delete-btn-{{ app.app_label }}-{{ model.object_name }}">
+                                <i class="bi bi-trash me-2"></i>Delete Selected
+                            </button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <input type="checkbox" class="btn-check" id="select-all-{{ app.app_label }}-{{ model.object_name }}" autocomplete="off">
+                            <label class="btn btn-sm btn-outline-secondary" for="select-all-{{ app.app_label }}-{{ model.object_name }}">Select All</label>
                         </div>
                     </div>
 
-                    <!-- Recent Users Tab -->
-                    <div class="tab-pane fade" id="recent-users" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Membership Type</th>
-                                        <th>Registration Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for user in recent_users %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
-                                                    <small class="text-muted">{{ user.email }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary">{{ user.membership_type|title }}</span>
-                                        </td>
-                                        <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
-                                        <td>
-                                            {% if user.is_active %}
+                    <!-- Data Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="40">
+                                        <input type="checkbox" class="form-check-input" id="header-checkbox-{{ app.app_label }}-{{ model.object_name }}">
+                                    </th>
+                                    {% for field in model.fields %}
+                                    <th>{{ field|title }}</th>
+                                    {% endfor %}
+                                    <th width="120">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in model.items %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input row-checkbox" name="selected_items" value="{{ item.id }}" form="bulk-form-{{ app.app_label }}-{{ model.object_name }}">
+                                    </td>
+                                    {% for field in model.fields %}
+                                    <td>
+                                        {% if field == 'user' or field == 'author' or field == 'organizer' or field == 'uploaded_by' or field == 'curator' %}
+                                            {% if item.user %}{{ item.user.get_full_name }}{% elif item.author %}{{ item.author.get_full_name }}{% elif item.organizer %}{{ item.organizer.get_full_name }}{% elif item.uploaded_by %}{{ item.uploaded_by.get_full_name }}{% elif item.curator %}{{ item.curator.get_full_name }}{% else %}-{% endif %}
+                                        {% elif field == 'book' or field == 'book_copy' %}
+                                            {% if item.book %}{{ item.book.title|truncatechars:30 }}{% elif item.book_copy %}{{ item.book_copy.book.title|truncatechars:30 }}{% else %}-{% endif %}
+                                        {% elif field == 'room' %}
+                                            {% if item.room %}{{ item.room.name }}{% else %}-{% endif %}
+                                        {% elif field == 'faculty' %}
+                                            {% if item.faculty %}{{ item.faculty.name }}{% else %}-{% endif %}
+                                        {% elif field == 'department' %}
+                                            {% if item.department %}{{ item.department.name }}{% else %}-{% endif %}
+                                        {% elif field == 'publisher' %}
+                                            {% if item.publisher %}{{ item.publisher.name }}{% else %}-{% endif %}
+                                        {% elif field == 'genre' %}
+                                            {% if item.genre %}{{ item.genre.name }}{% else %}-{% endif %}
+                                        {% elif field == 'topic' %}
+                                            {% if item.topic %}{{ item.topic.name }}{% else %}-{% endif %}
+                                        {% elif field == 'collection' %}
+                                            {% if item.collection %}{{ item.collection.name }}{% else %}-{% endif %}
+                                        {% elif field == 'loan' %}
+                                            {% if item.loan %}{{ item.loan.user.username }} - {{ item.loan.book_copy.book.title|truncatechars:20 }}{% else %}-{% endif %}
+                                        {% elif field == 'event' %}
+                                            {% if item.event %}{{ item.event.title|truncatechars:30 }}{% else %}-{% endif %}
+                                        {% elif field == 'authors' %}
+                                            {{ item.authors|truncatechars:30 }}
+                                        {% elif field == 'is_active' %}
+                                            {% if item.is_active %}
                                                 <span class="badge bg-success">Active</span>
                                             {% else %}
-                                                <span class="badge bg-warning">Inactive</span>
+                                                <span class="badge bg-secondary">Inactive</span>
                                             {% endif %}
-                                        </td>
-                                        <td>
-                                            <a href="/admin/accounts/libraryuser/{{ user.id }}/change/" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil me-1"></i>Edit
-                                            </a>
-                                        </td>
-                                    </tr>
+                                        {% elif field == 'status' %}
+                                            {% if item.status == 'active' %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% elif item.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif item.status == 'approved' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif item.status == 'rejected' %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% elif item.status == 'cancelled' %}
+                                                <span class="badge bg-secondary">Cancelled</span>
+                                            {% elif item.status == 'available' %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% elif item.status == 'checked_out' %}
+                                                <span class="badge bg-primary">Checked Out</span>
+                                            {% elif item.status == 'lost' %}
+                                                <span class="badge bg-danger">Lost</span>
+                                            {% elif item.status == 'damaged' %}
+                                                <span class="badge bg-warning">Damaged</span>
+                                            {% elif item.status == 'paid' %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% elif item.status == 'unpaid' %}
+                                                <span class="badge bg-danger">Unpaid</span>
+                                            {% elif item.status == 'waived' %}
+                                                <span class="badge bg-info">Waived</span>
+                                            {% elif item.status == 'draft' %}
+                                                <span class="badge bg-secondary">Draft</span>
+                                            {% elif item.status == 'published' %}
+                                                <span class="badge bg-success">Published</span>
+                                            {% elif item.status == 'completed' %}
+                                                <span class="badge bg-success">Completed</span>
+                                            {% elif item.status == 'expired' %}
+                                                <span class="badge bg-warning">Expired</span>
+                                            {% elif item.status == 'fulfilled' %}
+                                                <span class="badge bg-success">Fulfilled</span>
+                                            {% elif item.status == 'open' %}
+                                                <span class="badge bg-success">Open</span>
+                                            {% elif item.status == 'restricted' %}
+                                                <span class="badge bg-warning">Restricted</span>
+                                            {% elif item.status == 'embargo' %}
+                                                <span class="badge bg-info">Embargo</span>
+                                            {% elif item.status == 'private' %}
+                                                <span class="badge bg-danger">Private</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ item.status|title }}</span>
+                                            {% endif %}
+                                        {% elif field == 'membership_type' %}
+                                            <span class="badge bg-info">{{ item.get_membership_type_display }}</span>
+                                        {% elif field == 'room_type' %}
+                                            <span class="badge bg-info">{{ item.get_room_type_display }}</span>
+                                        {% elif field == 'condition' %}
+                                            {% if item.condition == 'excellent' %}
+                                                <span class="badge bg-success">Excellent</span>
+                                            {% elif item.condition == 'good' %}
+                                                <span class="badge bg-info">Good</span>
+                                            {% elif item.condition == 'fair' %}
+                                                <span class="badge bg-warning">Fair</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Poor</span>
+                                            {% endif %}
+                                        {% elif field == 'amount' %}
+                                            ${{ item.amount }}
+                                        {% elif field == 'date' or field == 'loan_date' or field == 'due_date' or field == 'return_date' or field == 'published_date' or field == 'upload_date' or field == 'check_in' or field == 'check_out' or field == 'approval_date' or field == 'rejection_date' or field == 'request_date' or field == 'reservation_date' or field == 'expiry_date' or field == 'registration_deadline' %}
+                                            {% if item|getattr:field %}
+                                                {{ item|getattr:field|date:"M d, Y" }}
+                                                {% if field == 'check_in' or field == 'check_out' or field == 'loan_date' or field == 'due_date' %}
+                                                    <br><small class="text-muted">{{ item|getattr:field|time:"H:i" }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        {% elif field == 'time' %}
+                                            {% if item.time %}
+                                                {{ item.time|time:"H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        {% elif field == 'start_time' or field == 'end_time' %}
+                                            {% if item|getattr:field %}
+                                                {{ item|getattr:field|time:"H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        {% elif field == 'created_at' %}
+                                            {{ item.created_at|date:"M d, Y H:i" }}
+                                        {% else %}
+                                            {% with value=item|getattr:field %}
+                                                {% if value %}
+                                                    {% if value|length > 50 %}
+                                                        {{ value|truncatechars:50 }}
+                                                    {% else %}
+                                                        {{ value }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </td>
                                     {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- User Statistics Tab -->
-                    <div class="tab-pane fade" id="user-stats" role="tabpanel">
-                        <div class="row g-4 p-4">
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow">
-                                    <div class="card-header bg-light">
-                                        <h6 class="mb-0">User Distribution</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <canvas id="userChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow">
-                                    <div class="card-header bg-light">
-                                        <h6 class="mb-0">System Statistics</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row text-center">
-                                            <div class="col-6">
-                                                <h3 class="text-primary">{{ active_loans }}</h3>
-                                                <p class="text-muted mb-0">Active Loans</p>
-                                            </div>
-                                            <div class="col-6">
-                                                <h3 class="text-info">{{ total_books }}</h3>
-                                                <p class="text-muted mb-0">Total Books</p>
-                                            </div>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" title="Edit"
+                                                    onclick="openEditModal('{{ app.app_label }}', '{{ model.object_name }}', '{{ model.name }}', {{ item.id }})">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                                                    onclick="deleteItem('{{ app.app_label }}', '{{ model.object_name }}', {{ item.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
 
-                    <!-- User Role Management Tab -->
-                    <div class="tab-pane fade" id="user-roles" role="tabpanel">
-                        <div class="p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h5 class="mb-0">Manage User Roles</h5>
-                                    <small class="text-muted">Change user roles between staff and student</small>
-                                </div>
-                                <a href="{% url 'accounts:user_role_management' %}" class="btn btn-primary">
-                                    <i class="bi bi-arrow-up-right-square me-2"></i>Open Full Page
+                    <!-- Pagination -->
+                    {% if model.items.has_other_pages %}
+                    <nav aria-label="Pagination for {{ model.name }}" class="mt-3">
+                        <ul class="pagination pagination-sm justify-content-center">
+                            {% if model.items.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ model.items.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i>
                                 </a>
-                            </div>
+                            </li>
+                            {% endif %}
 
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">
-                                                <i class="bi bi-info-circle text-info me-2"></i>Quick Role Change
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="mb-3">Select a user to change their role:</p>
-                                            <form method="post" id="quickRoleChangeForm" action="{% url 'accounts:change_user_role' 0 %}">
-                                                {% csrf_token %}
-                                                <div class="mb-3">
-                                                    <label class="form-label">Select User:</label>
-                                                    <select name="user_id" class="form-select" required>
-                                                        <option value="">Choose a user...</option>
-                                                        {% for user in recent_users %}
-                                                            {% if user.membership_type == 'staff' or user.membership_type == 'student' %}
-                                                            <option value="{{ user.id }}">
-                                                                {{ user.get_full_name|default:user.username }} ({{ user.get_membership_type_display }})
-                                                            </option>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                                <button type="submit" class="btn btn-warning">
-                                                    <i class="bi bi-arrow-left-right me-2"></i>Change Role
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">
-                                                <i class="bi bi-lightbulb text-warning me-2"></i>How It Works
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled mb-0">
-                                                <li class="mb-2">
-                                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                                    Staff ↔ Student role changes
-                                                </li>
-                                                <li class="mb-2">
-                                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                                    Automatic permission updates
-                                                </li>
-                                                <li class="mb-2">
-                                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                                    Group membership changes
-                                                </li>
-                                                <li class="mb-2">
-                                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                                    Email notifications sent
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                            {% for num in model.items.paginator.page_range %}
+                                {% if model.items.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > model.items.number|add:'-3' and num < model.items.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
 
-                    <!-- System Management Tab -->
-                    <div class="tab-pane fade" id="system-info" role="tabpanel">
-                        <div class="p-4">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">Quick Actions</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="d-grid gap-2">
-                                                <a href="/admin/" class="btn btn-outline-primary">
-                                                    <i class="bi bi-gear me-2"></i>Django Admin
-                                                </a>
-                                                <a href="/admin/accounts/libraryuser/" class="btn btn-outline-success">
-                                                    <i class="bi bi-people me-2"></i>Manage Users
-                                                </a>
-                                                <a href="/admin/catalog/book/" class="btn btn-outline-info">
-                                                    <i class="bi bi-book me-2"></i>Manage Books
-                                                </a>
-                                                <a href="/circulation/analytics/" class="btn btn-outline-warning">
-                                                    <i class="bi bi-bar-chart me-2"></i>View Analytics
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">System Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <dl class="row">
-                                                <dt class="col-sm-5">Django Version:</dt>
-                                                <dd class="col-sm-7">5.2.7</dd>
-
-                                                <dt class="col-sm-5">Python Version:</dt>
-                                                <dd class="col-sm-7">3.9+</dd>
-
-                                                <dt class="col-sm-5">Database:</dt>
-                                                <dd class="col-sm-7">SQLite3</dd>
-
-                                                <dt class="col-sm-5">Email Backend:</dt>
-                                                <dd class="col-sm-7">{% if debug %}Console{% else %}SMTP{% endif %}</dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                            {% if model.items.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ model.items.next_page_number }}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </form>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">No {{ model.name|lower }} found.</p>
+                    {% if model.add_url %}
+                    <a href="{{ model.add_url }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add First {{ model.name }}
+                    </a>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
+{% endfor %}
 
 <!-- Reject Staff Modals -->
 {% for user in pending_staff %}
@@ -458,6 +779,28 @@
     </div>
 </div>
 {% endfor %}
+
+<!-- CRUD Modal -->
+<div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crudModalTitle">Modal Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="crudForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body" id="crudModalBody">
+                    <!-- Form content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="crudSubmitBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -504,12 +847,31 @@
             });
         }
 
-        // Reject staff function
+        // Helper to get CSRF token from a hidden input or cookie
+        function getCSRFToken() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta && meta.content) return meta.content;
+
+            const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (tokenInput && tokenInput.value) return tokenInput.value;
+
+            // Fallback to cookie (Django default name: csrftoken)
+            const match = document.cookie.match(/(^|;)\s*csrftoken=([^;]+)/);
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+        // Reject staff function (uses CSRF token helper)
         window.rejectStaff = function(userId) {
             const reason = document.getElementById(`rejectReason${userId}`).value.trim();
 
             if (!reason) {
                 alert('Please provide a reason for rejection');
+                return;
+            }
+
+            const csrf = getCSRFToken();
+            if (!csrf) {
+                alert('CSRF token not found. Please reload the page and try again.');
                 return;
             }
 
@@ -526,12 +888,57 @@
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
             csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            csrfInput.value = csrf;
 
             form.appendChild(reasonInput);
             form.appendChild(csrfInput);
             document.body.appendChild(form);
             form.submit();
+        };
+
+        // Delete item function (uses CSRF token helper)
+        window.deleteItem = async function(appLabel, modelName, itemId) {
+            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) return;
+
+            const csrf = getCSRFToken();
+            if (!csrf) {
+                alert('CSRF token not found. Please reload the page and try again.');
+                console.error('CSRF token not found');
+                return;
+            }
+
+            try {
+                const resp = await fetch(`/accounts/delete/${appLabel}/${modelName}/${itemId}/`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const contentType = resp.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    const data = await resp.json();
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Failed to delete item');
+                    }
+                } else {
+                    // Non-JSON - likely a redirect to login or full-page response
+                    if (resp.redirected) {
+                        window.location = resp.url;
+                    } else if (!resp.ok) {
+                        alert('Failed to delete item (network error).');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            } catch (err) {
+                console.error('Delete error', err);
+                alert('An error occurred while deleting the item.');
+            }
         };
 
         // Quick role change form handler
@@ -556,6 +963,265 @@
                 }
             });
         }
+
+        // Bulk selection functionality
+        document.querySelectorAll('[id^="select-all-"]').forEach(function(selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                const suffix = this.id.replace('select-all-','');
+                const [appLabel, ...modelParts] = suffix.split('-');
+                const modelName = modelParts.join('-');
+                const table = this.closest('.dashboard-card');
+                const rowCheckboxes = table.querySelectorAll('.row-checkbox');
+                const bulkDeleteBtn = document.getElementById(`bulk-delete-btn-${appLabel}-${modelName}`);
+
+                rowCheckboxes.forEach(function(checkbox) {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+
+                updateBulkDeleteButton(rowCheckboxes, bulkDeleteBtn);
+            });
+        });
+
+        // Individual row checkbox change
+        document.querySelectorAll('.row-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const table = this.closest('.dashboard-card');
+                const rowCheckboxes = table.querySelectorAll('.row-checkbox');
+                const headerCheckbox = table.querySelector('[id^="header-checkbox-"]');
+                const bulkDeleteBtn = table.querySelector('[id^="bulk-delete-btn-"]');
+
+                // Update header checkbox
+                const checkedBoxes = table.querySelectorAll('.row-checkbox:checked');
+                headerCheckbox.checked = checkedBoxes.length === rowCheckboxes.length;
+                headerCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < rowCheckboxes.length;
+
+                updateBulkDeleteButton(rowCheckboxes, bulkDeleteBtn);
+            });
+        });
+
+        function updateBulkDeleteButton(rowCheckboxes, bulkDeleteBtn) {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            bulkDeleteBtn.disabled = checkedBoxes.length === 0;
+        }
+
+        // Confirm bulk delete
+        window.confirmBulkDelete = function() {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                alert('Please select items to delete.');
+                return false;
+            }
+
+            const count = checkedBoxes.length;
+            return confirm(`Are you sure you want to delete ${count} selected item${count > 1 ? 's' : ''}? This action cannot be undone.`);
+        };
+
+        // Search form enhancement
+        const searchForm = document.querySelector('form[method="get"]');
+        if (searchForm) {
+            const searchInput = searchForm.querySelector('input[name="search"]');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    if (searchInput.value.length >= 1 || searchInput.value.length === 0) {
+                        searchForm.submit();
+                    }
+                }, 500);
+            });
+        }
+
+        // CRUD Modal functions
+        window.openCreateModal = function(appLabel, modelName, modelDisplayName) {
+            const modal = new bootstrap.Modal(document.getElementById('crudModal'));
+            const modalTitle = document.getElementById('crudModalTitle');
+            const modalBody = document.getElementById('crudModalBody');
+            const crudForm = document.getElementById('crudForm');
+
+            modalTitle.textContent = `Add ${modelDisplayName}`;
+            modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading form...</p></div>';
+
+            // Set form action
+            crudForm.action = '/accounts/admin-dashboard/';
+            crudForm.method = 'post';
+
+            // Add hidden inputs
+            let hiddenInputs = crudForm.querySelectorAll('input[type="hidden"]');
+            hiddenInputs.forEach(input => {
+                if (input.name !== 'csrfmiddlewaretoken') input.remove();
+            });
+
+            crudForm.insertAdjacentHTML('afterbegin', `
+                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="app_label" value="${appLabel}">
+                <input type="hidden" name="model_name" value="${modelName}">
+            `);
+
+            // Load form via AJAX (robust handling)
+            (async function() {
+                try {
+                    const resp = await fetch(`/accounts/get-form/${appLabel}/${modelName}/`, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const text = await resp.text();
+                    let data;
+                    try { data = JSON.parse(text); }
+                    catch (e) { throw new Error('Non-JSON response (possible redirect to login)'); }
+
+                    if (data && data.success) {
+                        modalBody.innerHTML = data.form_html;
+                    } else {
+                        modalBody.innerHTML = '<div class="alert alert-danger">Error loading form</div>';
+                    }
+                } catch (err) {
+                    console.error('Form load error', err);
+                    modalBody.innerHTML = `<div class="alert alert-danger">Error loading form: ${err.message}</div>`;
+                }
+            })();
+
+            modal.show();
+        };
+
+        window.openEditModal = function(appLabel, modelName, modelDisplayName, itemId) {
+            const modal = new bootstrap.Modal(document.getElementById('crudModal'));
+            const modalTitle = document.getElementById('crudModalTitle');
+            const modalBody = document.getElementById('crudModalBody');
+            const crudForm = document.getElementById('crudForm');
+
+            modalTitle.textContent = `Edit ${modelDisplayName}`;
+            modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p>Loading form...</p></div>';
+
+            // Set form action
+            crudForm.action = '/accounts/admin-dashboard/';
+            crudForm.method = 'post';
+
+            // Add hidden inputs
+            let hiddenInputs = crudForm.querySelectorAll('input[type="hidden"]');
+            hiddenInputs.forEach(input => {
+                if (input.name !== 'csrfmiddlewaretoken') input.remove();
+            });
+
+            crudForm.insertAdjacentHTML('afterbegin', `
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="app_label" value="${appLabel}">
+                <input type="hidden" name="model_name" value="${modelName}">
+                <input type="hidden" name="item_id" value="${itemId}">
+            `);
+
+            // Load form via AJAX (robust handling)
+            (async function() {
+                try {
+                    const resp = await fetch(`/accounts/get-form/${appLabel}/${modelName}/${itemId}/`, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const text = await resp.text();
+                    let data;
+                    try { data = JSON.parse(text); }
+                    catch (e) { throw new Error('Non-JSON response (possible redirect to login)'); }
+
+                    if (data && data.success) {
+                        modalBody.innerHTML = data.form_html;
+                    } else {
+                        modalBody.innerHTML = '<div class="alert alert-danger">Error loading form</div>';
+                    }
+                } catch (err) {
+                    console.error('Form load error', err);
+                    modalBody.innerHTML = `<div class="alert alert-danger">Error loading form: ${err.message}</div>`;
+                }
+            })();
+
+            modal.show();
+        };
+
+        // Execute admin action function
+        window.executeAction = async function(appLabel, modelName, actionName, actionDescription) {
+            // Check if any items are selected for bulk actions
+            const selectedItems = document.querySelectorAll(`input[name="selected_items"]:checked`);
+            const selectedIds = Array.from(selectedItems).map(cb => cb.value);
+
+            if (selectedIds.length === 0) {
+                alert('Please select items to perform this action on.');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to ${actionDescription.toLowerCase()} ${selectedIds.length} selected item${selectedIds.length > 1 ? 's' : ''}?`)) {
+                return;
+            }
+
+            const csrf = getCSRFToken();
+            if (!csrf) {
+                alert('CSRF token not found. Please reload the page and try again.');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/accounts/execute-action/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        app_label: appLabel,
+                        model_name: modelName,
+                        action_name: actionName,
+                        selected_items: selectedIds
+                    })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    alert(data.message || 'Action executed successfully.');
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to execute action');
+                }
+            } catch (err) {
+                console.error('Action execution error', err);
+                alert('An error occurred while executing the action.');
+            }
+        };
+
+        // Import modal function
+        window.openImportModal = function(appLabel, modelName, modelDisplayName) {
+            const modal = new bootstrap.Modal(document.getElementById('crudModal'));
+            const modalTitle = document.getElementById('crudModalTitle');
+            const modalBody = document.getElementById('crudModalBody');
+            const crudForm = document.getElementById('crudForm');
+
+            modalTitle.textContent = `Import ${modelDisplayName} Data`;
+            modalBody.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Upload a CSV file to import ${modelDisplayName.toLowerCase()} data. Make sure the CSV headers match the expected format.
+                </div>
+                <div class="mb-3">
+                    <label for="importFile" class="form-label">Select CSV File</label>
+                    <input type="file" class="form-control" id="importFile" name="import_file" accept=".csv" required>
+                </div>
+                <div class="mb-3">
+                    <label for="inputFormat" class="form-label">Format</label>
+                    <select class="form-select" id="inputFormat" name="input_format">
+                        <option value="csv">CSV</option>
+                    </select>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This will validate the data first. If validation passes, the data will be imported. Make sure your CSV is properly formatted.
+                </div>
+            `;
+
+            // Set form action
+            crudForm.action = `/accounts/import-data/${appLabel}/${modelName}/`;
+            crudForm.method = 'post';
+            crudForm.enctype = 'multipart/form-data';
+
+            // Add hidden inputs
+            let hiddenInputs = crudForm.querySelectorAll('input[type="hidden"]');
+            hiddenInputs.forEach(input => {
+                if (input.name !== 'csrfmiddlewaretoken') input.remove();
+            });
+
+            modal.show();
+        };
     });
 </script>
 {% endblock %}
