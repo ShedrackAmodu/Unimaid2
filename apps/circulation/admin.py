@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Loan, Reservation, Fine, LoanRequest
+from .models import Loan, Reservation, Fine, LoanRequest, Attendance
 
 
 @admin.register(Loan)
@@ -62,3 +62,19 @@ class LoanRequestAdmin(admin.ModelAdmin):
             rejected += 1
         self.message_user(request, f'{rejected} loan requests rejected.')
     reject_requests.short_description = 'Reject selected loan requests'
+
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ['user', 'full_name', 'check_in', 'check_out', 'status']
+    list_filter = ['status', 'check_in', 'check_out']
+    search_fields = ['user__username', 'full_name', 'registration_number']
+    actions = ['check_out_visitors']
+
+    def check_out_visitors(self, request, queryset):
+        updated = 0
+        for attendance in queryset.filter(status='active'):
+            attendance.check_out_visitor()
+            updated += 1
+        self.message_user(request, f'{updated} visitors checked out successfully.')
+    check_out_visitors.short_description = 'Check out selected visitors'
