@@ -36,12 +36,34 @@ class Command(BaseCommand):
                 ]
             },
             'Staff': {
-                'apps': ['accounts', 'catalog', 'circulation', 'blog', 'events', 'repository'],
+                'apps': [],  # Staff should not have full app access
                 'permissions': [
-                    # Accounts permissions for patron management
+                    # Attendance permissions
+                    'circulation.add_attendance',
+                    'circulation.change_attendance',
+                    'circulation.view_attendance',
+                    # Document viewing permissions (will be checked via DocumentPermission model)
+                    'repository.view_document',
+                    'repository.view_collection',
+                    # Catalog view permissions (same as Patron)
+                    'catalog.view_book',
+                    'catalog.view_bookcopy',
+                    'catalog.view_author',
+                    'catalog.view_publisher',
+                    'catalog.view_genre',
+                    'catalog.view_topic',
+                    'catalog.view_department',
+                    'catalog.view_faculty',
+                    # Circulation permissions for personal use (same as Patron)
+                    'circulation.view_loan',
+                    'circulation.change_loan',  # for renewals
+                    'circulation.add_reservation',
+                    'circulation.view_reservation',
+                    'circulation.change_reservation',  # for cancellation
+                    'circulation.view_fine',
+                    # Basic account permissions for profile
                     'accounts.view_libraryuser',
                     'accounts.change_libraryuser',
-                    # Add any specific permissions
                 ]
             },
             'Admin': {

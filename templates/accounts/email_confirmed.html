@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Confirmed - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="/" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Home
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Email Confirmed</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-check-circle fs-3 text-success"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Email Confirmed!</h1>
+                <p class="lead text-muted">Your staff account has been successfully activated</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill fs-1 text-success mb-3"></i>
+                        <h3 class="fw-bold text-success mb-3">Account Activated Successfully!</h3>
+                        <p class="text-muted mb-4">
+                            Your email address has been confirmed and your staff account is now active.
+                        </p>
+                    </div>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Next Steps</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-lines-fill text-primary me-3 fs-4"></i>
+                                        <div class="text-start">
+                                            <h6 class="mb-1">Complete Your Profile</h6>
+                                            <p class="text-muted small mb-0">Add your Staff ID and other details</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-box-arrow-in-right text-success me-3 fs-4"></i>
+                                        <div class="text-start">
+                                            <h6 class="mb-1">Login to Your Account</h6>
+                                            <p class="text-muted small mb-0">Access staff features and dashboard</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Important:</strong> As a staff member, you can register library attendance and access documents where permissions have been granted by administrators.
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-lg me-md-2">
+                            <i class="bi bi-person me-2"></i>Complete Profile
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

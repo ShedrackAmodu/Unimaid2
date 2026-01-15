@@ -1,15 +1,32 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.files.base import ContentFile
+from django.utils import timezone
 import qrcode
 from io import BytesIO
 from config.models import BaseModel
 
 
+class EmailConfirmationToken(BaseModel):
+    user = models.OneToOneField(
+        'LibraryUser',
+        on_delete=models.CASCADE,
+        related_name='email_confirmation_token'
+    )
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"Confirmation token for {self.user.username}"
+
+
 class LibraryUser(AbstractUser, BaseModel):
     MEMBERSHIP_CHOICES = [
         ('student', 'Student'),
-        ('faculty', 'Faculty'),
         ('staff', 'Staff'),
         ('public', 'Public'),
     ]
@@ -23,6 +40,10 @@ class LibraryUser(AbstractUser, BaseModel):
     is_staff_approved = models.BooleanField(
         default=True,
         help_text="Whether staff membership has been approved by admin"
+    )
+    email_verified = models.BooleanField(
+        default=False,
+        help_text="Whether the user's email has been verified"
     )
     department = models.CharField(max_length=100, blank=True, help_text="Department or faculty for students/staff")
     student_id = models.CharField(max_length=50, blank=True, null=True, unique=True, help_text="Student ID number")
@@ -74,9 +95,9 @@ class LibraryUser(AbstractUser, BaseModel):
         if is_new and self.membership_type == 'staff':
             self.is_staff_approved = False
 
-        # Set is_active based on approval status for staff
+        # Set is_active based on approval status and email verification for staff
         if self.membership_type == 'staff':
-            self.is_active = self.is_staff_approved
+            self.is_active = self.is_staff_approved and self.email_verified
         elif not self.is_superuser:
             self.is_active = True
 

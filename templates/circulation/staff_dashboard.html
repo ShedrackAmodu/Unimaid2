@@ -18,8 +18,8 @@
                 </div>
             </div>
             <div>
-                <h1 class="display-4 fw-bold mb-2">Circulation Staff Dashboard</h1>
-                <p class="lead text-muted">Manage loans, returns, and patron services</p>
+                <h1 class="display-4 fw-bold mb-2">Staff Dashboard</h1>
+                <p class="lead text-muted">Register attendance and access granted documents</p>
             </div>
         </div>
     </div>
@@ -27,154 +27,37 @@
 {% endblock %}
 
 {% block content %}
-<!-- Quick Action Cards -->
+<!-- Quick Action Cards - Staff Restricted Access -->
 <div class="row g-4 mb-5">
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card action-card border-0 shadow-hover h-100">
             <div class="card-body text-center p-4">
                 <div class="action-icon mb-3">
-                    <i class="bi bi-cart-check fs-1 text-primary"></i>
-                </div>
-                <h5 class="fw-bold mb-3">Checkout Book</h5>
-                <p class="text-muted mb-4">Process new book loans for patrons</p>
-                <a href="{% url 'circulation:checkout' %}" class="btn btn-primary w-100">
-                    <i class="bi bi-plus-circle me-2"></i>New Checkout
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card action-card border-0 shadow-hover h-100">
-            <div class="card-body text-center p-4">
-                <div class="action-icon mb-3">
-                    <i class="bi bi-arrow-return-left fs-1 text-success"></i>
-                </div>
-                <h5 class="fw-bold mb-3">Return Book</h5>
-                <p class="text-muted mb-4">Process book returns and calculate fines</p>
-                <a href="{% url 'circulation:return' %}" class="btn btn-success w-100">
-                    <i class="bi bi-arrow-counterclockwise me-2"></i>Process Return
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card action-card border-0 shadow-hover h-100">
-            <div class="card-body text-center p-4">
-                <div class="action-icon mb-3">
-                    <i class="bi bi-calendar-check fs-1 text-warning"></i>
-                </div>
-                <h5 class="fw-bold mb-3">Analytics</h5>
-                <p class="text-muted mb-4">View library usage statistics and reports</p>
-                <a href="{% url 'circulation:analytics' %}" class="btn btn-warning w-100 text-white">
-                    <i class="bi bi-bar-chart me-2"></i>View Analytics
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card action-card border-0 shadow-hover h-100">
-            <div class="card-body text-center p-4">
-                <div class="action-icon mb-3">
-                    <i class="bi bi-door-open fs-1 text-purple"></i>
+                    <i class="bi bi-door-open fs-1 text-primary"></i>
                 </div>
                 <h5 class="fw-bold mb-3">Library Attendance</h5>
                 <p class="text-muted mb-4">Register student/library entry and exit</p>
-                <a href="{% url 'circulation:register_attendance' %}" class="btn btn-purple w-100 text-white">
+                <a href="{% url 'circulation:register_attendance' %}" class="btn btn-primary w-100">
                     <i class="bi bi-person-plus me-2"></i>Register Entry
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-6">
         <div class="card action-card border-0 shadow-hover h-100">
             <div class="card-body text-center p-4">
                 <div class="action-icon mb-3">
-                    <i class="bi bi-people fs-1 text-info"></i>
+                    <i class="bi bi-file-earmark-text fs-1 text-success"></i>
                 </div>
-                <h5 class="fw-bold mb-3">Patron Services</h5>
-                <p class="text-muted mb-4">Manage patron accounts and services</p>
-                <a href="/admin/accounts/libraryuser/" class="btn btn-info w-100 text-white">
-                    <i class="bi bi-person-gear me-2"></i>Manage Users
+                <h5 class="fw-bold mb-3">Document Repository</h5>
+                <p class="text-muted mb-4">Access and view granted documents</p>
+                <a href="{% url 'repository:document_list' %}" class="btn btn-success w-100 mb-2">
+                    <i class="bi bi-file-earmark-text me-2"></i>View Documents
                 </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Stats Overview -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-book text-primary fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ pending_loans.count }}</h3>
-                        <p class="text-muted mb-0">Active Loans</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-danger bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ overdue_loans.count }}</h3>
-                        <p class="text-muted mb-0">Overdue Loans</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-clock-history text-warning fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ pending_reservations.count }}</h3>
-                        <p class="text-muted mb-0">Active Reservations</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                            <i class="bi bi-arrow-return-right text-success fs-4"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0">{{ recent_returns.count }}</h3>
-                        <p class="text-muted mb-0">Recent Returns</p>
-                    </div>
-                </div>
+                <a href="{% url 'repository:my_requests' %}" class="btn btn-outline-success w-100">
+                    <i class="bi bi-clipboard-check me-2"></i>My Requests
+                </a>
             </div>
         </div>
     </div>
@@ -239,516 +122,50 @@
     </div>
 </div>
 
-<!-- Main Content Tabs -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-lg">
-            <div class="card-header bg-white border-0 py-4">
-                <ul class="nav nav-tabs nav-tabs-bordered" id="dashboardTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="active-loans-tab" data-bs-toggle="tab" data-bs-target="#active-loans" type="button" role="tab">
-                            <i class="bi bi-book me-2"></i>Active Loans
-                            <span class="badge bg-primary ms-2">{{ pending_loans.count }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="overdue-tab" data-bs-toggle="tab" data-bs-target="#overdue" type="button" role="tab">
-                            <i class="bi bi-exclamation-triangle me-2"></i>Overdue Loans
-                            <span class="badge bg-danger ms-2">{{ overdue_loans.count }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="borrow-requests-tab" data-bs-toggle="tab" data-bs-target="#borrow-requests" type="button" role="tab">
-                            <i class="bi bi-hourglass-split me-2"></i>Borrow Requests
-                            <span class="badge bg-info ms-2">{{ pending_borrow_requests.count }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations" type="button" role="tab">
-                            <i class="bi bi-clock-history me-2"></i>Reservations
-                            <span class="badge bg-warning ms-2">{{ pending_reservations.count }}</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="returns-tab" data-bs-toggle="tab" data-bs-target="#returns" type="button" role="tab">
-                            <i class="bi bi-arrow-return-right me-2"></i>Recent Returns
-                            <span class="badge bg-success ms-2">{{ recent_returns.count }}</span>
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="card-body p-0">
-                <div class="tab-content" id="dashboardTabsContent">
-                    <!-- Active Loans Tab -->
-                    <div class="tab-pane fade show active" id="active-loans" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Patron</th>
-                                        <th>Book Title</th>
-                                        <th>Copy ID</th>
-                                        <th>Loan Date</th>
-                                        <th>Due Date</th>
-                                        <th>Days Left</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for loan in pending_loans %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
-                                                    <small class="text-muted">{{ loan.user.membership_type|title }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
-                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">#{{ loan.book_copy.id }}</span>
-                                        </td>
-                                        <td>{{ loan.loan_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            <span class="{% if loan.due_date < now %}text-danger fw-bold{% else %}text-dark{% endif %}">
-                                                {{ loan.due_date|date:"M d, Y" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% with days_left=loan.due_date|timeuntil:now %}
-                                            {% if "day" in days_left %}
-                                                <span class="badge bg-info">Due in {{ days_left|slice:":2" }} days</span>
-                                            {% else %}
-                                                <span class="badge bg-warning">Due today</span>
-                                            {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'circulation:return' %}?loan_id={{ loan.id }}" class="btn btn-sm btn-success">
-                                                <i class="bi bi-check-circle me-1"></i>Return
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-inbox fs-1 mb-3"></i>
-                                                <p class="mb-0">No active loans found</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Overdue Loans Tab -->
-                    <div class="tab-pane fade" id="overdue" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Patron</th>
-                                        <th>Book Title</th>
-                                        <th>Copy ID</th>
-                                        <th>Due Date</th>
-                                        <th>Days Overdue</th>
-                                        <th>Fine Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for loan in overdue_loans %}
-                                    {% with days_overdue=loan.due_date|timesince:now|slice:":2" %}
-                                    <tr class="table-danger">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-danger"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
-                                                    <small class="text-danger">{{ loan.user.membership_type|title }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
-                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">#{{ loan.book_copy.id }}</span>
-                                        </td>
-                                        <td class="text-danger fw-bold">{{ loan.due_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            <span class="badge bg-danger">{{ days_overdue }} days</span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold">₦{{ days_overdue|add:"0"|floatformat:2 }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="{% url 'circulation:return' %}?loan_id={{ loan.id }}" class="btn btn-sm btn-success">
-                                                    <i class="bi bi-check-circle me-1"></i>Return
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#fineModal{{ loan.id }}">
-                                                    <i class="bi bi-cash-coin"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endwith %}
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-check-circle fs-1 mb-3"></i>
-                                                <p class="mb-0">No overdue loans! Great work!</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Borrow Requests Tab -->
-                    <div class="tab-pane fade" id="borrow-requests" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Patron</th>
-                                        <th>Book Title</th>
-                                        <th>Copy ID</th>
-                                        <th>Request Date</th>
-                                        <th>Expires In</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for request in pending_borrow_requests %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ request.user.get_full_name|default:request.user.username }}</h6>
-                                                    <small class="text-muted">{{ request.user.membership_type|title }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <h6 class="mb-0">{{ request.book_copy.book.title }}</h6>
-                                            <small class="text-muted">{{ request.book_copy.book.author }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">#{{ request.book_copy.id }}</span>
-                                        </td>
-                                        <td>{{ request.request_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            {% with expires_in=request.expiry_date|timeuntil:now %}
-                                            {% if "day" in expires_in %}
-                                                <span class="badge bg-info">{{ expires_in|slice:":2" }} days</span>
-                                            {% else %}
-                                                <span class="badge bg-warning">Expires soon</span>
-                                            {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">Pending</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="{% url 'circulation:approve_borrow_request' request.id %}"
-                                                   class="btn btn-sm btn-success">
-                                                    <i class="bi bi-check-circle me-1"></i>Approve
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        data-bs-toggle="modal" data-bs-target="#rejectModal{{ request.id }}">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-hourglass-split fs-1 mb-3"></i>
-                                                <p class="mb-0">No pending borrow requests</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Reservations Tab -->
-                    <div class="tab-pane fade" id="reservations" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Patron</th>
-                                        <th>Book Title</th>
-                                        <th>Reservation Date</th>
-                                        <th>Expiry Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for reservation in pending_reservations %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ reservation.user.get_full_name|default:reservation.user.username }}</h6>
-                                                    <small class="text-muted">{{ reservation.user.membership_type|title }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <h6 class="mb-0">{{ reservation.book.title }}</h6>
-                                            <small class="text-muted">{{ reservation.book.author }}</small>
-                                        </td>
-                                        <td>{{ reservation.reservation_date|date:"M d, Y" }}</td>
-                                        <td>
-                                            <span class="{% if reservation.expiry_date < now %}text-danger{% endif %}">
-                                                {{ reservation.expiry_date|date:"M d, Y" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning">Active</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#fulfillModal{{ reservation.id }}">
-                                                    <i class="bi bi-check-circle me-1"></i>Fulfill
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-clock-history fs-1 mb-3"></i>
-                                                <p class="mb-0">No active reservations</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Returns Tab -->
-                    <div class="tab-pane fade" id="returns" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Patron</th>
-                                        <th>Book Title</th>
-                                        <th>Return Date</th>
-                                        <th>Loan Period</th>
-                                        <th>Fine Applied</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for loan in recent_returns %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0">{{ loan.user.get_full_name|default:loan.user.username }}</h6>
-                                                    <small class="text-muted">{{ loan.user.membership_type|title }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <h6 class="mb-0">{{ loan.book_copy.book.title }}</h6>
-                                            <small class="text-muted">{{ loan.book_copy.book.author }}</small>
-                                        </td>
-                                        <td>{{ loan.return_date|date:"M d, Y H:i" }}</td>
-                                        <td>
-                                            {% with period=loan.return_date|timeuntil:loan.loan_date %}
-                                            {{ period|slice:":10" }}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            {% if loan.fines.exists %}
-                                            <span class="badge bg-danger">₦{{ loan.fines.first.amount }}</span>
-                                            {% else %}
-                                            <span class="badge bg-success">None</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success">Returned</span>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-arrow-return-right fs-1 mb-3"></i>
-                                                <p class="mb-0">No recent returns</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Fulfill Reservation Modals -->
-{% for reservation in pending_reservations %}
-<div class="modal fade" id="fulfillModal{{ reservation.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Fulfill Reservation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Fulfill reservation for <strong>{{ reservation.user.get_full_name }}</strong>?</p>
-                <p>Book: <strong>{{ reservation.book.title }}</strong></p>
-                <p>Reserved on: {{ reservation.reservation_date|date:"M d, Y" }}</p>
-                
-                <div class="mt-3">
-                    <label class="form-label">Select Book Copy:</label>
-                    <select class="form-select" id="copySelect{{ reservation.id }}">
-                        <option value="">Choose available copy...</option>
-                        {% comment %} Available copies would be populated via AJAX {% endcomment %}
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="fulfillReservation({{ reservation.id }})">
-                    <i class="bi bi-check-circle me-2"></i>Fulfill Reservation
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- Fine Modals for Overdue Loans -->
-{% for loan in overdue_loans %}
-<div class="modal fade" id="fineModal{{ loan.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Apply Fine</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Apply fine for overdue book:</p>
-                <p><strong>{{ loan.book_copy.book.title }}</strong></p>
-                <p>Patron: {{ loan.user.get_full_name }}</p>
-                <p>Due Date: {{ loan.due_date|date:"M d, Y" }}</p>
-                
-                <div class="mt-3">
-                    <label class="form-label">Fine Amount (₦):</label>
-                    <input type="number" class="form-control" id="fineAmount{{ loan.id }}" value="500" step="100">
-                </div>
-                
-                <div class="mt-3">
-                    <label class="form-label">Reason:</label>
-                    <textarea class="form-control" id="fineReason{{ loan.id }}" rows="2">Overdue return</textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="applyFine({{ loan.id }})">
-                    <i class="bi bi-cash-coin me-2"></i>Apply Fine
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- Reject Borrow Request Modals -->
-{% for request in pending_borrow_requests %}
-<div class="modal fade" id="rejectModal{{ request.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Reject Borrow Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Reject borrow request for <strong>{{ request.user.get_full_name }}</strong>?</p>
-                <p>Book: <strong>{{ request.book_copy.book.title }}</strong></p>
-                <p>Requested on: {{ request.request_date|date:"M d, Y" }}</p>
-
-                <div class="mt-3">
-                    <label class="form-label">Reason for rejection:</label>
-                    <textarea class="form-control" id="rejectReason{{ request.id }}" rows="3"
-                              placeholder="Please provide a reason for rejecting this request...">Book unavailable</textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="rejectRequest({{ request.id }})">
-                    <i class="bi bi-x-circle me-2"></i>Reject Request
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- Quick Search -->
+<!-- Attendance Reports Section -->
 <div class="row mt-5">
-    <div class="col-lg-8 mx-auto">
+    <div class="col-12">
         <div class="card border-0 shadow">
+            <div class="card-header bg-white border-0 py-4">
+                <h4 class="fw-bold mb-0">
+                    <i class="bi bi-file-earmark-spreadsheet me-2 text-primary"></i>Attendance Reports
+                </h4>
+            </div>
             <div class="card-body p-4">
-                <h5 class="fw-bold mb-4">Quick Patron Search</h5>
-                <div class="input-group input-group-lg">
-                    <input type="text" class="form-control" id="patronSearch" placeholder="Search by name, ID, or email...">
-                    <button class="btn btn-primary" type="button" id="searchBtn">
-                        <i class="bi bi-search"></i>
-                    </button>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-calendar-check text-primary fs-3"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Daily Reports</h5>
+                                <p class="text-muted mb-0">View today's attendance records</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'circulation:attendance_list' %}?date_filter=today" class="btn btn-primary">
+                            <i class="bi bi-eye me-2"></i>View Today's Attendance
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="bi bi-file-earmark-excel text-success fs-3"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Export Data</h5>
+                                <p class="text-muted mb-0">Download attendance reports</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'circulation:export_attendance_excel' %}?date_filter=today" class="btn btn-success">
+                            <i class="bi bi-download me-2"></i>Export to Excel
+                        </a>
+                    </div>
                 </div>
-                <div id="searchResults" class="mt-3" style="display: none;"></div>
             </div>
         </div>
     </div>

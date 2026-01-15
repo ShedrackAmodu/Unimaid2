@@ -25,6 +25,14 @@ def main():
         print(f"Error running migrate: {e}")
         return
 
+    print("Setting up user permissions...")
+    try:
+        call_command('setup_permissions')
+        print("User permissions setup completed successfully.")
+    except Exception as e:
+        print(f"Error setting up permissions: {e}")
+        return
+
     print("Running collectstatic...")
     try:
         call_command('collectstatic', '--noinput')

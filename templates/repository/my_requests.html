@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Permission Requests - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Dashboard
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">My Permission Requests</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-clipboard-check fs-3 text-primary"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">My Permission Requests</h1>
+                <p class="lead text-muted">Track the status of your document access requests</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card border-0">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-clock-history fs-1 text-warning"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">{{ requests|length }}</h3>
+                            <p class="text-muted mb-0">Total Requests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-0">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-hourglass-split fs-1 text-info"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">{{ requests|length|sub:approved_count|sub:rejected_count }}</h3>
+                            <p class="text-muted mb-0">Pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-0">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-check-circle fs-1 text-success"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">{{ approved_count }}</h3>
+                            <p class="text-muted mb-0">Approved</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card border-0">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-x-circle fs-1 text-danger"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">{{ rejected_count }}</h3>
+                            <p class="text-muted mb-0">Rejected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="card border-0 shadow">
+                <div class="card-header bg-white border-0 py-4">
+                    <h4 class="fw-bold mb-0">
+                        <i class="bi bi-list-ul me-2 text-primary"></i>All Requests
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Status</th>
+                                    <th>Reason</th>
+                                    <th>Requested</th>
+                                    <th>Reviewed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in requests %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">
+                                                <a href="{% url 'repository:document_detail' request.document.pk %}" class="text-decoration-none">
+                                                    {{ request.document.title|truncatechars:60 }}
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">{{ request.document.authors|truncatechars:40 }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'pending' %}
+                                        <span class="badge bg-warning px-3 py-2">
+                                            <i class="bi bi-hourglass-split me-1"></i>Pending Review
+                                        </span>
+                                        {% elif request.status == 'approved' %}
+                                        <span class="badge bg-success px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i>Approved
+                                        </span>
+                                        {% elif request.status == 'rejected' %}
+                                        <span class="badge bg-danger px-3 py-2">
+                                            <i class="bi bi-x-circle me-1"></i>Rejected
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="reason-cell">
+                                            {{ request.reason|truncatechars:80 }}
+                                            {% if request.reason|length > 80 %}
+                                            <button class="btn btn-link btn-sm p-0 ms-1" onclick="showFullReason('{{ request.reason|escapejs }}')">
+                                                <small>Read more</small>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span class="d-block">{{ request.requested_at|date:"M d, Y" }}</span>
+                                            <small class="text-muted">{{ request.requested_at|time:"H:i" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if request.reviewed_at %}
+                                        <div>
+                                            <span class="d-block">{{ request.reviewed_at|date:"M d, Y" }}</span>
+                                            <small class="text-muted">{{ request.reviewed_at|time:"H:i" }}</small>
+                                            {% if request.reviewed_by %}
+                                            <br><small class="text-muted">by {{ request.reviewed_by.get_full_name|default:request.reviewed_by.username }}</small>
+                                            {% endif %}
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'approved' %}
+                                        <a href="{% url 'repository:document_detail' request.document.pk %}"
+                                           class="btn btn-sm btn-success">
+                                            <i class="bi bi-eye me-1"></i>View Document
+                                        </a>
+                                        {% elif request.status == 'rejected' and request.review_notes %}
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                onclick="showRejectionReason('{{ request.review_notes|escapejs }}')">
+                                            <i class="bi bi-info-circle me-1"></i>View Reason
+                                        </button>
+                                        {% elif request.status == 'pending' %}
+                                        <span class="text-muted">Awaiting review</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-x fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">No Permission Requests</h5>
+                        <p class="text-muted">You haven't submitted any document access requests yet.</p>
+                        <a href="{% url 'repository:document_list' %}" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>Browse Documents
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Reason Modal -->
+<div class="modal fade" id="reasonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Request Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="fullReasonText"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div class="modal fade" id="rejectionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle text-danger me-2"></i>Rejection Reason
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="rejectionReasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitNewRequest()">
+                    <i class="bi bi-arrow-repeat me-2"></i>Submit New Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    .stat-card {
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-blue);
+        box-shadow: 0 10px 20px rgba(58, 134, 255, 0.15);
+    }
+
+    .reason-cell {
+        max-width: 200px;
+    }
+
+    .table-hover tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        transform: translateX(5px);
+        background-color: rgba(var(--primary-rgb), 0.03);
+    }
+</style>
+
+<script>
+    // Calculate counts from template data
+    const approvedCount = {{ approved_count }};
+    const rejectedCount = {{ rejected_count }};
+
+    function showFullReason(reason) {
+        document.getElementById('fullReasonText').textContent = reason;
+        new bootstrap.Modal(document.getElementById('reasonModal')).show();
+    }
+
+    function showRejectionReason(reason) {
+        document.getElementById('rejectionReasonText').textContent = reason;
+        new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+    }
+
+    function submitNewRequest() {
+        // In a real implementation, this could redirect to the document or open a new request form
+        window.location.href = '{% url "repository:document_list" %}';
+    }
+
+    // Add some animation to status badges
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusBadges = document.querySelectorAll('.badge');
+        statusBadges.forEach(badge => {
+            badge.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+
+            badge.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

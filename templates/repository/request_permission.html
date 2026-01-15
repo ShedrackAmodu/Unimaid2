@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Document Access - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'repository:document_list' %}" class="text-decoration-none">
+    <i class="bi bi-file-earmark-text me-1"></i>Documents
+</a></li>
+<li class="breadcrumb-item"><a href="{% url 'repository:document_detail' document.pk %}" class="text-decoration-none">{{ document.title|truncatechars:30 }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Request Access</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-shield-lock fs-3 text-warning"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Request Document Access</h1>
+                <p class="lead text-muted">Request permission to access restricted documents</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Document Info -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Document Details
+                            </h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Title:</dt>
+                                <dd class="col-sm-8">{{ document.title }}</dd>
+
+                                <dt class="col-sm-4">Authors:</dt>
+                                <dd class="col-sm-8">{{ document.authors }}</dd>
+
+                                <dt class="col-sm-4">Access Level:</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-lock me-1"></i>{{ document.get_access_level_display }}
+                                    </span>
+                                </dd>
+
+                                {% if document.abstract %}
+                                <dt class="col-sm-4">Abstract:</dt>
+                                <dd class="col-sm-8">{{ document.abstract|truncatechars:200 }}</dd>
+                                {% endif %}
+
+                                <dt class="col-sm-4">Uploaded:</dt>
+                                <dd class="col-sm-8">{{ document.upload_date|date:"M d, Y" }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Request Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-pencil-square me-2 text-success"></i>Access Request
+                            </h5>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Important:</strong> Please provide a clear reason for why you need access to this document. Your request will be reviewed by a library administrator.
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="reason" class="form-label fw-bold">Reason for Access <span class="text-danger">*</span></label>
+                                <textarea
+                                    class="form-control"
+                                    id="reason"
+                                    name="reason"
+                                    rows="5"
+                                    placeholder="Please explain why you need access to this document. Include details about your research, course requirements, or professional needs."
+                                    required
+                                ></textarea>
+                                <div class="form-text">
+                                    Be specific about how this document will support your work or studies.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'repository:document_detail' document.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Document
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-2"></i>Submit Request
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Guidelines -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-2">Request Guidelines:</h6>
+                        <ul class="text-muted small">
+                            <li>Requests are typically reviewed within 1-2 business days</li>
+                            <li>You will receive an email notification when your request is processed</li>
+                            <li>Access may be granted for a limited time period</li>
+                            <li>Documents should only be used for legitimate academic or research purposes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form');
+        const reasonTextarea = document.getElementById('reason');
+
+        form.addEventListener('submit', function(e) {
+            const reason = reasonTextarea.value.trim();
+
+            if (reason.length < 50) {
+                e.preventDefault();
+                alert('Please provide a more detailed reason (at least 50 characters).');
+                reasonTextarea.focus();
+                return false;
+            }
+
+            if (reason.length > 1000) {
+                e.preventDefault();
+                alert('Reason is too long. Please keep it under 1000 characters.');
+                reasonTextarea.focus();
+                return false;
+            }
+        });
+
+        // Character counter
+        const maxLength = 1000;
+        reasonTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            const remaining = maxLength - length;
+
+            // Remove existing counter
+            const existingCounter = this.parentNode.querySelector('.char-counter');
+            if (existingCounter) {
+                existingCounter.remove();
+            }
+
+            // Add counter
+            const counter = document.createElement('div');
+            counter.className = 'char-counter form-text';
+            counter.textContent = `${length}/${maxLength} characters`;
+
+            if (remaining < 50) {
+                counter.classList.add('text-warning');
+            }
+            if (remaining < 0) {
+                counter.classList.add('text-danger');
+            }
+
+            this.parentNode.appendChild(counter);
+        });
+    });
+</script>
+{% endblock %}

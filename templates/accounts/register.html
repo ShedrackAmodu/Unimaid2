@@ -21,7 +21,7 @@
             </div>
             <div>
                 <h1 class="display-4 fw-bold mb-2">Join Ramat Library</h1>
-                <p class="lead text-muted">Create your account to access our resources and services</p>
+                <p class="lead text-muted">Choose your registration type to get started</p>
             </div>
         </div>
     </div>
@@ -29,266 +29,110 @@
 {% endblock %}
 
 {% block content %}
-<!-- Registration Page Content -->
+<!-- Registration Options Page Content -->
 <div class="registration-page">
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-lg">
-                    <div class="row g-0">
-                        <!-- Registration Form -->
-                        <div class="col-12">
-                            <div class="card-body p-5">
-                                <div class="mb-4">
-                                    <h3 class="fw-bold mb-2">Create Your Account</h3>
-                                    <p class="text-muted">Simple registration - just the basics</p>
+            <div class="col-lg-10">
+                <div class="row g-4">
+                    <!-- Student Registration Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-lg h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0">
+                                    <i class="bi bi-mortarboard me-2"></i>Student Registration
+                                </h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <div class="icon-48 icon-48--blue mb-3 mx-auto">
+                                        <i class="bi bi-mortarboard fs-2 text-white"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-primary">For Students</h5>
+                                    <p class="text-muted">Access academic resources, borrow books, and use study facilities</p>
                                 </div>
 
-                                <!-- Registration Form -->
-                                <form method="post" id="registrationForm" novalidate>
-                                    {% csrf_token %}
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-2">Benefits:</h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Access to 50,000+ books</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Study rooms and facilities</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Research assistance</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Online databases</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Instant account activation</li>
+                                    </ul>
+                                </div>
 
-                                    <!-- Role Selection -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <h6 class="fw-bold mb-3">
-                                                <i class="bi bi-person-badge me-2"></i>Select Your Role
-                                            </h6>
-                                            <div class="row g-3 membership-cards">
-                                                <div class="col-md-3">
-                                                    <div class="membership-option" data-type="student">
-                                                        <div class="card h-100 border-2 {% if form.membership_type.value == 'student' %}border-primary selected{% else %}border-light{% endif %}">
-                                                            <div class="card-body text-center p-3">
-                                                                <div class="mb-2">
-                                                                    <i class="bi bi-mortarboard fs-3 text-primary"></i>
-                                                                </div>
-                                                                <h6 class="fw-bold mb-1">Student</h6>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Ready to register?</strong> You'll need your student ID number.
+                                </div>
 
-                                                <div class="col-md-3">
-                                                    <div class="membership-option" data-type="faculty">
-                                                        <div class="card h-100 border-2 {% if form.membership_type.value == 'faculty' %}border-primary selected{% else %}border-light{% endif %}">
-                                                            <div class="card-body text-center p-3">
-                                                                <div class="mb-2">
-                                                                    <i class="bi bi-person-workspace fs-3 text-success"></i>
-                                                                </div>
-                                                                <h6 class="fw-bold mb-1">Faculty</h6>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <div class="d-grid">
+                                    <a href="{% url 'accounts:student_register' %}" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-arrow-right me-2"></i>Register as Student
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                                <div class="col-md-3">
-                                                    <div class="membership-option" data-type="staff">
-                                                        <div class="card h-100 border-2 {% if form.membership_type.value == 'staff' %}border-primary selected{% else %}border-light{% endif %}">
-                                                            <div class="card-body text-center p-3">
-                                                                <div class="mb-2">
-                                                                    <i class="bi bi-person-badge fs-3 text-warning"></i>
-                                                                </div>
-                                                                <h6 class="fw-bold mb-1">Staff</h6>
-                                                                <small class="text-muted">Requires approval</small>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <div class="membership-option" data-type="public">
-                                                        <div class="card h-100 border-2 {% if form.membership_type.value == 'public' %}border-primary selected{% else %}border-light{% endif %}">
-                                                            <div class="card-body text-center p-3">
-                                                                <div class="mb-2">
-                                                                    <i class="bi bi-person fs-3 text-info"></i>
-                                                                </div>
-                                                                <h6 class="fw-bold mb-1">Public</h6>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="membership_type" id="membershipType" value="{{ form.membership_type.value|default:'student' }}" required>
-                                            <div class="invalid-feedback d-block" id="membershipTypeError"></div>
-                                        </div>
+                    <!-- Staff Registration Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-lg h-100">
+                            <div class="card-header bg-success text-white">
+                                <h4 class="mb-0">
+                                    <i class="bi bi-person-badge me-2"></i>Staff Registration
+                                </h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <div class="icon-48 icon-48--success mb-3 mx-auto">
+                                        <i class="bi bi-person-badge fs-2 text-white"></i>
                                     </div>
+                                    <h5 class="fw-bold text-success">For Library Staff</h5>
+                                    <p class="text-muted">Enhanced privileges for library management and operations</p>
+                                </div>
 
-                                    <!-- Basic Information -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <h6 class="fw-bold mb-3">
-                                                <i class="bi bi-person me-2"></i>Basic Information
-                                            </h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label for="firstName" class="form-label">First Name *</label>
-                                                    <input type="text"
-                                                           class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
-                                                           id="firstName"
-                                                           name="first_name"
-                                                           value="{{ form.first_name.value|default:'' }}"
-                                                           required>
-                                                    {% if form.first_name.errors %}
-                                                    <div class="invalid-feedback">{{ form.first_name.errors.0 }}</div>
-                                                    {% endif %}
-                                                </div>
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-2">Benefits:</h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Circulation management</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Extended loan periods</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Staff-only resources</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Administrative functions</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Priority support</li>
+                                    </ul>
+                                </div>
 
-                                                <div class="col-md-6">
-                                                    <label for="lastName" class="form-label">Last Name *</label>
-                                                    <input type="text"
-                                                           class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
-                                                           id="lastName"
-                                                           name="last_name"
-                                                           value="{{ form.last_name.value|default:'' }}"
-                                                           required>
-                                                    {% if form.last_name.errors %}
-                                                    <div class="invalid-feedback">{{ form.last_name.errors.0 }}</div>
-                                                    {% endif %}
-                                                </div>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <strong>Approval Required:</strong> Staff registration requires administrative approval before account activation.
+                                </div>
 
-                                                <div class="col-md-6">
-                                                    <label for="username" class="form-label">Username *</label>
-                                                    <input type="text"
-                                                           class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                                                           id="username"
-                                                           name="username"
-                                                           value="{{ form.username.value|default:'' }}"
-                                                           required>
-                                                    {% if form.username.errors %}
-                                                    <div class="invalid-feedback">{{ form.username.errors.0 }}</div>
-                                                    {% endif %}
-                                                    <div class="form-text">Letters, numbers, and underscores only</div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <label for="email" class="form-label">Email Address *</label>
-                                                    <input type="email"
-                                                           class="form-control {% if form.email.errors %}is-invalid{% endif %}"
-                                                           id="email"
-                                                           name="email"
-                                                           value="{{ form.email.value|default:'' }}"
-                                                           required>
-                                                    {% if form.email.errors %}
-                                                    <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Password Section -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <h6 class="fw-bold mb-3">
-                                                <i class="bi bi-shield-lock me-2"></i>Password
-                                            </h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label for="password1" class="form-label">Password *</label>
-                                                    <div class="input-group">
-                                                        <input type="password"
-                                                               class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
-                                                               id="password1"
-                                                               name="password1"
-                                                               required>
-                                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password1', this)">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        {% if form.password1.errors %}
-                                                        <div class="invalid-feedback">{{ form.password1.errors.0 }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="password-strength mt-2">
-                                                        <div class="progress progress-sm">
-                                                            <div class="progress-bar" id="passwordStrengthBar" style="width: 0%;"></div>
-                                                        </div>
-                                                        <small class="text-muted" id="passwordStrengthText">Password strength</small>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <label for="password2" class="form-label">Confirm Password *</label>
-                                                    <div class="input-group">
-                                                        <input type="password"
-                                                               class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
-                                                               id="password2"
-                                                               name="password2"
-                                                               required>
-                                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password2', this)">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        {% if form.password2.errors %}
-                                                        <div class="invalid-feedback">{{ form.password2.errors.0 }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="password-match mt-2">
-                                                        <small class="text-muted" id="passwordMatchText">Passwords must match</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Terms and Submit -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input {% if form.terms.errors %}is-invalid{% endif %}"
-                                                       type="checkbox"
-                                                       id="terms"
-                                                       name="terms"
-                                                       required>
-                                                <label class="form-check-label" for="terms">
-                                                    I agree to the
-                                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#termsModal">
-                                                        Terms and Conditions
-                                                    </a>
-                                                    *
-                                                </label>
-                                                {% if form.terms.errors %}
-                                                <div class="invalid-feedback">{{ form.terms.errors.0 }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Form Actions -->
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="d-grid gap-2">
-                                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                                    <i class="bi bi-person-plus me-2"></i>Create Account
-                                                </button>
-                                                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
-                                                    <i class="bi bi-box-arrow-in-right me-2"></i>Already have an account? Login
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                                <div class="d-grid">
+                                    <a href="{% url 'accounts:staff_register' %}" class="btn btn-success btn-lg">
+                                        <i class="bi bi-arrow-right me-2"></i>Register as Staff
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Terms Modal (simplified) -->
-<div class="modal fade" id="termsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Terms and Conditions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>By registering, you agree to use the library services responsibly and comply with all library policies.</p>
-                <p>Role-specific information (IDs, departments) can be added in your profile after registration.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+                <!-- Already have an account -->
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-2">Already have an account?</h6>
+                                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Login to Your Account
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -298,72 +142,32 @@
 {% block scripts %}
 {{ block.super }}
 <style>
-    .membership-option { cursor: pointer; }
-    .membership-option .card.selected { border-color: var(--accent-blue) !important; box-shadow: 0 0 0 0.25rem rgba(58, 134, 255, 0.25); }
-    .membership-option:hover .card:not(.selected) { border-color: #dee2e6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+    .icon-48 {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-48--blue {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+    .icon-48--success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+    .alert-info, .alert-warning {
+        border-left: 4px solid;
+    }
+    .alert-info {
+        border-left-color: #17a2b8;
+    }
+    .alert-warning {
+        border-left-color: #ffc107;
+    }
 </style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Role selection
-        const membershipOptions = document.querySelectorAll('.membership-option');
-        const membershipTypeInput = document.getElementById('membershipType');
-
-        membershipOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                membershipOptions.forEach(opt => {
-                    opt.querySelector('.card').classList.remove('selected', 'border-primary');
-                    opt.querySelector('.card').classList.add('border-light');
-                });
-
-                this.querySelector('.card').classList.add('selected', 'border-primary');
-                this.querySelector('.card').classList.remove('border-light');
-                membershipTypeInput.value = this.dataset.type;
-            });
-        });
-
-        // Initialize default selection
-        const defaultType = membershipTypeInput.value;
-        if (defaultType) {
-            const defaultOption = document.querySelector(`.membership-option[data-type="${defaultType}"]`);
-            if (defaultOption) defaultOption.click();
-        }
-
-        // Password toggle
-        window.togglePassword = function(inputId, button) {
-            const input = document.getElementById(inputId);
-            const icon = button.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'bi bi-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'bi bi-eye';
-            }
-        };
-
-        // Password strength and validation (simplified)
-        const passwordInput = document.getElementById('password1');
-        const confirmPasswordInput = document.getElementById('password2');
-        const strengthBar = document.getElementById('passwordStrengthBar');
-        const strengthText = document.getElementById('passwordStrengthText');
-        const matchText = document.getElementById('passwordMatchText');
-
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            let strength = password.length >= 8 ? 100 : password.length * 12.5;
-            strengthBar.style.width = `${strength}%`;
-            strengthText.textContent = password.length >= 8 ? 'Good' : 'Too short';
-            checkPasswordMatch();
-        });
-
-        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
-
-        function checkPasswordMatch() {
-            const match = passwordInput.value === confirmPasswordInput.value;
-            matchText.textContent = match ? '✓ Match' : '✗ No match';
-            matchText.className = match ? 'text-success' : 'text-danger';
-        }
-    });
-</script>
 {% endblock %}

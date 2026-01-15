@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Permission Requests - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:admin_dashboard' %}" class="text-decoration-none">
+    <i class="bi bi-house-door me-1"></i>Admin Dashboard
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Review Permission Requests</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-clipboard-check fs-3 text-primary"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Review Permission Requests</h1>
+                <p class="lead text-muted">Manage staff document access requests</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-white border-0 py-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold mb-0">
+                                <i class="bi bi-clipboard-data me-2 text-primary"></i>Pending Requests
+                                {% if pending_requests %}
+                                <span class="badge bg-warning ms-2">{{ pending_requests.count }}</span>
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Staff Member</th>
+                                    <th>Document</th>
+                                    <th>Reason</th>
+                                    <th>Requested</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in pending_requests %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="bi bi-person-circle fs-4 text-muted"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ request.user.get_full_name|default:request.user.username }}</h6>
+                                                <small class="text-muted">{{ request.user.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">{{ request.document.title|truncatechars:50 }}</h6>
+                                            <small class="text-muted">{{ request.document.authors|truncatechars:30 }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="reason-cell">
+                                            {{ request.reason|truncatechars:100 }}
+                                            {% if request.reason|length > 100 %}
+                                            <button class="btn btn-link btn-sm p-0 ms-1" onclick="showFullReason('{{ request.reason|escapejs }}')">
+                                                <small>Read more</small>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span class="d-block">{{ request.requested_at|date:"M d, Y" }}</span>
+                                            <small class="text-muted">{{ request.requested_at|time:"H:i" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                    onclick="approveRequest({{ request.id }}, '{{ request.user.get_full_name|default:request.user.username }}', '{{ request.document.title|truncatechars:30 }}')">
+                                                <i class="bi bi-check-circle me-1"></i>Approve
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    onclick="rejectRequest({{ request.id }}, '{{ request.user.get_full_name|default:request.user.username }}')">
+                                                <i class="bi bi-x-circle me-1"></i>Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-check fs-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">No Pending Requests</h5>
+                        <p class="text-muted">All permission requests have been reviewed.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle text-success me-2"></i>Approve Permission Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Grant <strong id="approveUserName"></strong> access to:</p>
+                <p class="text-muted" id="approveDocumentTitle"></p>
+
+                <div class="mt-3">
+                    <label for="approveNotes" class="form-label">Additional Notes (Optional)</label>
+                    <textarea class="form-control" id="approveNotes" rows="3" placeholder="Any notes about this approval..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmApproveBtn">
+                    <i class="bi bi-check-circle me-2"></i>Approve Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-x-circle text-danger me-2"></i>Reject Permission Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Reject <strong id="rejectUserName"></strong>'s access request?</p>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    This action cannot be undone. The staff member will need to submit a new request if they want to try again.
+                </div>
+
+                <div class="mt-3">
+                    <label for="rejectReason" class="form-label fw-bold">Reason for Rejection <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="rejectReason" rows="3" placeholder="Please explain why this request is being rejected..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmRejectBtn">
+                    <i class="bi bi-x-circle me-2"></i>Reject Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Reason Modal -->
+<div class="modal fade" id="reasonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Full Request Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="fullReasonText"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    let currentRequestId = null;
+
+    function showFullReason(reason) {
+        document.getElementById('fullReasonText').textContent = reason;
+        new bootstrap.Modal(document.getElementById('reasonModal')).show();
+    }
+
+    function approveRequest(requestId, userName, documentTitle) {
+        currentRequestId = requestId;
+        document.getElementById('approveUserName').textContent = userName;
+        document.getElementById('approveDocumentTitle').textContent = documentTitle;
+        document.getElementById('approveNotes').value = '';
+
+        const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+        modal.show();
+    }
+
+    function rejectRequest(requestId, userName) {
+        currentRequestId = requestId;
+        document.getElementById('rejectUserName').textContent = userName;
+        document.getElementById('rejectReason').value = '';
+
+        const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
+    }
+
+    document.getElementById('confirmApproveBtn').addEventListener('click', function() {
+        const notes = document.getElementById('approveNotes').value.trim();
+
+        // Submit approval
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/repository/approve-request/${currentRequestId}/`;
+
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'notes';
+        notesInput.value = notes;
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        form.appendChild(notesInput);
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    });
+
+    document.getElementById('confirmRejectBtn').addEventListener('click', function() {
+        const reason = document.getElementById('rejectReason').value.trim();
+
+        if (!reason) {
+            alert('Please provide a reason for rejection.');
+            return;
+        }
+
+        // Submit rejection
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/repository/reject-request/${currentRequestId}/`;
+
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'notes';
+        reasonInput.value = reason;
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        form.appendChild(reasonInput);
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+    });
+</script>
+{% endblock %}

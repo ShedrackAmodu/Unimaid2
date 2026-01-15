@@ -68,7 +68,7 @@ def patron_dashboard(request):
 
 
 @login_required
-@user_passes_test(is_staff_user)
+@user_passes_test(lambda u: u.is_superuser)
 def checkout_book(request):
     if request.method == 'POST':
         book_copy_id = request.POST.get('book_copy_id')
@@ -112,7 +112,7 @@ def checkout_book(request):
 
 
 @login_required
-@user_passes_test(is_staff_user)
+@user_passes_test(lambda u: u.is_superuser)
 def return_book(request):
     if request.method == 'POST':
         loan_id = request.POST.get('loan_id')
@@ -264,9 +264,9 @@ def cancel_borrow_request(request, request_id):
 
 
 @login_required
-@user_passes_test(is_staff_user)
+@user_passes_test(lambda u: u.is_superuser)
 def approve_borrow_request(request, request_id):
-    """Allow staff to approve borrow requests."""
+    """Allow admin to approve borrow requests."""
     loan_request = get_object_or_404(LoanRequest, id=request_id, status='pending')
 
     try:
@@ -279,13 +279,13 @@ def approve_borrow_request(request, request_id):
 
 
 @login_required
-@user_passes_test(is_staff_user)
+@user_passes_test(lambda u: u.is_superuser)
 def reject_borrow_request(request, request_id):
-    """Allow staff to reject borrow requests."""
+    """Allow admin to reject borrow requests."""
     loan_request = get_object_or_404(LoanRequest, id=request_id, status='pending')
 
     if request.method == 'POST':
-        reason = request.POST.get('reason', 'Request rejected by staff')
+        reason = request.POST.get('reason', 'Request rejected by admin')
         loan_request.reject(reason)
         messages.success(request, 'Borrow request rejected.')
         return redirect('circulation:staff_dashboard')
@@ -297,7 +297,7 @@ def reject_borrow_request(request, request_id):
 
 
 @login_required
-@user_passes_test(is_staff_user)
+@user_passes_test(lambda u: u.is_superuser)
 def analytics_dashboard(request):
     """Basic analytics dashboard with key metrics."""
     # Time range (default to last 30 days)

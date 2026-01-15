@@ -145,17 +145,27 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Email configuration
 # https://docs.djangoproject.com/en/5.2/topics/email/
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
-    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "piloteaglecrown@gmail.com")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "ugnporqmpdkjytof")
 
+# Email backend configuration
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend")
+
+# SMTP settings (only used if EMAIL_BACKEND is smtp)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() == "true"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "piloteaglecrown@gmail.com")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+
+# Default email settings
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@ramatlibrary.unimaid.edu.ng")
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+# Email timeout and security
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", 30))
+
+# For development, you can set EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
+# and configure the SMTP settings above to send real emails
 
 # Email templates directory
 EMAIL_TEMPLATES_DIR = BASE_DIR / "templates" / "emails"

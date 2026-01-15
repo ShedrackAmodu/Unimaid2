@@ -45,44 +45,68 @@ def logout_view(request):
 
 
 def register_view(request):
+    """Public registration page - now shows options for different registration types."""
+    return render(request, 'accounts/register.html')
+
+
+def student_register_view(request):
+    """Student-specific registration view."""
     if request.method == 'POST':
         form = LibraryUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.membership_type = 'student'
+            user.save()
 
-            # For staff, registration requires approval (they can add staff_id later in profile)
-            if user.membership_type == 'staff':
-                # Staff registration requires approval
-                user.is_active = False  # Deactivate until approved
-                user.save()
-                # Send email to admin
-                try:
-                    send_mail(
-                        subject=f"New Staff Registration Requires Approval: {user.get_full_name()}",
-                        message=f"A new staff member has registered and requires approval.\n\n"
-                               f"Name: {user.get_full_name()}\n"
-                               f"Username: {user.username}\n"
-                               f"Email: {user.email}\n\n"
-                               f"The user will need to provide their Staff ID in their profile for verification.\n"
-                               f"Please review and approve/reject this registration in the admin dashboard.",
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Send to admin email
-                        fail_silently=False,
-                    )
-                except Exception as e:
-                    # Log error but don't fail registration
-                    print(f"Failed to send admin notification email: {e}")
-
-                messages.info(request, 'Registration submitted for approval. You will need to provide your Staff ID in your profile and receive approval before you can log in.')
-                return redirect('accounts:login')
-            else:
-                # Non-staff users are active immediately
-                login(request, user)
-                messages.success(request, 'Registration successful!')
-                return redirect('accounts:dashboard')
+            # Students are active immediately
+            login(request, user)
+            messages.success(request, 'Student registration successful! Welcome to Ramat Library.')
+            return redirect('accounts:dashboard')
     else:
         form = LibraryUserCreationForm()
-    return render(request, 'accounts/register.html', {'form': form})
+
+    return render(request, 'accounts/register_student.html', {'form': form})
+
+
+def staff_register_view(request):
+    """Staff-specific registration view."""
+    if request.method == 'POST':
+        form = LibraryUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.membership_type = 'staff'
+            user.save()
+
+            # Staff registration requires approval
+            user.is_active = False  # Deactivate until approved
+            user.save()
+            # Send email to admin
+            try:
+                send_mail(
+                    subject=f"New Staff Registration Requires Approval: {user.get_full_name()}",
+                    message=f"A new staff member has registered and requires approval.\n\n"
+                           f"Name: {user.get_full_name()}\n"
+                           f"Username: {user.username}\n"
+                           f"Email: {user.email}\n\n"
+                           f"Please review and approve/reject this registration in the admin dashboard.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.EMAIL_HOST_USER],  # Send to admin email (piloteaglecrown@gmail.com)
+                    fail_silently=False,
+                )
+                messages.success(request, 'Staff registration submitted successfully. Admin has been notified.')
+            except Exception as e:
+                # Log error and show user-friendly message
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to send admin notification email for user {user.username}: {e}")
+                messages.warning(request, 'Staff registration submitted, but email notification to admin failed. Please contact admin directly.')
+
+            messages.info(request, 'Staff registration submitted for approval. You will receive an email notification once your account is activated.')
+            return redirect('accounts:login')
+    else:
+        form = LibraryUserCreationForm()
+
+    return render(request, 'accounts/register_staff.html', {'form': form})
 
 
 @login_required
@@ -429,7 +453,7 @@ def admin_dashboard(request):
     app_list.append({'name': 'Catalog', 'app_label': 'catalog', 'models': catalog_models, 'icon': 'book'})
 
     # Circulation app
-    from apps.circulation.admin import LoanAdmin, ReservationAdmin, FineAdmin, LoanRequestAdmin
+    from apps.circulation.admin import LoanAdmin, ReservationAdmin, FineAdmin, LoanRequestAdmin, AttendanceAdmin
     circulation_models = [
         {
             'name': 'Loans',
@@ -562,6 +586,7 @@ def admin_dashboard(request):
     app_list.append({'name': 'Events', 'app_label': 'events', 'models': events_models, 'icon': 'calendar-event'})
 
     # Repository app
+    from apps.repository.models import DocumentPermission, DocumentPermissionRequest
     repository_models = [
         {
             'name': 'Collections',
@@ -582,6 +607,26 @@ def admin_dashboard(request):
             'icon': 'file-earmark',
             'fields': ['title', 'authors', 'upload_date', 'access_level', 'uploaded_by'],
             'items': _get_paginated_items(Document, search_query, page_number, items_per_page, ['title', 'uploaded_by__username'])
+        },
+        {
+            'name': 'Document Permission Requests',
+            'object_name': 'DocumentPermissionRequest',
+            'count': DocumentPermissionRequest.objects.count(),
+            'admin_url': reverse('repository:review_requests'),
+            'add_url': None,
+            'icon': 'clipboard-check',
+            'fields': ['document', 'user', 'status', 'requested_at'],
+            'items': _get_paginated_items(DocumentPermissionRequest, search_query, page_number, items_per_page, ['document__title', 'user__username'])
+        },
+        {
+            'name': 'Document Permissions',
+            'object_name': 'DocumentPermission',
+            'count': DocumentPermission.objects.count(),
+            'admin_url': reverse('admin:repository_documentpermission_changelist'),
+            'add_url': reverse('admin:repository_documentpermission_add'),
+            'icon': 'shield-check',
+            'fields': ['document', 'user', 'granted', 'granted_by', 'granted_at'],
+            'items': _get_paginated_items(DocumentPermission, search_query, page_number, items_per_page, ['document__title', 'user__username'])
         },
     ]
     app_list.append({'name': 'Repository', 'app_label': 'repository', 'models': repository_models, 'icon': 'file-earmark'})
@@ -675,30 +720,36 @@ def _get_paginated_items(model_class, search_query, page_number, items_per_page,
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def approve_staff(request, user_id):
-    """Approve staff registration."""
+    """Approve staff registration and activate account immediately."""
     user = get_object_or_404(LibraryUser, id=user_id, membership_type='staff', is_staff_approved=False)
 
     if request.method == 'POST':
         user.is_staff_approved = True
-        user.is_active = True
+        user.email_verified = True  # Mark email as verified since admin approved
+        user.is_active = True  # Activate account immediately
         user.save()
 
-        # Send approval email
+        # Send notification email that account is active
         try:
             send_mail(
-                subject="Staff Registration Approved",
+                subject="Staff Registration Approved - Account Activated",
                 message=f"Dear {user.get_full_name()},\n\n"
-                       f"Your staff registration has been approved. You can now log in to your account.\n\n"
+                       f"Your staff registration has been approved by the library administration.\n\n"
+                       f"Your account has been activated and you can now log in to the library system.\n\n"
                        f"Username: {user.username}\n\n"
+                       f"You can access your account at: {request.build_absolute_uri(reverse('accounts:login'))}\n\n"
                        f"Best regards,\nRamat Library Administration",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=False,
             )
         except Exception as e:
-            print(f"Failed to send approval email: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send approval notification email to {user.username}: {e}")
+            messages.warning(request, f'Staff registration approved, but email notification failed. Please inform the user manually.')
 
-        messages.success(request, f'Staff registration for {user.get_full_name()} has been approved.')
+        messages.success(request, f'Staff registration for {user.get_full_name()} has been approved. Account activated and notification email sent.')
         return redirect('accounts:admin_dashboard')
 
     return render(request, 'accounts/approve_staff.html', {'user': user})
@@ -727,7 +778,10 @@ def reject_staff(request, user_id):
                 fail_silently=False,
             )
         except Exception as e:
-            print(f"Failed to send rejection email: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send rejection email to {user.username}: {e}")
+            messages.warning(request, f'Staff registration rejected, but email notification failed. Please inform the user manually.')
 
         # Delete the user account
         user.delete()
@@ -789,7 +843,10 @@ def change_user_role(request, user_id):
                 fail_silently=False,
             )
         except Exception as e:
-            print(f"Failed to send role change email: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send role change email to {user.username}: {e}")
+            messages.warning(request, f'User role updated, but email notification failed. Please inform the user manually.')
 
         messages.success(request, f'{user.get_full_name()}\'s role has been changed from {current_role.title()} to {new_role.title()}.')
         return redirect('accounts:user_role_management')
@@ -1347,6 +1404,38 @@ def delete_item(request, app_label, model_name, item_id):
         return redirect('accounts:admin_dashboard')
 
 
+def confirm_email(request, token):
+    """Handle email confirmation for staff registration - no login required."""
+    from .models import EmailConfirmationToken
+
+    try:
+        confirmation_token = EmailConfirmationToken.objects.get(token=token)
+
+        if confirmation_token.is_expired():
+            messages.error(request, 'This confirmation link has expired. Please contact the administrator.')
+            return redirect('accounts:login')
+
+        user = confirmation_token.user
+
+        if user.email_verified:
+            messages.info(request, 'Your email has already been confirmed. You can now log in.')
+            return redirect('accounts:login')
+
+        # Mark email as verified and activate account
+        user.email_verified = True
+        user.save()
+
+        # Delete the used token
+        confirmation_token.delete()
+
+        # Show success page instead of redirecting
+        return render(request, 'accounts/email_confirmed.html', {'user': user})
+
+    except EmailConfirmationToken.DoesNotExist:
+        messages.error(request, 'Invalid confirmation link.')
+        return redirect('accounts:login')
+
+
 def download_user_qr(request, user_id):
     """Download QR code for a user."""
     user = get_object_or_404(LibraryUser, id=user_id)
@@ -1495,12 +1584,14 @@ def execute_action(request):
 
         # Create mock admin site and request
         admin_site = AdminSite()
-        mock_request = request._get_raw_host()  # Create a basic request object
-        mock_request.user = request.user
+        mock_request = request
+
+        # Create an instance of the admin class
+        admin_instance = admin_class(model_class, admin_site)
 
         # Execute the action
         try:
-            result = action_method(mock_request, queryset)
+            result = action_method(admin_instance, mock_request, queryset)
             # Some actions return HttpResponseRedirect, others return None
             return JsonResponse({
                 'success': True,

@@ -5,16 +5,10 @@ from .models import LibraryUser
 
 class LibraryUserCreationForm(UserCreationForm):
     # Only essential fields for registration
-    membership_type = forms.ChoiceField(
-        choices=LibraryUser.MEMBERSHIP_CHOICES,
-        widget=forms.HiddenInput(),
-        required=True
-    )
-    terms = forms.BooleanField(required=True, help_text="Agreement to terms and conditions")
 
     class Meta:
         model = LibraryUser
-        fields = ('username', 'email', 'first_name', 'last_name')
+        fields = ('username', 'email')
 
 
 class LibraryUserChangeForm(UserChangeForm):
