@@ -23,7 +23,7 @@ class Collection(BaseModel):
         verbose_name_plural = "Collections"
 
 
-class Document(BaseModel):
+class EBook(BaseModel):
     ACCESS_LEVEL_CHOICES = [
         ('open', 'Open Access'),
         ('restricted', 'Restricted'),
@@ -31,16 +31,16 @@ class Document(BaseModel):
         ('private', 'Private'),
     ]
 
-    title = models.CharField(max_length=500, help_text="Title of the document")
-    authors = models.TextField(help_text="Authors of the document (comma-separated)")
-    abstract = models.TextField(blank=True, help_text="Abstract or summary of the document")
+    title = models.CharField(max_length=500, help_text="Title of the eBook")
+    authors = models.TextField(help_text="Authors of the eBook (comma-separated)")
+    abstract = models.TextField(blank=True, help_text="Abstract or summary of the eBook")
     file = models.FileField(upload_to='repository/', help_text="Uploaded file")
-    upload_date = models.DateTimeField(auto_now_add=True, help_text="Date the document was uploaded")
+    upload_date = models.DateTimeField(auto_now_add=True, help_text="Date the eBook was uploaded")
     access_level = models.CharField(
         max_length=20,
         choices=ACCESS_LEVEL_CHOICES,
         default='open',
-        help_text="Access level for the document"
+        help_text="Access level for the eBook"
     )
     doi = models.CharField(max_length=100, blank=True, unique=True, help_text="Digital Object Identifier")
     collection = models.ForeignKey(
@@ -48,21 +48,21 @@ class Document(BaseModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='documents',
-        help_text="Collection this document belongs to"
+        related_name='ebooks',
+        help_text="Collection this eBook belongs to"
     )
     uploaded_by = models.ForeignKey(
         LibraryUser,
         on_delete=models.CASCADE,
-        related_name='uploaded_documents',
-        help_text="User who uploaded the document"
+        related_name='uploaded_ebooks',
+        help_text="User who uploaded the eBook"
     )
 
     def __str__(self):
         return self.title
 
     def can_user_access(self, user):
-        """Check if a user can access this document."""
+        """Check if a user can access this eBook."""
         if self.access_level == 'open':
             return True
 
@@ -75,8 +75,8 @@ class Document(BaseModel):
 
         # Staff with granted permission can access
         if user.groups.filter(name='Staff').exists():
-            return DocumentPermission.objects.filter(
-                document=self,
+            return EBookPermission.objects.filter(
+                ebook=self,
                 user=user,
                 granted=True
             ).exists()
@@ -84,13 +84,13 @@ class Document(BaseModel):
         return False
 
     class Meta:
-        verbose_name = "Document"
-        verbose_name_plural = "Documents"
+        verbose_name = "eBook"
+        verbose_name_plural = "eBooks"
         ordering = ['-upload_date']
 
 
-class DocumentPermissionRequest(BaseModel):
-    """Model for staff members to request access to restricted documents."""
+class EBookPermissionRequest(BaseModel):
+    """Model for staff members to request access to restricted eBooks."""
 
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -98,21 +98,21 @@ class DocumentPermissionRequest(BaseModel):
         ('rejected', 'Rejected'),
     ]
 
-    document = models.ForeignKey(
-        Document,
+    ebook = models.ForeignKey(
+        EBook,
         on_delete=models.CASCADE,
         related_name='permission_requests',
-        help_text="The document access is being requested for"
+        help_text="The eBook access is being requested for"
     )
     user = models.ForeignKey(
         LibraryUser,
         on_delete=models.CASCADE,
-        related_name='document_permission_requests',
+        related_name='ebook_permission_requests',
         help_text="The staff user requesting access",
         limit_choices_to={'groups__name': 'Staff'}
     )
     reason = models.TextField(
-        help_text="Reason for requesting access to this document"
+        help_text="Reason for requesting access to this eBook"
     )
     status = models.CharField(
         max_length=20,
@@ -143,7 +143,7 @@ class DocumentPermissionRequest(BaseModel):
     )
 
     def __str__(self):
-        return f"Request: {self.user.get_full_name()} → {self.document.title}"
+        return f"Request: {self.user.get_full_name()} → {self.ebook.title}"
 
     def approve(self, admin_user):
         """Approve the permission request and create the permission."""
@@ -155,8 +155,8 @@ class DocumentPermissionRequest(BaseModel):
         self.save()
 
         # Create the actual permission
-        DocumentPermission.objects.get_or_create(
-            document=self.document,
+        EBookPermission.objects.get_or_create(
+            ebook=self.ebook,
             user=self.user,
             defaults={
                 'granted': True,
@@ -176,25 +176,25 @@ class DocumentPermissionRequest(BaseModel):
         self.save()
 
     class Meta:
-        verbose_name = "Document Permission Request"
-        verbose_name_plural = "Document Permission Requests"
-        unique_together = ('document', 'user')
+        verbose_name = "eBook Permission Request"
+        verbose_name_plural = "eBook Permission Requests"
+        unique_together = ('ebook', 'user')
         ordering = ['-requested_at']
 
 
-class DocumentPermission(BaseModel):
-    """Model to grant specific document access to staff members."""
+class EBookPermission(BaseModel):
+    """Model to grant specific eBook access to staff members."""
 
-    document = models.ForeignKey(
-        Document,
+    ebook = models.ForeignKey(
+        EBook,
         on_delete=models.CASCADE,
         related_name='permissions',
-        help_text="The document being granted access to"
+        help_text="The eBook being granted access to"
     )
     user = models.ForeignKey(
         LibraryUser,
         on_delete=models.CASCADE,
-        related_name='document_permissions',
+        related_name='ebook_permissions',
         help_text="The staff user being granted access",
         limit_choices_to={'groups__name': 'Staff'}
     )
@@ -221,10 +221,10 @@ class DocumentPermission(BaseModel):
 
     def __str__(self):
         status = "Granted" if self.granted else "Revoked"
-        return f"{status}: {self.user.get_full_name()} → {self.document.title}"
+        return f"{status}: {self.user.get_full_name()} → {self.ebook.title}"
 
     class Meta:
-        verbose_name = "Document Permission"
-        verbose_name_plural = "Document Permissions"
-        unique_together = ('document', 'user')
+        verbose_name = "eBook Permission"
+        verbose_name_plural = "eBook Permissions"
+        unique_together = ('ebook', 'user')
         ordering = ['-granted_at']

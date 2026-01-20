@@ -307,18 +307,13 @@
                                 <p class="text-muted small mb-3">
                                     Access your library account on the go with our mobile-friendly interface.
                                 </p>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-qr-code me-1"></i>Scan QR Code
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="showMobileInstructions()">
-                                        <i class="bi bi-info-circle me-1"></i>Instructions
-                                    </button>
-                                </div>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="showMobileInstructions()">
+                                    <i class="bi bi-info-circle me-1"></i>Instructions
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 mb-3">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body p-4">
@@ -354,29 +349,16 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="text-center mb-4">
-                    <div class="qr-code mb-3">
-                        <!-- Placeholder for QR code -->
-                        <div style="width: 200px; height: 200px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <div class="text-center">
-                                <i class="bi bi-qr-code fs-1 text-muted mb-2 d-block"></i>
-                                <small class="text-muted">Scan to login on mobile</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="instructions">
                     <h6 class="fw-bold mb-3">How to Access on Mobile:</h6>
                     <ol class="small text-muted">
-                        <li class="mb-2">Open your phone's camera app</li>
-                        <li class="mb-2">Point camera at the QR code above</li>
-                        <li class="mb-2">Tap the link that appears</li>
+                        <li class="mb-2">Open your browser on mobile device</li>
+                        <li class="mb-2">Navigate to the library website</li>
                         <li class="mb-2">Login with your credentials</li>
                         <li>Bookmark the page for quick access</li>
                     </ol>
                 </div>
-                
+
                 <div class="alert alert-info mt-3">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-info-circle me-2"></i>
@@ -388,9 +370,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="downloadQRCode()">
-                    <i class="bi bi-download me-2"></i>Download QR Code
-                </button>
             </div>
         </div>
     </div>
@@ -463,14 +442,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* QR Code */
-    .qr-code {
-        transition: all 0.3s ease;
-    }
-    
-    .qr-code:hover {
-        transform: scale(1.02);
-    }
+
     
     /* Animation */
     @keyframes shake {
@@ -782,11 +754,7 @@
             modal.show();
         };
         
-        // Download QR code (simulated)
-        window.downloadQRCode = function() {
-            showToast('info', 'QR code download would start...');
-            // In real implementation, this would generate and download a QR code
-        };
+
         
         // Load remembered username
         const rememberedUsername = localStorage.getItem('lastUsername');

@@ -8,7 +8,7 @@ from config.admin_mixins import BaseAdminMixin, ExportMixin
 @admin.register(LibraryUser)
 class LibraryUserAdmin(BaseAdminMixin, ExportMixin, UserAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name',
-                    'membership_type', 'is_active', 'date_joined', 'qr_code_thumbnail', '_actions']
+                    'membership_type', 'is_active', 'date_joined', '_actions']
     list_filter = ['membership_type', 'is_active', 'is_staff', 'date_joined']
     search_fields = ['username', 'email', 'first_name', 'last_name',
                      'student_id', 'faculty_id']
@@ -20,7 +20,6 @@ class LibraryUserAdmin(BaseAdminMixin, ExportMixin, UserAdmin):
                                      'phone', 'emergency_contact')}),
         ('University Info', {'fields': ('membership_type', 'department',
                                        'student_id', 'faculty_id')}),
-        ('QR Code', {'fields': ('qr_code', 'qr_code_preview')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                    'groups', 'user_permissions')}),
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
@@ -34,19 +33,7 @@ class LibraryUserAdmin(BaseAdminMixin, ExportMixin, UserAdmin):
         }),
     )
 
-    readonly_fields = ['last_login', 'date_joined', 'qr_code', 'qr_code_preview']
-
-    def qr_code_thumbnail(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="50" height="50" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_thumbnail.short_description = 'QR Code'
-
-    def qr_code_preview(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="150" height="150" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_preview.short_description = 'QR Code Preview'
+    readonly_fields = ['last_login', 'date_joined']
 
     def get_queryset(self, request):
         """Custom queryset with annotations."""

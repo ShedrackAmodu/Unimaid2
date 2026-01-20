@@ -1,0 +1,351 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Bulk Upload Documents{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label %}">{{ opts.app_label|title }}</a>
+    &rsaquo; <a href="{% url 'admin:repository_document_changelist' %}">{{ opts.verbose_name_plural|title }}</a>
+    &rsaquo; Bulk Upload
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Bulk Upload Documents</h2>
+
+    <div class="form-row">
+        <p>Select multiple document files to upload them to the repository. The system will process each file and create a document record.</p>
+        <p><strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, RTF, ODT, XLS, XLSX, PPT, PPTX</p>
+
+        <div class="alert alert-info">
+            <strong>ℹ️ Information:</strong> Files are uploaded directly from your computer. Maximum file size is 50MB per document, and you can upload up to 50 files at once.
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+            {{ form.files.label_tag }}
+            {{ form.files|cut:"multiple=\"multiple\"" }}
+            <input type="file" name="{{ form.files.name }}" id="{{ form.files.id_for_label }}" multiple required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; max-width: 600px;">
+            {{ form.files.errors }}
+            <p style="margin-top: 5px; color: #666; font-size: 12px;">{{ form.files.help_text }}</p>
+        </div>
+
+        <div class="form-row">
+            {{ form.access_level.label_tag }}
+            {{ form.access_level }}
+            {{ form.access_level.errors }}
+            <p style="margin-top: 5px; color: #666; font-size: 12px;">{{ form.access_level.help_text }}</p>
+        </div>
+
+        <div class="form-row">
+            {{ form.collection.label_tag }}
+            {{ form.collection }}
+            {{ form.collection.errors }}
+            <p style="margin-top: 5px; color: #666; font-size: 12px;">{{ form.collection.help_text }}</p>
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="Upload Documents" class="default">
+            <a href="{% url 'admin:repository_document_changelist' %}" class="cancel-link">Cancel</a>
+        </div>
+    </form>
+
+    <div class="form-row">
+        <h3>How it works</h3>
+        <ul>
+            <li>The filename will be used as the document title (formatted nicely)</li>
+            <li>Authors will be set to "Unknown" - you can edit each document later to add details</li>
+            <li>Files are uploaded and stored securely in the repository</li>
+            <li>Each document gets a unique filename to avoid conflicts</li>
+            <li>You can edit each document later to add more details like authors, abstract, etc.</li>
+        </ul>
+    </div>
+
+    <div class="form-row">
+        <h3>Upload Requirements</h3>
+        <div class="requirements-section">
+            <h4>📋 File Specifications</h4>
+            <ul>
+                <li><strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, RTF, ODT, XLS, XLSX, PPT, PPTX</li>
+                <li><strong>Maximum file size:</strong> 50MB per document</li>
+                <li><strong>Maximum files:</strong> 50 files per batch</li>
+                <li><strong>Minimum files:</strong> At least 1 file must be selected</li>
+            </ul>
+
+            <h4>⚠️ Client-Side Validation</h4>
+            <p>The form will validate your files before upload and prevent submission if:</p>
+            <ul>
+                <li>Unsupported file types are selected</li>
+                <li>Any file exceeds 50MB</li>
+                <li>More than 50 files are selected</li>
+                <li>No files are selected</li>
+            </ul>
+
+            <h4>✅ Best Practices</h4>
+            <ul>
+                <li>Upload files in smaller batches (10-20 files) for better monitoring</li>
+                <li>Ensure files are not password-protected</li>
+                <li>Check file names are descriptive - they will be used as document titles</li>
+                <li>Verify files are not corrupted before uploading</li>
+                <li>Use consistent naming conventions for easier management</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <h3>Quick Tips</h3>
+        <ul>
+            <li>You can select multiple files at once using Ctrl+Click (or Cmd+Click on Mac)</li>
+            <li>The system will show you exactly which files were uploaded successfully</li>
+            <li>If any files fail to upload, you'll see specific error messages</li>
+            <li>Large files may take time to upload - be patient</li>
+            <li>All documents will be marked as uploaded by you (admin)</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.alert {
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.submit-row {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.cancel-link {
+    color: #999;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.cancel-link:hover {
+    color: #333;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-row input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-row select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+}
+
+.form-row ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.form-row ul li {
+    margin-bottom: 3px;
+}
+
+.form-row h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.requirements-section {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+}
+
+.requirements-section h4 {
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: #2e7d32;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.requirements-section h4:first-child {
+    margin-top: 0;
+}
+
+.requirements-section ul {
+    margin: 5px 0;
+    padding-left: 15px;
+}
+
+.requirements-section li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+</style>
+
+<script>
+// Client-side validation for file uploads
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.files.id_for_label }}');
+    const form = document.querySelector('form');
+
+    // Valid file extensions
+    const validExtensions = ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt', '.xls', '.xlsx', '.ppt', '.pptx'];
+    const maxFileSize = 50 * 1024 * 1024; // 50MB
+    const maxFiles = 50;
+
+    // Count selected files and show feedback
+    fileInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        const count = files.length;
+
+        // Remove existing count display
+        const existingCount = document.getElementById('file-count');
+        if (existingCount) {
+            existingCount.remove();
+        }
+
+        // Remove existing validation errors
+        const existingErrors = document.getElementById('validation-errors');
+        if (existingErrors) {
+            existingErrors.remove();
+        }
+
+        if (count > 0) {
+            const countDiv = document.createElement('div');
+            countDiv.id = 'file-count';
+            countDiv.style.marginTop = '5px';
+            countDiv.style.fontSize = '12px';
+            countDiv.style.color = count > 50 ? '#d32f2f' : '#666';
+
+            let message = `${count} file${count > 1 ? 's' : ''} selected`;
+            if (count > 50) {
+                message += ' (Warning: More than 50 files. Consider uploading in batches.)';
+            }
+
+            // Add file size info
+            let totalSize = 0;
+            for (let i = 0; i < files.length; i++) {
+                totalSize += files[i].size;
+            }
+            const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+            message += ` (Total: ${totalSizeMB}MB)`;
+
+            countDiv.textContent = message;
+            e.target.parentNode.appendChild(countDiv);
+        }
+    });
+
+    // Form validation before submission
+    form.addEventListener('submit', function(e) {
+        const files = fileInput.files;
+        const errors = [];
+
+        // Remove existing validation errors
+        const existingErrors = document.getElementById('validation-errors');
+        if (existingErrors) {
+            existingErrors.remove();
+        }
+
+        // Check if files are selected
+        if (files.length === 0) {
+            errors.push('Please select at least one file to upload.');
+        }
+
+        // Check file count
+        if (files.length > maxFiles) {
+            errors.push(`Too many files selected. Maximum ${maxFiles} files allowed per batch.`);
+        }
+
+        // Check each file
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileName = file.name.toLowerCase();
+            const fileExt = fileName.substring(fileName.lastIndexOf('.'));
+
+            // Check file extension
+            if (!validExtensions.includes(fileExt)) {
+                errors.push(`"${file.name}": Unsupported file type. Only ${validExtensions.join(', ')} files are allowed.`);
+            }
+
+            // Check file size
+            if (file.size > maxFileSize) {
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                errors.push(`"${file.name}": File too large (${fileSizeMB}MB). Maximum file size is 50MB.`);
+            }
+        }
+
+        // If there are validation errors, prevent submission and show errors
+        if (errors.length > 0) {
+            e.preventDefault();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'validation-errors';
+            errorDiv.style.marginTop = '10px';
+            errorDiv.style.padding = '10px';
+            errorDiv.style.border = '1px solid #dc3545';
+            errorDiv.style.borderRadius = '4px';
+            errorDiv.style.backgroundColor = '#f8d7da';
+            errorDiv.style.color = '#721c24';
+
+            const errorTitle = document.createElement('strong');
+            errorTitle.textContent = 'Validation Errors:';
+            errorDiv.appendChild(errorTitle);
+
+            const errorList = document.createElement('ul');
+            errorList.style.marginTop = '5px';
+            errorList.style.marginBottom = '0';
+            errorList.style.paddingLeft = '20px';
+
+            errors.forEach(function(error) {
+                const errorItem = document.createElement('li');
+                errorItem.textContent = error;
+                errorList.appendChild(errorItem);
+            });
+
+            errorDiv.appendChild(errorList);
+            fileInput.parentNode.appendChild(errorDiv);
+
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

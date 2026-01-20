@@ -52,37 +52,8 @@ class LibraryUser(AbstractUser, BaseModel):
     phone = models.CharField(max_length=20, blank=True, help_text="Phone number")
     emergency_contact = models.TextField(blank=True, help_text="Emergency contact information")
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="User profile picture")
-    qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
 
     objects = UserManager()
-
-    def generate_qr_code(self):
-        """Generate QR code containing user information."""
-        # Create data string with user details
-        user_id = self.student_id or self.faculty_id or self.staff_id or str(self.id)
-        data = f"User: {self.first_name} {self.last_name}\nID: {user_id}\nUsername: {self.username}\nType: {self.get_membership_type_display()}"
-
-        # Generate QR code
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(data)
-        qr.make(fit=True)
-
-        # Create image
-        img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save to BytesIO
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        buffer.seek(0)
-
-        # Save to model field
-        filename = f"user_{self.id}_qr.png"
-        self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=False)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -108,11 +79,6 @@ class LibraryUser(AbstractUser, BaseModel):
             self.assign_group_based_on_membership(is_new)
             # Save again to persist group and is_staff changes
             super().save(update_fields=['is_staff'])
-
-        # Generate QR code if not exists
-        if not self.qr_code:
-            self.generate_qr_code()
-            super().save(update_fields=['qr_code'])
 
     def assign_group_based_on_membership(self, is_new=False):
         """Assign user to appropriate group based on membership_type."""
