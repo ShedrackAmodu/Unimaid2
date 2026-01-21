@@ -2,7 +2,7 @@ from django.contrib.auth.models import ContentType
 from django.db.models import Count
 from apps.accounts.models import LibraryUser
 from apps.catalog.models import Book, BookCopy
-from apps.repository.models import Document
+from apps.repository.models import EBook
 from apps.events.models import Event
 from apps.circulation.models import Loan
 from django.utils import timezone
@@ -17,7 +17,7 @@ def admin_context(request):
         context.update({
             'user_count': LibraryUser.objects.count(),
             'book_count': Book.objects.count(),
-            'document_count': Document.objects.count(),
+            'document_count': EBook.objects.count(),
             'event_count': Event.objects.filter(date__gte=timezone.now().date()).count(),
             'active_users': LibraryUser.objects.filter(is_active=True).count(),
             'overdue_loans': Loan.objects.filter(
@@ -47,7 +47,7 @@ def admin_context(request):
             'loan': 'arrow-left-right',
             'reservation': 'bookmark',
             'fine': 'cash-coin',
-            'document': 'file-earmark-text',
+            'ebook': 'file-earmark-text',
             'collection': 'folder',
             'blogpost': 'newspaper',
             'event': 'calendar-event',

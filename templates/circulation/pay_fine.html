@@ -333,27 +333,21 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% if recent_fines %}
+                                {% for fine in recent_fines %}
                                 <tr>
-                                    <td>Apr 10, 2024</td>
-                                    <td>Overdue: "Database Systems"</td>
-                                    <td>₦200.00</td>
-                                    <td><span class="badge bg-primary">Online</span></td>
+                                    <td>{{ fine.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ fine.reason }}: "{{ fine.loan.book_copy.book.title|truncatechars:25 }}"</td>
+                                    <td>₦{{ fine.amount }}</td>
+                                    <td><span class="badge bg-primary">{{ fine.payment_method|default:"Online" }}</span></td>
                                     <td><span class="badge bg-success">Paid</span></td>
                                 </tr>
+                                {% endfor %}
+                                {% else %}
                                 <tr>
-                                    <td>Mar 25, 2024</td>
-                                    <td>Damage fee: "Computer Networks"</td>
-                                    <td>₦500.00</td>
-                                    <td><span class="badge bg-warning">Cash</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td colspan="5" class="text-center text-muted py-3">No recent fine payments</td>
                                 </tr>
-                                <tr>
-                                    <td>Feb 15, 2024</td>
-                                    <td>Overdue: "Algorithms"</td>
-                                    <td>₦150.00</td>
-                                    <td><span class="badge bg-info">Bank</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                </tr>
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>

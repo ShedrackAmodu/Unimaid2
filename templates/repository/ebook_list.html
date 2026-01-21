@@ -19,8 +19,8 @@
     </div>
     <div class="col-lg-4 text-lg-end">
         {% if user.is_staff %}
-        <a href="{% url 'repository:upload_document' %}" class="btn btn-primary btn-lg">
-            <i class="bi bi-upload me-2"></i>Upload Document
+        <a href="{% url 'accounts:contact' %}?subject=repository_upload" class="btn btn-primary btn-lg">
+            <i class="bi bi-upload me-2"></i>Contact Admin for Upload Instructions
         </a>
         {% endif %}
     </div>
@@ -270,8 +270,8 @@
         {% endif %}
     </p>
     {% if user.is_staff %}
-    <a href="{% url 'repository:upload_document' %}" class="btn btn-primary btn-lg">
-        <i class="bi bi-upload me-2"></i>Upload First Document
+    <a href="{% url 'accounts:contact' %}?subject=repository_upload" class="btn btn-primary btn-lg">
+        <i class="bi bi-upload me-2"></i>Contact Admin for Upload Instructions
     </a>
     {% endif %}
 </div>
@@ -371,8 +371,8 @@
                     </p>
                     <div class="d-grid gap-2">
                         {% if user.is_staff %}
-                        <a href="{% url 'repository:upload_document' %}" class="btn btn-primary">
-                            <i class="bi bi-upload me-2"></i>Upload Document
+                        <a href="{% url 'accounts:contact' %}?subject=repository_upload" class="btn btn-primary">
+                            <i class="bi bi-upload me-2"></i>Contact Admin for Upload Instructions
                         </a>
                         {% else %}
                         <a href="{% url 'accounts:contact' %}" class="btn btn-primary">

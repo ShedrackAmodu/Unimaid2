@@ -14,7 +14,7 @@ from .models import LibraryUser, StudyRoom, StudyRoomBooking
 from .forms import LibraryUserCreationForm, LibraryUserChangeForm
 from apps.catalog.models import Book, Genre
 from apps.events.models import Event
-from apps.repository.models import Document
+from apps.repository.models import EBook
 from django.apps import apps as django_apps
 
 # Safe dynamic lookup for BlogPost
@@ -22,6 +22,137 @@ try:
     BlogPost = django_apps.get_model('blog', 'BlogPost')
 except (LookupError, ModuleNotFoundError):
     BlogPost = None
+
+
+def generate_recent_activity(user):
+    """Generate recent activity timeline for the user dashboard."""
+    from apps.circulation.models import Attendance, Fine
+    from apps.events.models import EventRegistration
+    from apps.repository.models import EBookPermission
+    from django.utils import timezone
+    from datetime import timedelta
+
+    activities = []
+
+    # Get recent loans (returned books)
+    recent_loans = user.loans.filter(status='returned').order_by('-return_date')[:2]
+    for loan in recent_loans:
+        activities.append({
+            'icon': 'bi-check-circle',
+            'icon_bg': 'bg-success',
+            'title': 'Book Returned',
+            'description': f'Returned "{loan.book_copy.book.title[:30]}..."',
+            'timestamp': loan.return_date or loan.created_at,
+            'time_ago': _get_time_ago(loan.return_date or loan.created_at),
+        })
+
+    # Get recent check-ins
+    recent_attendance = Attendance.objects.filter(
+        Q(user=user) | Q(registration_number=user.student_id) | Q(registration_number=user.faculty_id)
+    ).order_by('-check_in')[:2]
+    for attendance in recent_attendance:
+        activities.append({
+            'icon': 'bi-clock',
+            'icon_bg': 'bg-info',
+            'title': 'Library Visit',
+            'description': f'Checked in at {attendance.check_in.strftime("%I:%M %p")}',
+            'timestamp': attendance.check_in,
+            'time_ago': _get_time_ago(attendance.check_in),
+        })
+
+    # Get recent reservations
+    recent_reservations = user.reservations.filter(status__in=['fulfilled', 'cancelled']).order_by('-updated_at')[:2]
+    for reservation in recent_reservations:
+        status_text = 'Reservation fulfilled' if reservation.status == 'fulfilled' else 'Reservation cancelled'
+        activities.append({
+            'icon': 'bi-bookmark' if reservation.status == 'fulfilled' else 'bi-x-circle',
+            'icon_bg': 'bg-primary' if reservation.status == 'fulfilled' else 'bg-warning',
+            'title': status_text,
+            'description': f'"{reservation.book.title[:30]}..."',
+            'timestamp': reservation.updated_at,
+            'time_ago': _get_time_ago(reservation.updated_at),
+        })
+
+    # Get recent fines paid
+    recent_fines = Fine.objects.filter(
+        loan__user=user,
+        status='paid'
+    ).order_by('-paid_date')[:2]
+    for fine in recent_fines:
+        activities.append({
+            'icon': 'bi-credit-card',
+            'icon_bg': 'bg-warning',
+            'title': 'Fine Paid',
+            'description': f'Paid ₦{fine.amount} for "{fine.loan.book_copy.book.title[:25]}..."',
+            'timestamp': fine.paid_date,
+            'time_ago': _get_time_ago(fine.paid_date),
+        })
+
+    # Get recent event registrations
+    try:
+        recent_events = EventRegistration.objects.filter(user=user).order_by('-created_at')[:2]
+        for event_reg in recent_events:
+            activities.append({
+                'icon': 'bi-calendar-event',
+                'icon_bg': 'bg-info',
+                'title': 'Event Registration',
+                'description': f'Registered for "{event_reg.event.title[:30]}..."',
+                'timestamp': event_reg.created_at,
+                'time_ago': _get_time_ago(event_reg.created_at),
+            })
+    except:
+        pass  # Events app might not be available
+
+    # Get recent eBook permissions
+    try:
+        recent_permissions = EBookPermission.objects.filter(
+            user=user,
+            granted=True
+        ).order_by('-granted_at')[:1]
+        for perm in recent_permissions:
+            activities.append({
+                'icon': 'bi-file-earmark-check',
+                'icon_bg': 'bg-success',
+                'title': 'eBook Access Granted',
+                'description': f'Access granted to "{perm.ebook.title[:25]}..."',
+                'timestamp': perm.granted_at,
+                'time_ago': _get_time_ago(perm.granted_at),
+            })
+    except:
+        pass  # Repository app might not be available
+
+    # Sort activities by timestamp (most recent first) and limit to 4
+    activities.sort(key=lambda x: x['timestamp'], reverse=True)
+    return activities[:4]
+
+
+def _get_time_ago(timestamp):
+    """Helper function to get human-readable time ago string."""
+    if not timestamp:
+        return "Recently"
+
+    now = timezone.now()
+    diff = now - timestamp
+
+    if diff.days > 0:
+        if diff.days == 1:
+            return "1 day ago"
+        elif diff.days < 7:
+            return f"{diff.days} days ago"
+        elif diff.days < 30:
+            weeks = diff.days // 7
+            return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+        else:
+            months = diff.days // 30
+            return f"{months} month{'s' if months > 1 else ''} ago"
+    elif diff.seconds >= 3600:
+        hours = diff.seconds // 3600
+        return f"{hours} hour{'s' if hours > 1 else ''} ago"
+    elif diff.seconds >= 60:
+        minutes = diff.seconds // 60
+        return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    else:
+        return "Just now"
 
 
 def login_view(request):
@@ -120,11 +251,72 @@ def dashboard_view(request):
         return redirect('circulation:staff_dashboard')
     else:
         # Patron dashboard
+        from django.db.models import Count, Sum, Q
+        from datetime import datetime
+        from apps.circulation.models import Attendance, Fine
+
+        # Get current date info
+        today = timezone.now().date()
+        current_month = today.month
+        current_year = today.year
+
+        # Calculate dynamic statistics
+        total_read_books = user.loans.filter(status='returned').count()
+
+        # Books read this month (loans created this month)
+        books_this_month = user.loans.filter(
+            loan_date__year=current_year,
+            loan_date__month=current_month
+        ).count()
+
+        # Reading goal - default to 12 books per year, 1 per month
+        monthly_goal = 1
+        annual_goal = 12
+        books_this_year = user.loans.filter(
+            loan_date__year=current_year
+        ).count()
+
+        # Days visited this month
+        days_visited_this_month = Attendance.objects.filter(
+            Q(user=user) | Q(registration_number=user.student_id) | Q(registration_number=user.faculty_id),
+            check_in__year=current_year,
+            check_in__month=current_month
+        ).dates('check_in', 'day').count()
+
+        # Calculate renewal rate (simplified - could be enhanced with actual renewal tracking)
+        total_loans = user.loans.count()
+        renewal_rate = 85  # Default, could calculate from loan history if renewal tracking exists
+
+        # Recent fines total
+        recent_fines_total = Fine.objects.filter(
+            loan__user=user,
+            status='unpaid'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        # Notifications count (pending reservations + overdue loans + unpaid fines)
+        notifications_count = (
+            user.reservations.filter(status='active').count() +
+            user.loans.filter(status='active', due_date__lt=today).count() +
+            Fine.objects.filter(loan__user=user, status='unpaid').count()
+        )
+
+        # Generate recent activity
+        recent_activity = generate_recent_activity(user)
+
         context = {
             'user': user,
-            'current_loans': user.loans.filter(status='active')[:5],  # Show recent loans
+            'current_loans': user.loans.filter(status='active')[:5],
             'reservations': user.reservations.filter(status='active')[:5],
             'recent_fines': user.loans.filter(fines__status='unpaid').distinct()[:5],
+            'total_read_books': total_read_books,
+            'books_this_month': books_this_month,
+            'reading_goal_progress': f"{books_this_month}/{monthly_goal}",
+            'days_visited_this_month': days_visited_this_month,
+            'days_goal': 30,  # Monthly goal
+            'renewal_rate': renewal_rate,
+            'recent_fines_total': recent_fines_total,
+            'notifications_count': notifications_count,
+            'recent_activity': recent_activity,
         }
         return render(request, 'accounts/dashboard.html', context)
 
@@ -240,10 +432,10 @@ def admin_dashboard(request):
     # System stats
     from apps.catalog.models import Book
     from apps.circulation.models import Loan, Reservation, Fine
-    from apps.repository.models import Document
+    from apps.repository.models import EBook
     from apps.events.models import Event
     total_books = Book.objects.active().count()
-    document_count = Document.objects.count()
+    document_count = EBook.objects.count()
     event_count = Event.objects.count()
     active_loans = Loan.objects.filter(status='active').count()
     overdue_loans = Loan.objects.filter(status='active', due_date__lt=timezone.now().date()).count()
@@ -274,11 +466,11 @@ def admin_dashboard(request):
             })
 
         # Recent documents
-        for doc in Document.objects.order_by('-upload_date')[:2]:
+        for doc in EBook.objects.order_by('-upload_date')[:2]:
             recent_actions.append({
-                'description': f'Document uploaded: {doc.title[:30]}...',
+                'description': f'eBook uploaded: {doc.title[:30]}...',
                 'timestamp': doc.upload_date,
-                'get_admin_url': reverse('admin:repository_document_change', args=[doc.id]),
+                'get_admin_url': reverse('admin:repository_ebook_change', args=[doc.id]),
                 'get_icon': 'file-earmark'
             })
     except:
@@ -293,7 +485,7 @@ def admin_dashboard(request):
     from apps.catalog.models import Author, Publisher, Faculty, Department, Topic, Genre, BookCopy
     from apps.circulation.models import Reservation, Fine, LoanRequest, Attendance
     from apps.events.models import Event, EventRegistration
-    from apps.repository.models import Collection, Document
+    from apps.repository.models import Collection, EBook
 
     # Get search and pagination parameters
     search_query = request.GET.get('search', '')
@@ -586,7 +778,7 @@ def admin_dashboard(request):
     app_list.append({'name': 'Events', 'app_label': 'events', 'models': events_models, 'icon': 'calendar-event'})
 
     # Repository app
-    from apps.repository.models import DocumentPermission, DocumentPermissionRequest
+    from apps.repository.models import EBookPermission, EBookPermissionRequest
     repository_models = [
         {
             'name': 'Collections',
@@ -599,34 +791,34 @@ def admin_dashboard(request):
             'items': _get_paginated_items(Collection, search_query, page_number, items_per_page, ['name', 'curator__username'])
         },
         {
-            'name': 'Documents',
-            'object_name': 'Document',
-            'count': Document.objects.count(),
-            'admin_url': reverse('admin:repository_document_changelist'),
-            'add_url': reverse('admin:repository_document_add'),
+            'name': 'eBooks',
+            'object_name': 'EBook',
+            'count': EBook.objects.count(),
+            'admin_url': reverse('admin:repository_ebook_changelist'),
+            'add_url': reverse('admin:repository_ebook_add'),
             'icon': 'file-earmark',
             'fields': ['title', 'authors', 'upload_date', 'access_level', 'uploaded_by'],
-            'items': _get_paginated_items(Document, search_query, page_number, items_per_page, ['title', 'uploaded_by__username'])
+            'items': _get_paginated_items(EBook, search_query, page_number, items_per_page, ['title', 'uploaded_by__username'])
         },
         {
-            'name': 'Document Permission Requests',
-            'object_name': 'DocumentPermissionRequest',
-            'count': DocumentPermissionRequest.objects.count(),
+            'name': 'eBook Permission Requests',
+            'object_name': 'EBookPermissionRequest',
+            'count': EBookPermissionRequest.objects.count(),
             'admin_url': reverse('repository:review_requests'),
             'add_url': None,
             'icon': 'clipboard-check',
-            'fields': ['document', 'user', 'status', 'requested_at'],
-            'items': _get_paginated_items(DocumentPermissionRequest, search_query, page_number, items_per_page, ['document__title', 'user__username'])
+            'fields': ['ebook', 'user', 'status', 'requested_at'],
+            'items': _get_paginated_items(EBookPermissionRequest, search_query, page_number, items_per_page, ['ebook__title', 'user__username'])
         },
         {
-            'name': 'Document Permissions',
-            'object_name': 'DocumentPermission',
-            'count': DocumentPermission.objects.count(),
-            'admin_url': reverse('admin:repository_documentpermission_changelist'),
-            'add_url': reverse('admin:repository_documentpermission_add'),
+            'name': 'eBook Permissions',
+            'object_name': 'EBookPermission',
+            'count': EBookPermission.objects.count(),
+            'admin_url': reverse('admin:repository_ebookpermission_changelist'),
+            'add_url': reverse('admin:repository_ebookpermission_add'),
             'icon': 'shield-check',
-            'fields': ['document', 'user', 'granted', 'granted_by', 'granted_at'],
-            'items': _get_paginated_items(DocumentPermission, search_query, page_number, items_per_page, ['document__title', 'user__username'])
+            'fields': ['ebook', 'user', 'granted', 'granted_by', 'granted_at'],
+            'items': _get_paginated_items(EBookPermission, search_query, page_number, items_per_page, ['ebook__title', 'user__username'])
         },
     ]
     app_list.append({'name': 'Repository', 'app_label': 'repository', 'models': repository_models, 'icon': 'file-earmark'})
@@ -682,7 +874,7 @@ def admin_dashboard(request):
         'events': Event.objects.order_by('-created_at')[:20],
         'event_registrations': EventRegistration.objects.order_by('-created_at')[:20],
         'collections': Collection.objects.all()[:20],
-        'documents': Document.objects.order_by('-upload_date')[:20],
+        'documents': EBook.objects.order_by('-upload_date')[:20],
     }
     return render(request, 'accounts/admin_dashboard.html', context)
 
@@ -969,7 +1161,7 @@ def home_view(request):
 
     # Quick stats for overview
     total_books = Book.objects.active().count()
-    total_documents = Document.objects.filter(access_level='open').count()
+    total_documents = EBook.objects.filter(access_level='open').count()
 
     context = {
         'featured_books': featured_books,

@@ -479,25 +479,25 @@
                     <div class="col-6">
                         <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
                             <small class="text-muted">Overdue Fines</small>
-                            <span class="badge bg-danger">₦950</span>
+                            <span class="badge bg-danger">{{ overdue_fines_amount|default:"₦0.00" }}</span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
                             <small class="text-muted">Damage Fees</small>
-                            <span class="badge bg-warning">₦200</span>
+                            <span class="badge bg-warning">{{ damage_fees_amount|default:"₦0.00" }}</span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
                             <small class="text-muted">Lost Books</small>
-                            <span class="badge bg-dark">₦100</span>
+                            <span class="badge bg-dark">{{ lost_books_amount|default:"₦0.00" }}</span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
                             <small class="text-muted">Waived Fines</small>
-                            <span class="badge bg-success">₦150</span>
+                            <span class="badge bg-success">{{ waived_fines_amount|default:"₦0.00" }}</span>
                         </div>
                     </div>
                 </div>

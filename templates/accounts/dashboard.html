@@ -106,7 +106,7 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="stat-number display-6 fw-bold">{{ total_read_books|default:"24" }}</div>
+                                <div class="stat-number display-6 fw-bold">{{ total_read_books }}</div>
                                 <div class="stat-label">Books Read</div>
                             </div>
                         </div>
@@ -462,7 +462,7 @@
                                 <i class="bi bi-pencil-square me-2"></i>Edit Profile
                             </a>
                             <a href="/circulation/patron_dashboard/" class="btn btn-outline-success">
-                                <i class="bi bi-bell me-2"></i>Notifications (3)
+                                <i class="bi bi-bell me-2"></i>Notifications ({{ notifications_count }})
                             </a>
                             <a href="/circulation/history/" class="btn btn-outline-info">
                                 <i class="bi bi-clock-history me-2"></i>Borrowing History
@@ -485,40 +485,40 @@
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Books This Month</span>
-                                <strong>3</strong>
+                                <strong>{{ books_this_month }}</strong>
                             </div>
                             <div class="progress progress-md">
-                                <div class="progress-bar bg-primary" style="width: 60%;"></div>
+                                <div class="progress-bar bg-primary" style="width: {{ books_this_month }}0%;"></div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Reading Goal</span>
-                                <strong>5/12 books</strong>
+                                <strong>{{ reading_goal_progress }}</strong>
                             </div>
                             <div class="progress progress-md">
-                                <div class="progress-bar bg-success" style="width: 42%;"></div>
+                                <div class="progress-bar bg-success" style="width: {{ books_this_month }}0%;"></div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Days Visited</span>
-                                <strong>18/30</strong>
+                                <strong>{{ days_visited_this_month }}/{{ days_goal }}</strong>
                             </div>
-                            <div class="progress progress-md">
+                                <div class="progress progress-md">
                                 <div class="progress-bar bg-info" style="width: 60%;"></div>
                             </div>
                         </div>
-                        
+
                         <div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Renewal Rate</span>
-                                <strong>85%</strong>
+                                <strong>{{ renewal_rate }}%</strong>
                             </div>
                             <div class="progress progress-md">
-                                <div class="progress-bar bg-warning" style="width: 85%;"></div>
+                                <div class="progress-bar bg-warning" style="width: {{ renewal_rate }}%;"></div>
                             </div>
                         </div>
                     </div>
@@ -589,61 +589,26 @@
                     </div>
                     <div class="card-body">
                         <div class="timeline">
+                            {% for activity in recent_activity %}
                             <div class="timeline-item">
-                                <div class="timeline-icon bg-success">
-                                    <i class="bi bi-check-circle"></i>
+                                <div class="timeline-icon {{ activity.icon_bg }}">
+                                    <i class="{{ activity.icon }}"></i>
                                 </div>
                                 <div class="timeline-content">
                                     <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Book Returned</h6>
-                                        <small class="text-muted">2 hours ago</small>
+                                        <h6 class="mb-1">{{ activity.title }}</h6>
+                                        <small class="text-muted">{{ activity.time_ago }}</small>
                                     </div>
-                                    <p class="mb-1">Returned "Introduction to Computer Science" at Circulation Desk</p>
-                                    <small class="text-muted">No. 123456</small>
+                                    <p class="mb-1">{{ activity.description }}</p>
                                 </div>
                             </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon bg-primary">
-                                    <i class="bi bi-book"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Book Renewed</h6>
-                                        <small class="text-muted">1 day ago</small>
-                                    </div>
-                                    <p class="mb-1">Renewed "Advanced Mathematics" online</p>
-                                    <small class="text-muted">New due date: Dec 15, 2024</small>
-                                </div>
+                            {% empty %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-activity display-1 text-muted mb-3"></i>
+                                <h5 class="text-muted">No Recent Activity</h5>
+                                <p class="text-muted">Your recent library activities will appear here.</p>
                             </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon bg-info">
-                                    <i class="bi bi-clock"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Reservation Made</h6>
-                                        <small class="text-muted">2 days ago</small>
-                                    </div>
-                                    <p class="mb-1">Reserved "Data Structures and Algorithms"</p>
-                                    <small class="text-muted">Position #3 in queue</small>
-                                </div>
-                            </div>
-                            
-                            <div class="timeline-item">
-                                <div class="timeline-icon bg-warning">
-                                    <i class="bi bi-credit-card"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Fine Paid</h6>
-                                        <small class="text-muted">3 days ago</small>
-                                    </div>
-                                    <p class="mb-1">Paid overdue fine for "Physics Textbook"</p>
-                                    <small class="text-muted">Amount: ₦500 | Receipt: #789012</small>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

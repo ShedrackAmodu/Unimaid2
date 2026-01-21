@@ -163,44 +163,22 @@ class BookResource(resources.ModelResource):
             for author_name in author_names:
                 Author.objects.get_or_create(name=author_name)
 
-    def after_import_row(self, row, row_result, **kwargs):
-        """Called after each row is imported."""
-        if row_result.import_type == 'new':
-            # Generate QR code for new books
-            if hasattr(row_result.object, 'generate_qr_code'):
-                try:
-                    row_result.object.generate_qr_code()
-                    row_result.object.save(update_fields=['qr_code'])
-                except Exception as e:
-                    # Log error but don't fail the import
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to generate QR code for book {row_result.object}: {e}")
+
 
 
 @admin.register(Book)
 class BookAdmin(ImportExportModelAdmin):
     resource_class = BookResource
     form = BookForm
-    list_display = ['title', 'isbn', 'publisher', 'faculty', 'department', 'topic', 'genre', 'publication_date', 'copy_count', 'available_copies', 'qr_code_thumbnail']
+    list_display = ['title', 'isbn', 'publisher', 'faculty', 'department', 'topic', 'genre', 'publication_date', 'copy_count', 'available_copies']
     list_filter = ['faculty', 'department', 'topic__department__faculty', 'topic__department', 'topic', 'genre', 'publisher', 'publication_date']
     search_fields = ['title', 'isbn', 'authors__name']
     filter_horizontal = ['authors']
-    readonly_fields = ['copy_count', 'available_copies', 'qr_code', 'qr_code_preview']
+    readonly_fields = ['copy_count', 'available_copies']
     actions = ['bulk_upload_books']
     change_list_template = 'admin/catalog/book/change_list.html'
 
-    def qr_code_thumbnail(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="50" height="50" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_thumbnail.short_description = 'QR Code'
 
-    def qr_code_preview(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="150" height="150" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_preview.short_description = 'QR Code Preview'
 
     def copy_count(self, obj):
         return obj.copies.count()
@@ -305,23 +283,12 @@ class BookAdmin(ImportExportModelAdmin):
 @admin.register(BookCopy)
 class BookCopyAdmin(admin.ModelAdmin):
     form = BookCopyForm
-    list_display = ['book', 'barcode', 'status', 'condition', 'location', 'acquisition_date', 'qr_code_thumbnail']
+    list_display = ['book', 'barcode', 'status', 'condition', 'location', 'acquisition_date']
     list_filter = ['status', 'condition', 'book__faculty', 'book__department']
     search_fields = ['barcode', 'book__title']
-    readonly_fields = ['qr_code', 'qr_code_preview']
     actions = ['mark_as_available']
 
-    def qr_code_thumbnail(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="50" height="50" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_thumbnail.short_description = 'QR Code'
 
-    def qr_code_preview(self, obj):
-        if obj.qr_code:
-            return format_html('<img src="{}" width="150" height="150" />', obj.qr_code.url)
-        return "No QR Code"
-    qr_code_preview.short_description = 'QR Code Preview'
 
     def mark_as_available(self, request, queryset):
         updated = queryset.update(status='available')

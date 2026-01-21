@@ -252,7 +252,7 @@
         <i class="bi bi-file-earmark-text stat-icon"></i>
         <div class="stat-number">{{ document_count }}</div>
         <div class="stat-label">Research Documents</div>
-        <a href="{% url 'admin:repository_document_changelist' %}" class="quick-action-btn">View Documents</a>
+        <a href="{% url 'admin:repository_ebook_changelist' %}" class="quick-action-btn">View Documents</a>
     </div>
 
     <div class="dashboard-card stat-card">
@@ -291,7 +291,7 @@
                     <i class="bi bi-newspaper"></i> Create Post
                 </a>
                 {% endif %}
-                <a href="{% url 'admin:repository_document_add' %}" class="quick-action-btn">
+                <a href="{% url 'admin:repository_ebook_add' %}" class="quick-action-btn">
                     <i class="bi bi-upload"></i> Upload Document
                 </a>
                 <a href="{% url 'admin:circulation_loan_changelist' %}" class="quick-action-btn">

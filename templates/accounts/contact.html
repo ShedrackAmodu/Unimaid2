@@ -26,6 +26,40 @@
 {% endblock %}
 
 {% block content %}
+<!-- Repository Upload Instructions Banner -->
+{% if request.GET.subject == 'repository_upload' %}
+<div class="alert alert-info border-0 mb-4" role="alert">
+    <div class="d-flex align-items-start">
+        <i class="bi bi-info-circle-fill fs-3 me-3 text-info mt-1"></i>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-2">Document Upload Instructions</h5>
+            <p class="mb-3">
+                To upload documents to the Institutional Repository, please provide detailed information below.
+                Our repository administrators will review your submission and contact you with further instructions.
+            </p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <strong>What you'll need:</strong>
+                    <ul class="mb-0 small">
+                        <li>Complete document metadata (title, authors, abstract)</li>
+                        <li>Document file in PDF, DOC, DOCX, or similar format</li>
+                        <li>Information about copyright and licensing</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <strong>Next steps:</strong>
+                    <ul class="mb-0 small">
+                        <li>Fill out the contact form below</li>
+                        <li>Attach your document if it's under 5MB</li>
+                        <li>Repository staff will review and provide upload instructions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Contact Page Content -->
 <div class="contact-page">
     <div class="container-fluid">
@@ -514,6 +548,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Pre-populate form for repository uploads
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('subject') === 'repository_upload') {
+            const subjectSelect = document.getElementById('subject');
+            if (subjectSelect) {
+                subjectSelect.value = 'repository';
+            }
+        }
+
         // Form Validation
         const contactForm = document.getElementById('contactForm');
         if (contactForm) {

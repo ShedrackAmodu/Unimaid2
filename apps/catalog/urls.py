@@ -30,8 +30,4 @@ urlpatterns = [
     # API endpoints for dynamic filtering
     path('api/departments/', views.api_departments, name='api_departments'),
     path('api/topics/', views.api_topics, name='api_topics'),
-
-    # QR code downloads
-    path('books/<int:book_id>/qr/', views.download_book_qr, name='download_book_qr'),
-    path('copies/<int:copy_id>/qr/', views.download_copy_qr, name='download_copy_qr'),
 ]
