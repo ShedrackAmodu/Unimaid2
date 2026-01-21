@@ -9,18 +9,6 @@ django.setup()
 from apps.accounts.models import LibraryUser
 
 def main():
-    # Load backup data if exists
-    if os.path.exists('backup.json'):
-        print("Loading data from backup.json...")
-        try:
-            call_command('loaddata', 'backup')
-            print("Data loaded from backup.json successfully.")
-        except Exception as e:
-            print(f"Error loading data from backup.json: {e}")
-            return
-    else:
-        print("No backup.json found, proceeding with fresh setup.")
-
     print("Running makemigrations...")
     try:
         call_command('makemigrations')
@@ -62,14 +50,6 @@ def main():
             print("Superuser 'drmk' already exists.")
     except Exception as e:
         print(f"Error creating superuser: {e}")
-
-    # Backup data to JSON
-    print("Backing up data to backup.json...")
-    try:
-        call_command('dumpdata', '--output', 'backup.json')
-        print("Data backed up to backup.json successfully.")
-    except Exception as e:
-        print(f"Error backing up data: {e}")
 
 if __name__ == '__main__':
     main()
