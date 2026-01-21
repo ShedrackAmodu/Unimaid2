@@ -53,6 +53,9 @@ class LibraryUser(AbstractUser, BaseModel):
     emergency_contact = models.TextField(blank=True, help_text="Emergency contact information")
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="User profile picture")
     qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
+    position = models.CharField(max_length=100, blank=True, help_text="Job title or position")
+    specialization = models.JSONField(default=list, blank=True, help_text="List of specializations")
+    office_hours = models.CharField(max_length=200, blank=True, help_text="Office hours information")
 
     objects = UserManager()
 

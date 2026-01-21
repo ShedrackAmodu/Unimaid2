@@ -858,6 +858,13 @@
                             <i class="bi bi-people me-2"></i>Staff
                         </a>
                     </li>
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'analytics:dashboard' %}">
+                            <i class="bi bi-bar-chart me-2"></i>Analytics
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
 
@@ -915,6 +922,9 @@
                             {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="/admin/">
                                 <i class="bi bi-gear me-2"></i>Admin Panel
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'analytics:dashboard' %}">
+                                <i class="bi bi-bar-chart me-2"></i>Analytics
                             </a></li>
                             {% endif %}
                             {% if user.is_staff and user.is_staff_approved %}

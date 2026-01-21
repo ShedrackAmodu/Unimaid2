@@ -100,31 +100,51 @@
                                         <div class="card-body p-4 text-center">
                                             <div class="mb-3">
                                                 <div class="profile-image mx-auto" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid var(--gold-accent);">
-                                                      <img src="{% static 'images/librarian.jpg' %}" 
-                                                          alt="Head Librarian" 
-                                                          class="w-100 h-100 img-cover--fixed">
+                                                    {% if head_librarian.profile_picture %}
+                                                    <img src="{{ head_librarian.profile_picture.url }}" 
+                                                         alt="{{ head_librarian.first_name }} {{ head_librarian.last_name }}" 
+                                                         class="w-100 h-100 img-cover--fixed">
+                                                    {% else %}
+                                                    <img src="{% static 'images/librarian.jpg' %}" 
+                                                         alt="Head Librarian" 
+                                                         class="w-100 h-100 img-cover--fixed">
+                                                    {% endif %}
                                                 </div>
                                             </div>
-                                            <h5 class="fw-bold mb-1">Dr. Abubakar Sadiq</h5>
-                                            <p class="text-primary mb-2">Head Librarian</p>
+                                            {% if head_librarian %}
+                                            <h5 class="fw-bold mb-1">{{ head_librarian.first_name }} {{ head_librarian.last_name }}</h5>
+                                            <p class="text-primary mb-2">{{ head_librarian.position|default:"Head Librarian" }}</p>
                                             <p class="small text-muted mb-3">
                                                 Overall administration and strategic direction of the library.
                                             </p>
                                             <div class="contact-info">
                                                 <div class="d-flex align-items-center justify-content-center mb-2">
                                                     <i class="bi bi-envelope me-2 small text-primary"></i>
-                                                    <small>asadiq@unimaid.edu.ng</small>
+                                                    <small>{{ head_librarian.email|default:"Not provided" }}</small>
                                                 </div>
                                                 <div class="d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-telephone me-2 small text-primary"></i>
-                                                    <small>Ext. 101</small>
+                                                    <small>{{ head_librarian.phone|default:"Ext. N/A" }}</small>
                                                 </div>
                                             </div>
                                             <div class="mt-3">
-                                                <button class="btn btn-sm btn-outline-primary view-profile" data-id="1">
+                                                <button class="btn btn-sm btn-outline-primary view-profile" data-id="{{ head_librarian.id }}">
                                                     <i class="bi bi-person me-1"></i> View Profile
                                                 </button>
                                             </div>
+                                            {% else %}
+                                            <h5 class="fw-bold mb-1">Head Librarian</h5>
+                                            <p class="text-primary mb-2">Position Vacant</p>
+                                            <p class="small text-muted mb-3">
+                                                Overall administration and strategic direction of the library.
+                                            </p>
+                                            <div class="contact-info">
+                                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                                    <i class="bi bi-envelope me-2 small text-primary"></i>
+                                                    <small>Contact administration</small>
+                                                </div>
+                                            </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -148,7 +168,7 @@
                                                         <span class="badge bg-primary">{{ department_counts.circulation }} Staff</span>
                                                     </div>
                                                     <div class="mt-2">
-                                                        <small class="text-muted">Head: Ms. Fatima Bello</small>
+                                                        <small class="text-muted">Head: {% if department_heads.circulation %}{{ department_heads.circulation.first_name }} {{ department_heads.circulation.last_name }}{% else %}Vacant{% endif %}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -170,7 +190,7 @@
                                                         <span class="badge bg-success">{{ department_counts.reference }} Staff</span>
                                                     </div>
                                                     <div class="mt-2">
-                                                        <small class="text-muted">Head: Dr. Ibrahim Musa</small>
+                                                        <small class="text-muted">Head: {% if department_heads.reference %}{{ department_heads.reference.first_name }} {{ department_heads.reference.last_name }}{% else %}Vacant{% endif %}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -192,7 +212,7 @@
                                                         <span class="badge bg-warning">{{ department_counts.technical }} Staff</span>
                                                     </div>
                                                     <div class="mt-2">
-                                                        <small class="text-muted">Head: Engr. Chinedu Okoro</small>
+                                                        <small class="text-muted">Head: {% if department_heads.technical %}{{ department_heads.technical.first_name }} {{ department_heads.technical.last_name }}{% else %}Vacant{% endif %}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -214,7 +234,7 @@
                                                         <span class="badge bg-info">{{ department_counts.digital }} Staff</span>
                                                     </div>
                                                     <div class="mt-2">
-                                                        <small class="text-muted">Head: Ms. Aisha Mohammed</small>
+                                                        <small class="text-muted">Head: {% if department_heads.digital %}{{ department_heads.digital.first_name }} {{ department_heads.digital.last_name }}{% else %}Vacant{% endif %}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -236,7 +256,7 @@
                                                         <span class="badge bg-purple">{{ department_counts.special_collections }} Staff</span>
                                                     </div>
                                                     <div class="mt-2">
-                                                        <small class="text-muted">Head: Dr. Samuel Johnson</small>
+                                                        <small class="text-muted">Head: {% if department_heads.special_collections %}{{ department_heads.special_collections.first_name }} {{ department_heads.special_collections.last_name }}{% else %}Vacant{% endif %}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -778,46 +798,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Sample staff data (in real app, this would come from Django context)
-        const staffData = [
-            {
-                id: 1,
-                name: "Dr. Abubakar Sadiq",
-                position: "Head Librarian",
-                department: "Administration",
-                email: "asadiq@unimaid.edu.ng",
-                phone: "Ext. 101",
-                specialization: ["Library Management", "Strategic Planning", "Academic Libraries"],
-                office_hours: "Mon-Fri: 9:00 AM - 5:00 PM",
-                bio: "With over 20 years of experience in library management, Dr. Sadiq leads the strategic direction of Ramat Library.",
-                qualifications: "PhD in Library Science, MLS, PMP"
-            },
-            {
-                id: 2,
-                name: "Ms. Fatima Bello",
-                position: "Circulation Head",
-                department: "Circulation",
-                email: "fbello@unimaid.edu.ng",
-                phone: "Ext. 102",
-                specialization: ["Loan Management", "Customer Service", "Library Systems"],
-                office_hours: "Mon-Fri: 8:00 AM - 4:00 PM",
-                bio: "Manages all circulation operations with 15 years of experience in academic libraries.",
-                qualifications: "MLS, BA English"
-            },
-            {
-                id: 3,
-                name: "Dr. Ibrahim Musa",
-                position: "Reference Librarian",
-                department: "Reference",
-                email: "imusac@unimaid.edu.ng",
-                phone: "Ext. 103",
-                specialization: ["Research Assistance", "Database Management", "Information Literacy"],
-                office_hours: "Mon-Thu: 10:00 AM - 6:00 PM",
-                bio: "Specializes in research support and information literacy instruction.",
-                qualifications: "PhD Information Science, MLS"
-            }
-            // Add more staff data as needed
-        ];
+        // Staff data cache
+        let staffData = {};
+        let staffDataLoaded = false;
         
         // Initialize card indices for animation
         document.querySelectorAll('.staff-card').forEach((card, index) => {
@@ -933,13 +916,63 @@
             });
         }
         
+        // Load staff data from API
+        async function loadStaffData() {
+            if (staffDataLoaded) return;
+
+            try {
+                const response = await fetch('/api/library-users/?membership_type=staff');
+                if (response.ok) {
+                    const data = await response.json();
+                    // Convert array to object keyed by id
+                    staffData = {};
+                    data.results.forEach(staff => {
+                        staffData[staff.id] = staff;
+                    });
+                    staffDataLoaded = true;
+                }
+            } catch (error) {
+                console.error('Failed to load staff data:', error);
+            }
+        }
+
         // Show staff profile
-        function showStaffProfile(staffId) {
-            const staff = staffData.find(s => s.id == staffId) || staffData[0];
+        async function showStaffProfile(staffId) {
             const modal = new bootstrap.Modal(document.getElementById('staffProfileModal'));
-            
-            // Load profile content
             const profileContent = document.querySelector('.profile-content');
+
+            // Show loading state
+            profileContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading staff profile...</p>
+                </div>
+            `;
+
+            // Load data if not loaded
+            await loadStaffData();
+
+            const staff = staffData[staffId];
+            if (!staff) {
+                profileContent.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+                        <h4 class="text-muted mb-3">Staff member not found</h4>
+                        <p class="text-muted">Unable to load profile information.</p>
+                    </div>
+                `;
+                modal.show();
+                return;
+            }
+
+            // Format specializations
+            const specializationHtml = staff.specialization && staff.specialization.length > 0
+                ? staff.specialization.map(spec => `<span class="badge bg-primary px-3 py-2">${spec}</span>`).join('')
+                : '<span class="text-muted">Not specified</span>';
+
+            // Load profile content
             profileContent.innerHTML = `
                 <div class="row g-0">
                     <!-- Left Column: Profile Info -->
@@ -947,64 +980,64 @@
                         <div class="text-center text-white">
                             <div class="mb-4">
                                 <div class="profile-image-modal mx-auto" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 5px solid rgba(255, 255, 255, 0.3);">
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255, 255, 255, 0.1);">
-                                        <span class="display-2 fw-bold">
-                                            ${staff.name.split(' ').map(n => n[0]).join('')}
-                                        </span>
-                                    </div>
+                                    ${staff.profile_picture ? `
+                                        <img src="${staff.profile_picture}" alt="${staff.first_name} ${staff.last_name}"
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    ` : `
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255, 255, 255, 0.1);">
+                                            <span class="display-2 fw-bold">
+                                                ${staff.first_name.charAt(0)}${staff.last_name.charAt(0)}
+                                            </span>
+                                        </div>
+                                    `}
                                 </div>
                             </div>
-                            <h3 class="fw-bold mb-2">${staff.name}</h3>
-                            <h5 class="mb-4 opacity-75">${staff.position}</h5>
-                            
+                            <h3 class="fw-bold mb-2">${staff.first_name} ${staff.last_name}</h3>
+                            <h5 class="mb-4 opacity-75">${staff.position || 'Library Staff'}</h5>
+
                             <div class="department-badge mb-4">
-                                <span class="badge bg-white text-dark px-3 py-2 fs-6">${staff.department}</span>
+                                <span class="badge bg-white text-dark px-3 py-2 fs-6">${staff.department || 'Library'}</span>
                             </div>
-                            
+
                             <div class="contact-details">
                                 <div class="d-flex align-items-center justify-content-center mb-3">
                                     <i class="bi bi-envelope me-3 fs-5"></i>
-                                    <span>${staff.email}</span>
+                                    <span>${staff.email || 'Not provided'}</span>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-center mb-3">
                                     <i class="bi bi-telephone me-3 fs-5"></i>
-                                    <span>${staff.phone}</span>
+                                    <span>${staff.phone || 'Ext. N/A'}</span>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-clock me-3 fs-5"></i>
-                                    <span>${staff.office_hours}</span>
-                                </div>
+                                ${staff.office_hours ? `
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-clock me-3 fs-5"></i>
+                                        <span>${staff.office_hours}</span>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Right Column: Detailed Info -->
                     <div class="col-lg-7 p-4">
                         <div class="mb-4">
                             <h5 class="fw-bold mb-3">
                                 <i class="bi bi-person-badge me-2"></i>About
                             </h5>
-                            <p class="text-muted">${staff.bio}</p>
+                            <p class="text-muted">Staff member information for ${staff.first_name} ${staff.last_name}.</p>
                         </div>
-                        
-                        <div class="mb-4">
-                            <h5 class="fw-bold mb-3">
-                                <i class="bi bi-mortarboard me-2"></i>Qualifications
-                            </h5>
-                            <p class="text-muted">${staff.qualifications}</p>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h5 class="fw-bold mb-3">
-                                <i class="bi bi-stars me-2"></i>Specializations
-                            </h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                ${staff.specialization.map(spec => `
-                                    <span class="badge bg-primary px-3 py-2">${spec}</span>
-                                `).join('')}
+
+                        ${staff.specialization && staff.specialization.length > 0 ? `
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-stars me-2"></i>Specializations
+                                </h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${specializationHtml}
+                                </div>
                             </div>
-                        </div>
-                        
+                        ` : ''}
+
                         <div class="mt-4 pt-3 border-top">
                             <div class="row g-2">
                                 <div class="col-6">
@@ -1022,10 +1055,10 @@
                     </div>
                 </div>
             `;
-            
+
             // Update modal title
-            document.getElementById('profileModalTitle').textContent = `${staff.name}'s Profile`;
-            
+            document.getElementById('profileModalTitle').textContent = `${staff.first_name} ${staff.last_name}'s Profile`;
+
             // Show modal
             modal.show();
         }

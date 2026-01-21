@@ -22,10 +22,12 @@ from apps.accounts.views import home_view
 urlpatterns = [
     path("", home_view, name="home"),
     path("admin/", admin.site.urls),
+    path("api/", include("config.api_urls")),
     path("accounts/", include("apps.accounts.urls")),
     path("catalog/", include("apps.catalog.urls")),
     path("circulation/", include("apps.circulation.urls")),
     path("repository/", include("apps.repository.urls")),
+    path("analytics/", include("apps.analytics.urls")),
     path("blog/", include("apps.blog.urls")),
     path("events/", include("apps.events.urls")),
 ]

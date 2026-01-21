@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Event Analytics - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Analytics</a></li>
+<li class="breadcrumb-item active" aria-current="page">Event Analytics</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-search fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Event Analytics</h1>
+                <p class="lead text-muted">Detailed tracking of user activities and system events</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-funnel me-2"></i>Filters & Search
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Event Type</label>
+                        <select name="event_type" class="form-select">
+                            <option value="">All Event Types</option>
+                            {% for value, label in event_choices %}
+                            <option value="{{ value }}" {% if selected_event_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Time Range</label>
+                        <select name="days" class="form-select">
+                            <option value="1" {% if days == 1 %}selected{% endif %}>Last 24 hours</option>
+                            <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+                            <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+                            <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">User</label>
+                        <select name="user" class="form-select">
+                            <option value="">All Users</option>
+                            {% for user in active_users %}
+                            <option value="{{ user.id }}" {% if selected_user == user.id|stringformat:"s" %}selected{% endif %}>
+                                {{ user.get_full_name|default:user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-search me-1"></i>Filter
+                            </button>
+                            <a href="{% url 'analytics:event_analytics' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg text-center h-100">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-primary mb-2">{{ events|length }}</div>
+                <h6 class="text-muted mb-0">Total Events</h6>
+                <small class="text-muted">In selected period</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg text-center h-100">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-success mb-2">{{ events|length|div:events.paginator.num_pages|floatformat:0 }}</div>
+                <h6 class="text-muted mb-0">Avg per Day</h6>
+                <small class="text-muted">Last {{ days }} days</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg text-center h-100">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-info mb-2">{{ active_users|length }}</div>
+                <h6 class="text-muted mb-0">Active Users</h6>
+                <small class="text-muted">With events</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-lg text-center h-100">
+            <div class="card-body">
+                {% with event_types=events|groupby:"event_type" %}
+                <div class="display-4 fw-bold text-warning mb-2">{{ event_types|length }}</div>
+                {% endwith %}
+                <h6 class="text-muted mb-0">Event Types</h6>
+                <small class="text-muted">Categories</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-table me-2"></i>Event Details
+                    </h3>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="exportEvents()">
+                            <i class="bi bi-download me-1"></i>Export
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshEvents()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Time</th>
+                                <th>Event Type</th>
+                                <th>User</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ event.created_at|date:"M j, g:i A" }}</span>
+                                        <small class="text-muted">{{ event.created_at|timesince }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if event.event_type == 'login' %}success{% elif event.event_type == 'logout' %}secondary{% elif event.event_type == 'search' %}info{% elif event.event_type == 'checkout' %}primary{% elif event.event_type == 'return' %}success{% elif event.event_type == 'download' %}warning{% else %}light text-dark{% endif %}">
+                                        {{ event.get_event_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if event.user %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                                                    <i class="bi bi-person text-primary"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ event.user.get_full_name|default:event.user.username }}</div>
+                                                <small class="text-muted">{{ event.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Anonymous</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="event-details">
+                                        {% if event.book %}
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-book me-2 text-primary"></i>
+                                                <div>
+                                                    <div class="fw-bold">{{ event.book.title|truncatechars:30 }}</div>
+                                                    <small class="text-muted">Book</small>
+                                                </div>
+                                            </div>
+                                        {% elif event.document %}
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-earmark-text me-2 text-success"></i>
+                                                <div>
+                                                    <div class="fw-bold">{{ event.document.title|truncatechars:30 }}</div>
+                                                    <small class="text-muted">Document</small>
+                                                </div>
+                                            </div>
+                                        {% elif event.search_query %}
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-search me-2 text-info"></i>
+                                                <div>
+                                                    <div class="fw-bold">Search: "{{ event.search_query|truncatechars:30 }}"</div>
+                                                    <small class="text-muted">Query</small>
+                                                </div>
+                                            </div>
+                                        {% elif event.page_url %}
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-globe me-2 text-secondary"></i>
+                                                <div>
+                                                    <div class="fw-bold">{{ event.page_url|truncatechars:30 }}</div>
+                                                    <small class="text-muted">Page View</small>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <code class="small">{{ event.ip_address|default:"-" }}</code>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewEventDetails({{ event.id }})">
+                                        <i class="bi bi-eye me-1"></i>Details
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-search fs-1 mb-3"></i>
+                                        <h5 class="mb-2">No events found</h5>
+                                        <p class="mb-0">Try adjusting your filters or check back later</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if events.has_other_pages %}
+                <nav aria-label="Event pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if events.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% querystring %}page={{ events.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in events.paginator.page_range %}
+                        {% if events.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?{% querystring %}page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% elif num > events.number|add:'-3' and num < events.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% querystring %}page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if events.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% querystring %}page={{ events.next_page_number }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="eventDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <div class="btn-group">
+                        <a href="{% url 'analytics:reports' %}" class="btn btn-primary">
+                            <i class="bi bi-file-earmark-bar-graph me-2"></i>Generate Report
+                        </a>
+                        <a href="{% url 'analytics:settings' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-gear me-2"></i>Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function viewEventDetails(eventId) {
+        // In production, make AJAX call to get event details
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+        const content = document.getElementById('eventDetailsContent');
+
+        // Sample content - replace with actual AJAX call
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="fw-bold">Basic Information</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>Event ID:</strong></td><td>${eventId}</td></tr>
+                        <tr><td><strong>Timestamp:</strong></td><td>2024-01-16 15:30:00</td></tr>
+                        <tr><td><strong>Event Type:</strong></td><td>Page View</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold">Additional Data</h6>
+                    <div class="bg-light p-3 rounded">
+                        <pre class="mb-0 small">{
+  "user_agent": "Mozilla/5.0...",
+  "referrer": "https://library.com/dashboard",
+  "session_id": "abc123def456",
+  "metadata": {}
+}</pre>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.show();
+    }
+
+    function exportEvents() {
+        // In production, implement proper export
+        showToast('Event data export feature coming soon!', 'info');
+    }
+
+    function refreshEvents() {
+        const btn = document.querySelector('button[onclick="refreshEvents()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Refreshing...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1060';
+
+        const bgClass = type === 'success' ? 'text-bg-success' :
+                       type === 'warning' ? 'text-bg-warning' :
+                       type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+
+        toastContainer.innerHTML = `
+            <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(toastContainer);
+
+        const toastEl = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastContainer.remove();
+        });
+    }
+
+    // Add querystring template tag functionality
+    // This is a simple implementation - in production you might want a proper template tag
+    function getQueryString() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const params = [];
+        for (const [key, value] of urlParams) {
+            if (key !== 'page') { // Exclude page for pagination links
+                params.push(`${key}=${encodeURIComponent(value)}`);
+            }
+        }
+        return params.join('&');
+    }
+
+    // Update pagination links to include filters
+    document.addEventListener('DOMContentLoaded', function() {
+        const paginationLinks = document.querySelectorAll('.pagination .page-link');
+        const queryString = getQueryString();
+
+        if (queryString) {
+            paginationLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !href.includes('?')) {
+                    link.setAttribute('href', href + '?' + queryString);
+                } else if (href && href.includes('?')) {
+                    link.setAttribute('href', href + '&' + queryString);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .event-details {
+        max-width: 300px;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .modal-body pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        overflow-x: auto;
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .event-details {
+            max-width: 200px;
+        }
+    }
+</style>
+{% endblock %}

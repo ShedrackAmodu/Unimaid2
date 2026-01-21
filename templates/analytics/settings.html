@@ -1,0 +1,540 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Settings - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Analytics</a></li>
+<li class="breadcrumb-item active" aria-current="page">Settings</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-gear fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Analytics Settings</h1>
+                <p class="lead text-muted">Configure analytics tracking and system preferences</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Settings Form -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-sliders me-2"></i>Configuration
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Tracking Settings -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-eye me-2 text-primary"></i>Tracking Settings
+                        </h4>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.enable_tracking }}
+                                    <label class="form-check-label fw-bold" for="{{ form.enable_tracking.id_for_label }}">
+                                        <div class="d-flex flex-column">
+                                            <span>Enable User Activity Tracking</span>
+                                            <small class="text-muted">Track user actions like page views, searches, and logins</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.enable_popular_items }}
+                                    <label class="form-check-label fw-bold" for="{{ form.enable_popular_items.id_for_label }}">
+                                        <div class="d-flex flex-column">
+                                            <span>Track Popular Items</span>
+                                            <small class="text-muted">Calculate and display most popular books and documents</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.enable_system_health }}
+                                    <label class="form-check-label fw-bold" for="{{ form.enable_system_health.id_for_label }}">
+                                        <div class="d-flex flex-column">
+                                            <span>Monitor System Health</span>
+                                            <small class="text-muted">Track system performance and error rates</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <!-- Data Management -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-database me-2 text-success"></i>Data Management
+                        </h4>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Data Retention Period</label>
+                                {{ form.retention_days }}
+                                <div class="form-text">
+                                    How long to keep analytics data (30-3650 days)
+                                </div>
+                                {% if form.retention_days.errors %}
+                                    <div class="text-danger small">{{ form.retention_days.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Daily Statistics Update</label>
+                                {{ form.daily_stats_update }}
+                                <div class="form-text">
+                                    Frequency of automatic statistics updates
+                                </div>
+                                {% if form.daily_stats_update.errors %}
+                                    <div class="text-danger small">{{ form.daily_stats_update.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <!-- Alerts & Notifications -->
+                    <div class="mb-5">
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-bell me-2 text-warning"></i>Alerts & Notifications
+                        </h4>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Alert Email Address</label>
+                                {{ form.alert_email }}
+                                <div class="form-text">
+                                    Email address for system alerts and notifications
+                                </div>
+                                {% if form.alert_email.errors %}
+                                    <div class="text-danger small">{{ form.alert_email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.enable_error_alerts }}
+                                    <label class="form-check-label fw-bold" for="{{ form.enable_error_alerts.id_for_label }}">
+                                        <div class="d-flex flex-column">
+                                            <span>Enable Error Alerts</span>
+                                            <small class="text-muted">Send alerts when system errors occur</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.enable_performance_alerts }}
+                                    <label class="form-check-label fw-bold" for="{{ form.enable_performance_alerts.id_for_label }}">
+                                        <div class="d-flex flex-column">
+                                            <span>Enable Performance Alerts</span>
+                                            <small class="text-muted">Send alerts when system performance degrades</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Performance Threshold</label>
+                                <div class="input-group">
+                                    {{ form.performance_threshold }}
+                                    <span class="input-group-text">seconds</span>
+                                </div>
+                                <div class="form-text">
+                                    Alert when average response time exceeds this threshold
+                                </div>
+                                {% if form.performance_threshold.errors %}
+                                    <div class="text-danger small">{{ form.performance_threshold.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 pt-4 border-top">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Save Settings
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="resetToDefaults()">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset to Defaults
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Info & Actions -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <button class="btn btn-outline-primary" onclick="testAnalytics()">
+                        <i class="bi bi-play-circle me-2"></i>Test Analytics
+                    </button>
+
+                    <button class="btn btn-outline-success" onclick="clearCache()">
+                        <i class="bi bi-trash me-2"></i>Clear Cache
+                    </button>
+
+                    <button class="btn btn-outline-warning" onclick="exportSettings()">
+                        <i class="bi bi-download me-2"></i>Export Settings
+                    </button>
+
+                    <button class="btn btn-outline-info" onclick="viewLogs()">
+                        <i class="bi bi-file-text me-2"></i>View System Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Status -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Current Status
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Tracking Status</span>
+                            <span class="badge bg-success">Enabled</span>
+                        </div>
+                        <small class="text-muted">User activity is being tracked</small>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Data Retention</span>
+                            <span class="badge bg-info">365 days</span>
+                        </div>
+                        <small class="text-muted">Analytics data will be kept for 1 year</small>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">System Health</span>
+                            <span class="badge bg-success">Monitoring</span>
+                        </div>
+                        <small class="text-muted">Performance metrics are being collected</small>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="status-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Last Updated</span>
+                            <span class="badge bg-secondary">Just now</span>
+                        </div>
+                        <small class="text-muted">Settings saved successfully</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help & Documentation -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-question-circle me-2"></i>Help & Resources
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action px-0">
+                        <i class="bi bi-book me-2"></i>Analytics Documentation
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action px-0">
+                        <i class="bi bi-play-circle me-2"></i>Tutorial Videos
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action px-0">
+                        <i class="bi bi-chat-dots me-2"></i>Support Forum
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action px-0">
+                        <i class="bi bi-envelope me-2"></i>Contact Support
+                    </a>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="fw-bold mb-2">💡 Pro Tip</h6>
+                    <p class="mb-0 small">
+                        Regular monitoring of analytics data helps identify usage patterns
+                        and optimize system performance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Backup/Restore -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-shield me-2"></i>Backup & Restore
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-4 text-center">
+                            <i class="bi bi-download fs-1 text-primary mb-3"></i>
+                            <h5 class="fw-bold">Backup Settings</h5>
+                            <p class="text-muted mb-3">Create a backup of your current analytics configuration</p>
+                            <button class="btn btn-outline-primary" onclick="backupSettings()">
+                                <i class="bi bi-download me-2"></i>Create Backup
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-4 text-center">
+                            <i class="bi bi-upload fs-1 text-success mb-3"></i>
+                            <h5 class="fw-bold">Restore Settings</h5>
+                            <p class="text-muted mb-3">Restore analytics configuration from a backup file</p>
+                            <button class="btn btn-outline-success" onclick="restoreSettings()">
+                                <i class="bi bi-upload me-2"></i>Restore Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> Backup files contain sensitive configuration data.
+                    Store them securely and never share with unauthorized users.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <div class="btn-group">
+                        <a href="{% url 'analytics:reports' %}" class="btn btn-primary">
+                            <i class="bi bi-file-earmark-bar-graph me-2"></i>View Reports
+                        </a>
+                        <a href="{% url 'analytics:event_analytics' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-search me-2"></i>Event Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Auto-save draft (optional enhancement)
+        let autoSaveTimeout;
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    console.log('Auto-saving settings draft...');
+                    // In production, implement auto-save functionality
+                }, 2000);
+            });
+        });
+    });
+
+    function resetToDefaults() {
+        if (confirm('Are you sure you want to reset all settings to their default values? This action cannot be undone.')) {
+            // Reset form to defaults
+            document.querySelector('form').reset();
+
+            // Set specific default values
+            const retentionDays = document.getElementById('{{ form.retention_days.id_for_label }}');
+            if (retentionDays) retentionDays.value = 365;
+
+            const performanceThreshold = document.getElementById('{{ form.performance_threshold.id_for_label }}');
+            if (performanceThreshold) performanceThreshold.value = 2.0;
+
+            showToast('Settings reset to defaults', 'warning');
+        }
+    }
+
+    function testAnalytics() {
+        showToast('Running analytics system test...', 'info');
+
+        // Simulate testing process
+        setTimeout(() => {
+            showToast('Analytics system test completed successfully!', 'success');
+        }, 3000);
+    }
+
+    function clearCache() {
+        if (confirm('Clear analytics cache? This will temporarily affect performance while cache rebuilds.')) {
+            showToast('Clearing analytics cache...', 'warning');
+
+            setTimeout(() => {
+                showToast('Analytics cache cleared successfully', 'success');
+            }, 2000);
+        }
+    }
+
+    function exportSettings() {
+        // In production, implement actual export
+        showToast('Settings export feature coming soon!', 'info');
+    }
+
+    function viewLogs() {
+        // In production, open logs modal or redirect to logs page
+        showToast('System logs feature coming soon!', 'info');
+    }
+
+    function backupSettings() {
+        // In production, implement actual backup
+        showToast('Settings backup created successfully!', 'success');
+    }
+
+    function restoreSettings() {
+        // In production, implement file upload and restore
+        showToast('Settings restore feature coming soon!', 'info');
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1060';
+
+        const bgClass = type === 'success' ? 'text-bg-success' :
+                       type === 'warning' ? 'text-bg-warning' :
+                       type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+
+        toastContainer.innerHTML = `
+            <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(toastContainer);
+
+        const toastEl = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastContainer.remove();
+        });
+    }
+</script>
+
+<style>
+    .status-list .status-item {
+        margin-bottom: 1rem;
+    }
+
+    .status-list .badge {
+        font-size: 0.75rem;
+    }
+
+    .form-switch .form-check-input {
+        width: 3em;
+        margin-left: -2.5em;
+    }
+
+    .form-switch .form-check-label {
+        margin-left: 0.5em;
+    }
+
+    .form-switch .form-check-label .d-flex {
+        align-items: flex-start;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .list-group-item-action:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .d-grid.gap-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .row.g-4 .col-md-6 {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}

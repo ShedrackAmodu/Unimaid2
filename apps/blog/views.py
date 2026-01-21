@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.generic import ListView, DetailView
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.db.models.functions import TruncMonth
 from .models import BlogPost
 from .forms import BlogPostForm
 
@@ -31,6 +32,18 @@ class BlogPostListView(ListView):
         context = super().get_context_data(**kwargs)
         # Add staff check to context
         context['user_is_staff'] = self.request.user.is_staff
+
+        # Add archive entries (published posts grouped by month)
+        archive_entries = BlogPost.objects.filter(
+            status='published',
+            published_date__isnull=False
+        ).annotate(
+            month=TruncMonth('published_date')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('-month')[:12]  # Last 12 months
+
+        context['archive_entries'] = archive_entries
         return context
 
 

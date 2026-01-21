@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 # Third-party apps
     "import_export",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
 # Custom apps
     "apps.accounts",
     "apps.catalog",
@@ -47,6 +50,7 @@ INSTALLED_APPS = [
     "apps.repository",
     "apps.blog",
     "apps.events",
+    "apps.analytics",
 ]
 
 # Custom user model
@@ -54,6 +58,7 @@ AUTH_USER_MODEL = "accounts.LibraryUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -184,3 +189,37 @@ IMPORT_EXPORT_TMP_STORAGE_CLASS = 'import_export.tmp_storages.CacheStorage'
 
 # Increase import batch size for better performance with large datasets
 IMPORT_EXPORT_CHUNK_SIZE = 100  # Process 100 records at a time
+
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+    },
+}
+
+# CORS configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://unimaidlibrary.pythonanywhere.com",
+]
+
+CORS_ALLOW_CREDENTIALS = True

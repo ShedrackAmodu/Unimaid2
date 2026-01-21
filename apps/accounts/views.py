@@ -909,6 +909,42 @@ class StaffDirectoryView(ListView):
             'special_collections': dept_counts_dict.get('Special Collections', 0),
         }
 
+        # Get organizational leaders
+        context['head_librarian'] = LibraryUser.objects.filter(
+            membership_type__in=['faculty', 'staff'],
+            position__icontains='head librarian'
+        ).first()
+
+        # Get department heads
+        department_heads = {}
+        department_mappings = {
+            'circulation': ['circulation', 'loan'],
+            'reference': ['reference', 'research'],
+            'technical': ['technical', 'systems', 'catalog'],
+            'digital': ['digital', 'electronic', 'repository'],
+            'special_collections': ['special collections', 'archives']
+        }
+
+        for dept_key, keywords in department_mappings.items():
+            head = None
+            for keyword in keywords:
+                head = LibraryUser.objects.filter(
+                    membership_type__in=['faculty', 'staff'],
+                    department__iexact=dept_key.title(),
+                    position__icontains=keyword
+                ).first()
+                if head:
+                    break
+            if not head:
+                # Fallback: get any staff member from this department
+                head = LibraryUser.objects.filter(
+                    membership_type__in=['faculty', 'staff'],
+                    department__iexact=dept_key.title()
+                ).first()
+            department_heads[dept_key] = head
+
+        context['department_heads'] = department_heads
+
         return context
 
 

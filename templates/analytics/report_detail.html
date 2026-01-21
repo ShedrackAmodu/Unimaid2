@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Report - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Analytics</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:reports' %}">Reports</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ report_type|title }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-file-earmark-bar-graph fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">{{ report_data.title }}</h1>
+                <p class="lead text-muted">{{ report_data.period }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Report Header -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold mb-1">{{ report_data.title }}</h3>
+                        <p class="text-muted mb-0">Generated on {% now "F j, Y, g:i a" %}</p>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i>Print
+                        </button>
+                        <button class="btn btn-success" onclick="exportReport()">
+                            <i class="bi bi-download me-2"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="fw-bold text-primary">{{ report_data.total_loans|default:0 }}</h4>
+                            <small class="text-muted">Total Loans</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="fw-bold text-success">{{ report_data.active_loans|default:0 }}</h4>
+                            <small class="text-muted">Active Loans</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="fw-bold text-warning">{{ report_data.overdue_loans|default:0 }}</h4>
+                            <small class="text-muted">Overdue</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="fw-bold text-info">{{ report_data.returned_loans|default:0 }}</h4>
+                            <small class="text-muted">Returned</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Report -->
+        {% if report_type == 'user_activity' %}
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-people me-2"></i>User Activity Summary
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Loans</th>
+                                <th>Logins</th>
+                                <th>Membership Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in report_data.users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                                                <i class="bi bi-person text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ user.name }}</h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ user.loans }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ user.logins }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ user.membership_type }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-info-circle fs-1 mb-3"></i>
+                                        <p class="mb-0">No user activity data available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Popular Items Report -->
+        {% if report_type == 'popular_items' %}
+        <!-- Popular Books -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-book me-2"></i>Most Popular Books
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Book Title</th>
+                                <th>Views</th>
+                                <th>Checkouts</th>
+                                <th>Popularity Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in report_data.popular_books %}
+                            <tr>
+                                <td>
+                                    <div class="rank-badge bg-primary text-white">{{ forloop.counter }}</div>
+                                </td>
+                                <td>
+                                    <h6 class="fw-bold mb-1">{{ item.title }}</h6>
+                                </td>
+                                <td>{{ item.views }}</td>
+                                <td>{{ item.checkouts }}</td>
+                                <td>
+                                    <span class="fw-bold text-primary">{{ item.score }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-book fs-1 mb-3"></i>
+                                        <p class="mb-0">No popular books data</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Documents -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i>Most Popular Documents
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Document Title</th>
+                                <th>Views</th>
+                                <th>Downloads</th>
+                                <th>Popularity Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in report_data.popular_documents %}
+                            <tr>
+                                <td>
+                                    <div class="rank-badge bg-secondary text-white">{{ forloop.counter }}</div>
+                                </td>
+                                <td>
+                                    <h6 class="fw-bold mb-1">{{ item.title }}</h6>
+                                </td>
+                                <td>{{ item.views }}</td>
+                                <td>{{ item.downloads }}</td>
+                                <td>
+                                    <span class="fw-bold text-primary">{{ item.score }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-file-earmark-text fs-1 mb-3"></i>
+                                        <p class="mb-0">No popular documents data</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Circulation Summary Report -->
+        {% if report_type == 'circulation_summary' %}
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-arrow-left-right me-2"></i>Circulation Statistics
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-journal-plus fs-1 mb-3"></i>
+                                <h3 class="fw-bold mb-1">{{ report_data.total_loans }}</h3>
+                                <p class="mb-0">Total Loans</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-check-circle fs-1 mb-3"></i>
+                                <h3 class="fw-bold mb-1">{{ report_data.active_loans }}</h3>
+                                <p class="mb-0">Active Loans</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-exclamation-triangle fs-1 mb-3"></i>
+                                <h3 class="fw-bold mb-1">{{ report_data.overdue_loans }}</h3>
+                                <p class="mb-0">Overdue</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-arrow-return-left fs-1 mb-3"></i>
+                                <h3 class="fw-bold mb-1">{{ report_data.returned_loans }}</h3>
+                                <p class="mb-0">Returned</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'analytics:reports' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Reports
+                    </a>
+                    <div class="btn-group">
+                        <a href="{% url 'analytics:dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-bar-chart me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function exportReport() {
+        // For now, trigger print dialog. In production, implement proper export
+        window.print();
+    }
+
+    // Auto-print if requested via URL parameter
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('print') === 'true') {
+            setTimeout(() => window.print(), 1000);
+        }
+    });
+</script>
+
+<style>
+    .rank-badge {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    @media print {
+        .btn, .card-header .btn-group {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

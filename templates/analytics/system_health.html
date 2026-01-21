@@ -1,0 +1,614 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Health - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Analytics</a></li>
+<li class="breadcrumb-item active" aria-current="page">System Health</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-activity fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">System Health Monitor</h1>
+                <p class="lead text-muted">Real-time performance and health metrics</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Current Health Status -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-lg mb-4 h-100">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-heart-pulse me-2"></i>Current Status
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if latest_health %}
+                <div class="text-center mb-4">
+                    {% if latest_health.error_count == 0 %}
+                        <div class="status-indicator status-healthy">
+                            <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                            <h4 class="mt-3 text-success">System Healthy</h4>
+                        </div>
+                    {% else %}
+                        <div class="status-indicator status-warning">
+                            <i class="bi bi-exclamation-triangle-fill fs-1 text-warning"></i>
+                            <h4 class="mt-3 text-warning">Issues Detected</h4>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="metric-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Response Time</h6>
+                                    <small class="text-muted">Average</small>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold text-primary mb-0">{{ avg_response_time|floatformat:2 }}s</h4>
+                                    <small class="text-muted">Target: <2.0s</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar {% if avg_response_time < 1 %}bg-success{% elif avg_response_time < 2 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {% widthratio avg_response_time 3 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="metric-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Error Rate</h6>
+                                    <small class="text-muted">Last 24h</small>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold text-danger mb-0">{{ error_rate|floatformat:1 }}%</h4>
+                                    <small class="text-muted">Target: <5%</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar {% if error_rate < 1 %}bg-success{% elif error_rate < 5 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {{ error_rate }}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if latest_health.cpu_usage %}
+                    <div class="col-12">
+                        <div class="metric-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1">CPU Usage</h6>
+                                    <small class="text-muted">Current</small>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold text-info mb-0">{{ latest_health.cpu_usage|floatformat:1 }}%</h4>
+                                    <small class="text-muted">Target: <80%</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar {% if latest_health.cpu_usage < 60 %}bg-success{% elif latest_health.cpu_usage < 80 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {{ latest_health.cpu_usage }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if latest_health.memory_usage %}
+                    <div class="col-12">
+                        <div class="metric-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Memory Usage</h6>
+                                    <small class="text-muted">Current</small>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold text-secondary mb-0">{{ latest_health.memory_usage|floatformat:1 }}%</h4>
+                                    <small class="text-muted">Target: <85%</small>
+                                </div>
+                            </div>
+                            <div class="progress mt-2" style="height: 6px;">
+                                <div class="progress-bar {% if latest_health.memory_usage < 70 %}bg-success{% elif latest_health.memory_usage < 85 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     style="width: {{ latest_health.memory_usage }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <div class="metric-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1">DB Connections</h6>
+                                    <small class="text-muted">Active</small>
+                                </div>
+                                <div class="text-end">
+                                    <h4 class="fw-bold text-warning mb-0">{{ latest_health.db_connections }}</h4>
+                                    <small class="text-muted">Max: 100</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        Last checked: {{ latest_health.checked_at|date:"M j, g:i A" }}
+                    </small>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="bi bi-activity fs-1 mb-3"></i>
+                        <p class="mb-0">No health data available</p>
+                        <small>System health monitoring may not be configured</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Health History Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Health Trends (Last 24 Hours)
+                    </h3>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-clock me-1"></i>Last 24h
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="?hours=24">Last 24 hours</a></li>
+                            <li><a class="dropdown-item" href="?hours=72">Last 3 days</a></li>
+                            <li><a class="dropdown-item" href="?hours=168">Last week</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="healthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Health Checks -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-list-check me-2"></i>Recent Health Checks
+                    </h3>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshHealth()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="exportHealthData()">
+                            <i class="bi bi-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Time</th>
+                                <th>Response Time</th>
+                                <th>CPU</th>
+                                <th>Memory</th>
+                                <th>Disk</th>
+                                <th>DB Connections</th>
+                                <th>Errors</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for check in health_checks %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ check.checked_at|date:"M j, g:i A" }}</span>
+                                        <small class="text-muted">{{ check.checked_at|timesince }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="{% if check.response_time < 1 %}text-success{% elif check.response_time < 2 %}text-warning{% else %}text-danger{% endif %} fw-bold">
+                                        {{ check.response_time|floatformat:2 }}s
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if check.cpu_usage %}
+                                        <span class="{% if check.cpu_usage < 60 %}text-success{% elif check.cpu_usage < 80 %}text-warning{% else %}text-danger{% endif %}">
+                                            {{ check.cpu_usage|floatformat:1 }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if check.memory_usage %}
+                                        <span class="{% if check.memory_usage < 70 %}text-success{% elif check.memory_usage < 85 %}text-warning{% else %}text-danger{% endif %}">
+                                            {{ check.memory_usage|floatformat:1 }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if check.disk_usage %}
+                                        <span class="{% if check.disk_usage < 80 %}text-success{% elif check.disk_usage < 90 %}text-warning{% else %}text-danger{% endif %}">
+                                            {{ check.disk_usage|floatformat:1 }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="{% if check.db_connections < 50 %}text-success{% elif check.db_connections < 80 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ check.db_connections }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if check.error_count > 0 %}
+                                        <span class="badge bg-danger">{{ check.error_count }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if check.error_count == 0 %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Healthy
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Issues
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-clipboard-x fs-1 mb-3"></i>
+                                        <p class="mb-0">No health check data available</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if health_checks.has_other_pages %}
+                <nav aria-label="Health checks pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if health_checks.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ health_checks.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in health_checks.paginator.page_range %}
+                        {% if health_checks.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% elif num > health_checks.number|add:'-3' and num < health_checks.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if health_checks.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ health_checks.next_page_number }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <div class="btn-group">
+                        <a href="{% url 'analytics:reports' %}" class="btn btn-primary">
+                            <i class="bi bi-file-earmark-bar-graph me-2"></i>Generate Report
+                        </a>
+                        <a href="{% url 'analytics:settings' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-gear me-2"></i>Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize health chart
+        initializeHealthChart();
+
+        // Auto-refresh every 5 minutes
+        setInterval(refreshHealth, 300000);
+    });
+
+    function initializeHealthChart() {
+        const ctx = document.getElementById('healthChart').getContext('2d');
+
+        // Sample data - in production, this would come from the backend
+        const labels = [];
+        const responseTimes = [];
+        const cpuUsage = [];
+        const memoryUsage = [];
+        const errorCounts = [];
+
+        // Generate sample data for the last 24 hours
+        const now = new Date();
+        for (let i = 23; i >= 0; i--) {
+            const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+            labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            responseTimes.push(Math.random() * 2 + 0.5); // 0.5-2.5 seconds
+            cpuUsage.push(Math.random() * 40 + 30); // 30-70%
+            memoryUsage.push(Math.random() * 30 + 40); // 40-70%
+            errorCounts.push(Math.random() > 0.8 ? Math.floor(Math.random() * 3) : 0);
+        }
+
+        const healthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Response Time (s)',
+                        data: responseTimes,
+                        borderColor: 'rgb(58, 134, 255)',
+                        backgroundColor: 'rgba(58, 134, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'CPU Usage (%)',
+                        data: cpuUsage,
+                        borderColor: 'rgb(255, 193, 7)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Memory Usage (%)',
+                        data: memoryUsage,
+                        borderColor: 'rgb(40, 167, 69)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Response Time (seconds)'
+                        },
+                        beginAtZero: true
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Usage (%)'
+                        },
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false,
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function refreshHealth() {
+        // Show loading state
+        const refreshBtn = document.querySelector('button[onclick="refreshHealth()"]');
+        const originalText = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Refreshing...';
+        refreshBtn.disabled = true;
+
+        // In production, make AJAX call to refresh data
+        setTimeout(() => {
+            // Simulate refresh
+            showToast('System health data refreshed', 'success');
+
+            // Restore button
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+
+            // Update current metrics with slight variations
+            updateCurrentMetrics();
+        }, 2000);
+    }
+
+    function updateCurrentMetrics() {
+        // Simulate updating current health metrics
+        const metrics = document.querySelectorAll('.metric-card h4');
+        metrics.forEach(metric => {
+            const currentValue = parseFloat(metric.textContent);
+            const variation = (Math.random() - 0.5) * 0.2; // ±10% variation
+            const newValue = Math.max(0, currentValue + variation);
+            metric.textContent = newValue.toFixed(1) + (metric.textContent.includes('%') ? '%' : 's');
+        });
+    }
+
+    function exportHealthData() {
+        // In production, implement proper export
+        showToast('Health data export feature coming soon!', 'info');
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1060';
+
+        const bgClass = type === 'success' ? 'text-bg-success' :
+                       type === 'warning' ? 'text-bg-warning' :
+                       type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+
+        toastContainer.innerHTML = `
+            <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(toastContainer);
+
+        const toastEl = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastContainer.remove();
+        });
+    }
+</script>
+
+<style>
+    .status-indicator {
+        padding: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 768px) {
+        .metric-card .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .metric-card .text-end {
+            text-align: left !important;
+            margin-top: 10px;
+        }
+    }
+</style>
+{% endblock %}

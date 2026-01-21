@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Reports - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Analytics</a></li>
+<li class="breadcrumb-item active" aria-current="page">Reports</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-file-earmark-bar-graph fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Analytics Reports</h1>
+                <p class="lead text-muted">Generate and download detailed analytics reports</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Report Generation Form -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-gear me-2"></i>Generate Report
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="reportForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Report Type</label>
+                            {{ report_form.report_type }}
+                            {% if report_form.report_type.errors %}
+                                <div class="text-danger small">{{ report_form.report_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Export Format</label>
+                            {{ report_form.format }}
+                            {% if report_form.format.errors %}
+                                <div class="text-danger small">{{ report_form.format.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Start Date</label>
+                            {{ date_form.start_date }}
+                            {% if date_form.start_date.errors %}
+                                <div class="text-danger small">{{ date_form.start_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">End Date</label>
+                            {{ date_form.end_date }}
+                            {% if date_form.end_date.errors %}
+                                <div class="text-danger small">{{ date_form.end_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ report_form.include_charts }}
+                                <label class="form-check-label fw-bold" for="{{ report_form.include_charts.id_for_label }}">
+                                    Include Charts and Visualizations
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ report_form.include_raw_data }}
+                                <label class="form-check-label fw-bold" for="{{ report_form.include_raw_data.id_for_label }}">
+                                    Include Raw Data Tables
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ report_form.email_report }}
+                                <label class="form-check-label fw-bold" for="{{ report_form.email_report.id_for_label }}">
+                                    Email Report When Generated
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="emailRecipientsGroup" style="display: none;">
+                            <label class="form-label fw-bold">Email Recipients</label>
+                            {{ report_form.email_recipients }}
+                            {% if report_form.email_recipients.errors %}
+                                <div class="text-danger small">{{ report_form.email_recipients.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">Comma-separated email addresses</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Generate Report
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg ms-2" onclick="resetForm()">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Report Templates -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i>Quick Reports
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <button class="btn btn-outline-primary text-start p-3 h-auto" onclick="quickReport('user_activity')">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-people fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">User Activity Report</div>
+                                <small class="text-muted">User engagement and activity patterns</small>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button class="btn btn-outline-success text-start p-3 h-auto" onclick="quickReport('circulation_summary')">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-arrow-left-right fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Circulation Summary</div>
+                                <small class="text-muted">Loan and return statistics</small>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button class="btn btn-outline-info text-start p-3 h-auto" onclick="quickReport('popular_items')">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-star fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Popular Items</div>
+                                <small class="text-muted">Most borrowed books and documents</small>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button class="btn btn-outline-warning text-start p-3 h-auto" onclick="quickReport('system_usage')">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-activity fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">System Usage</div>
+                                <small class="text-muted">Platform usage analytics</small>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reports -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <h3 class="fw-bold mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Recent Reports
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <!-- Sample recent reports -->
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">User Activity Report</h6>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                            <p class="mb-1">Generated for last 30 days</p>
+                            <small class="text-muted">PDF format • 245 KB</small>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">Circulation Summary</h6>
+                                <small class="text-muted">1 day ago</small>
+                            </div>
+                            <p class="mb-1">Monthly circulation data</p>
+                            <small class="text-muted">Excel format • 180 KB</small>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-1">Popular Items</h6>
+                                <small class="text-muted">3 days ago</small>
+                            </div>
+                            <p class="mb-1">Top 50 most popular items</p>
+                            <small class="text-muted">HTML format • 95 KB</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-folder me-2"></i>View All Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Preview Section (shown when generating HTML reports) -->
+<div id="reportPreview" class="row mt-4" style="display: none;">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-eye me-2"></i>Report Preview
+                    </h3>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="printReport()">
+                            <i class="bi bi-printer me-1"></i>Print
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="downloadReport()">
+                            <i class="bi bi-download me-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="reportContent">
+                <!-- Report content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Email report toggle
+        const emailReportCheckbox = document.getElementById('{{ report_form.email_report.id_for_label }}');
+        const emailRecipientsGroup = document.getElementById('emailRecipientsGroup');
+
+        if (emailReportCheckbox) {
+            emailReportCheckbox.addEventListener('change', function() {
+                emailRecipientsGroup.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // Set default dates
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        const startDateInput = document.getElementById('{{ date_form.start_date.id_for_label }}');
+        const endDateInput = document.getElementById('{{ date_form.end_date.id_for_label }}');
+
+        if (startDateInput && !startDateInput.value) {
+            startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+        }
+        if (endDateInput && !endDateInput.value) {
+            endDateInput.value = today.toISOString().split('T')[0];
+        }
+    });
+
+    function quickReport(reportType) {
+        // Set the report type
+        const reportTypeSelect = document.getElementById('{{ report_form.report_type.id_for_label }}');
+        if (reportTypeSelect) {
+            reportTypeSelect.value = reportType;
+        }
+
+        // Set format to HTML for preview
+        const formatSelect = document.getElementById('{{ report_form.format.id_for_label }}');
+        if (formatSelect) {
+            formatSelect.value = 'html';
+        }
+
+        // Submit the form
+        document.getElementById('reportForm').submit();
+    }
+
+    function resetForm() {
+        document.getElementById('reportForm').reset();
+
+        // Reset dates to defaults
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        const startDateInput = document.getElementById('{{ date_form.start_date.id_for_label }}');
+        const endDateInput = document.getElementById('{{ date_form.end_date.id_for_label }}');
+
+        if (startDateInput) {
+            startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+        }
+        if (endDateInput) {
+            endDateInput.value = today.toISOString().split('T')[0];
+        }
+    }
+
+    function printReport() {
+        const printContent = document.getElementById('reportContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Analytics Report - Ramat Library</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .text-center { text-align: center; }
+                    .fw-bold { font-weight: bold; }
+                    .badge { padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+                    .bg-primary { background-color: #0a2472 !important; color: white; }
+                    .bg-success { background-color: #198754 !important; color: white; }
+                    .bg-info { background-color: #0dcaf0 !important; color: black; }
+                    .text-muted { color: #6c757d; }
+                </style>
+            </head>
+            <body>
+                <h2>Ramat Library Analytics Report</h2>
+                <p>Generated on ${new Date().toLocaleString()}</p>
+                <div style="border: 2px solid #0a2472; padding: 20px; border-radius: 10px;">
+                    ${printContent}
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    function downloadReport() {
+        // In a real implementation, this would trigger a download
+        // For now, we'll show a message
+        showToast('Report download feature coming soon!', 'info');
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1060';
+
+        const bgClass = type === 'success' ? 'text-bg-success' :
+                       type === 'warning' ? 'text-bg-warning' :
+                       type === 'danger' ? 'text-bg-danger' : 'text-bg-info';
+
+        toastContainer.innerHTML = `
+            <div class="toast align-items-center ${bgClass} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(toastContainer);
+
+        const toastEl = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastContainer.remove();
+        });
+    }
+</script>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-blue), var(--accent-blue));
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px var(--primary-blue);
+    }
+
+    .timeline-content {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .timeline-content:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+{% endblock %}
