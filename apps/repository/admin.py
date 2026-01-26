@@ -8,6 +8,7 @@ import os
 import uuid
 from .models import Collection, EBook, EBookPermission
 from .forms import BulkUploadForm
+from config.bulk_actions import bulk_update_ebook_access_level
 
 
 @admin.register(Collection)
@@ -21,7 +22,7 @@ class EBookAdmin(admin.ModelAdmin):
     list_display = ['title', 'authors', 'access_level', 'upload_date', 'uploaded_by']
     list_filter = ['access_level', 'upload_date']
     search_fields = ['title', 'authors']
-    actions = ['bulk_upload_ebooks']
+    actions = ['bulk_upload_ebooks', bulk_update_ebook_access_level]
 
     def get_urls(self):
         urls = super().get_urls()

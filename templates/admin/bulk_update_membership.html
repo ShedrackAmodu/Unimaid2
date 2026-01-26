@@ -1,0 +1,14 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_membership_type">{% trans "Membership Type" %}:</label>
+    <select name="membership_type" id="id_membership_type" required>
+        <option value="">{% trans "---------" %}</option>
+        <option value="student">{% trans "Student" %}</option>
+        <option value="staff">{% trans "Staff" %}</option>
+        <option value="faculty">{% trans "Faculty" %}</option>
+        <option value="external">{% trans "External" %}</option>
+    </select>
+    <p class="help">{% trans "Select the membership type to apply to all selected users." %}</p>
+{% endblock %}

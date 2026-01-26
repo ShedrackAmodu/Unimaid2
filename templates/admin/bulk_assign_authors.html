@@ -1,0 +1,12 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_authors">{% trans "Authors" %}:</label>
+    <select name="authors" id="id_authors" multiple size="10" required>
+        {% for author in authors %}
+        <option value="{{ author.id }}">{{ author.name }}</option>
+        {% endfor %}
+    </select>
+    <p class="help">{% trans "Select one or more authors to assign to all selected books." %}</p>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_location">{% trans "Book Location" %}:</label>
+    <input type="text" name="location" id="id_location" required>
+    <p class="help">{% trans "Enter the new location to apply to all selected book copies." %}</p>
+{% endblock %}

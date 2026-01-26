@@ -1,0 +1,131 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module filtered" id="changelist-form">
+    <div class="results">
+        <h2>{{ title }}</h2>
+        <p class="help">{% trans "You have selected the following items for bulk operation:" %}</p>
+        
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        <th>{% trans "Selected" %}</th>
+                        <th>{% trans "Item" %}</th>
+                        <th>{% trans "Details" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in queryset %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>
+                            <input type="checkbox" name="_selected_action" value="{{ obj.pk }}" checked>
+                        </td>
+                        <td>
+                            <strong>{{ obj }}</strong>
+                        </td>
+                        <td>
+                            {% if obj.get_absolute_url %}
+                                <a href="{{ obj.get_absolute_url }}" target="_blank">{% trans "View" %}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="submit-row">
+            <form method="post" id="bulk-action-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{{ action_name }}">
+                <input type="hidden" name="select_across" value="0">
+                <input type="hidden" name="index" value="0">
+                
+                {% for obj in queryset %}
+                <input type="hidden" name="_selected_action" value="{{ obj.pk }}">
+                {% endfor %}
+
+                <div class="form-row">
+                    {% block action_form %}
+                    {% endblock %}
+                </div>
+
+                <div class="submit-row">
+                    <p class="deletelink-box">
+                        <a href="#" onclick="window.history.back(); return false;" class="deletelink">{% trans "Cancel" %}</a>
+                    </p>
+                    <input type="submit" value="{% trans 'Apply' %}" class="default" name="apply">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .module {
+        margin: 20px 0;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .results table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .results th, .results td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+    }
+    
+    .results th {
+        background: #f8f8f8;
+        font-weight: bold;
+    }
+    
+    .submit-row {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .form-row {
+        margin-bottom: 20px;
+    }
+    
+    .deletelink-box {
+        float: left;
+        margin: 0;
+    }
+    
+    .default {
+        float: right;
+        background: #007cba;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .default:hover {
+        background: #005a87;
+    }
+</style>
+{% endblock %}

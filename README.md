@@ -249,7 +249,7 @@ UNIMAID LIBRARY is a modern, Django‑based library management system developed 
 
 ## Version & Metadata
 
-**System**: UNI_made_library v2.0  
+**System**: UNIMAD_library v1.0  
 **Library**: Ramat Library, University of Maiduguri  
 **Abbreviation**: UNIMAID Library  
 **Contact**: ramatlibrary@unimaid.edu.ng  

@@ -12,6 +12,10 @@ from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export.forms import ImportForm
 from .models import Author, Publisher, Faculty, Department, Topic, Genre, Book, BookCopy
 from .forms import AuthorForm, PublisherForm, FacultyForm, DepartmentForm, TopicForm, GenreForm, BookForm, BookCopyForm
+from config.bulk_actions import (
+    bulk_update_book_status, bulk_update_book_condition, bulk_update_book_location,
+    bulk_assign_authors, bulk_assign_topics
+)
 
 
 @admin.register(Author)
@@ -286,7 +290,7 @@ class BookCopyAdmin(admin.ModelAdmin):
     list_display = ['book', 'barcode', 'status', 'condition', 'location', 'acquisition_date']
     list_filter = ['status', 'condition', 'book__faculty', 'book__department']
     search_fields = ['barcode', 'book__title']
-    actions = ['mark_as_available']
+    actions = ['mark_as_available', bulk_update_book_status, bulk_update_book_condition, bulk_update_book_location]
 
 
 

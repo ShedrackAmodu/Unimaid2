@@ -187,6 +187,12 @@ def student_register_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.membership_type = 'student'
+            
+            # Explicitly set staff-specific fields to None to prevent validation issues
+            user.office_hours = None
+            user.position = None
+            user.specialization = None
+            
             user.save()
 
             # Students are active immediately
@@ -1051,18 +1057,51 @@ def profile_view(request):
     if request.method == 'POST':
         form = LibraryUserChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-
-            # Check if this is an AJAX request
+            # Handle profile picture cleanup if a new one is uploaded
+            old_profile_picture = request.user.profile_picture
+            user = form.save()
+            
+            # If a new profile picture was uploaded, delete the old one
+            if old_profile_picture and user.profile_picture != old_profile_picture:
+                try:
+                    old_profile_picture.delete(save=False)
+                except Exception as e:
+                    # Log the error but don't fail the update
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Failed to delete old profile picture for user {user.username}: {e}")
+            
+            # Check if this is an AJAX request (profile picture upload)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Profile picture updated successfully!',
+                    'profile_picture_url': user.profile_picture.url if user.profile_picture else None,
+                    'user_data': {
+                        'full_name': user.get_full_name(),
+                        'username': user.username,
+                        'email': user.email,
+                        'department': user.department or '',
+                        'student_id': user.student_id or '',
+                        'faculty_id': user.faculty_id or '',
+                    }
+                })
             else:
+                messages.success(request, 'Profile updated successfully!')
                 return redirect('accounts:profile')
         else:
             # Handle AJAX request with errors
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': 'Please correct the errors and try again.'})
+                errors = {}
+                for field, error_list in form.errors.items():
+                    errors[field] = [str(error) for error in error_list]
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Please correct the errors and try again.',
+                    'errors': errors
+                })
+            else:
+                messages.error(request, 'Please correct the errors below.')
     else:
         form = LibraryUserChangeForm(instance=request.user)
     return render(request, 'accounts/profile.html', {'form': form})
