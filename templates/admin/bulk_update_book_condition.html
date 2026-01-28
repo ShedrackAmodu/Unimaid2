@@ -1,0 +1,15 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_condition">{% trans "Book Condition" %}:</label>
+    <select name="condition" id="id_condition" required>
+        <option value="">{% trans "---------" %}</option>
+        <option value="new">{% trans "New" %}</option>
+        <option value="good">{% trans "Good" %}</option>
+        <option value="fair">{% trans "Fair" %}</option>
+        <option value="poor">{% trans "Poor" %}</option>
+        <option value="damaged">{% trans "Damaged" %}</option>
+    </select>
+    <p class="help">{% trans "Select the condition to apply to all selected book copies." %}</p>
+{% endblock %}

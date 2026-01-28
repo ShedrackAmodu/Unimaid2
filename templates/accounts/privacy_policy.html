@@ -1,120 +1,103 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-shield-check fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">How we protect and handle your personal information</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Privacy Policy - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="privacy-policy-page">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-body p-5">
-                        <div class="last-updated text-muted mb-4">
-                            <small>Last updated: January 6, 2025</small>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Privacy Policy</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h2 class="h4 text-primary">Information We Collect</h2>
+                            <p class="text-muted">We collect the following information to provide you with the best library experience:</p>
+                            
+                            <h3 class="h5 mt-4">Personal Information</h3>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-user text-primary"></i> Name and contact information</li>
+                                <li><i class="fas fa-envelope text-primary"></i> Email address</li>
+                                <li><i class="fas fa-id-card text-primary"></i> Student/staff ID number</li>
+                                <li><i class="fas fa-university text-primary"></i> Department and faculty information</li>
+                            </ul>
+
+                            <h3 class="h5 mt-4">Usage Information</h3>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-book text-primary"></i> Borrowing history and preferences</li>
+                                <li><i class="fas fa-search text-primary"></i> Search queries and reading habits</li>
+                                <li><i class="fas fa-calendar-alt text-primary"></i> Account activity and login patterns</li>
+                            </ul>
+
+                            <h2 class="h4 text-primary mt-4">How We Use Your Information</h2>
+                            <p class="text-muted">We use your information to:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success"></i> Manage your library account and access</li>
+                                <li><i class="fas fa-check-circle text-success"></i> Process book loans and returns</li>
+                                <li><i class="fas fa-check-circle text-success"></i> Provide personalized recommendations</li>
+                                <li><i class="fas fa-check-circle text-success"></i> Improve our services and resources</li>
+                                <li><i class="fas fa-check-circle text-success"></i> Ensure security and prevent fraud</li>
+                            </ul>
+
+                            <h2 class="h4 text-primary mt-4">Data Protection</h2>
+                            <p class="text-muted">We implement industry-standard security measures to protect your personal information:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-shield-alt text-primary"></i> Encrypted data transmission</li>
+                                <li><i class="fas fa-lock text-primary"></i> Secure authentication systems</li>
+                                <li><i class="fas fa-database text-primary"></i> Regular security audits</li>
+                                <li><i class="fas fa-user-shield text-primary"></i> Access controls and monitoring</li>
+                            </ul>
+
+                            <h2 class="h4 text-primary mt-4">Your Rights</h2>
+                            <p class="text-muted">You have the right to:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-eye text-primary"></i> Access your personal information</li>
+                                <li><i class="fas fa-edit text-primary"></i> Correct inaccurate data</li>
+                                <li><i class="fas fa-trash text-primary"></i> Request data deletion (where applicable)</li>
+                                <li><i class="fas fa-ban text-primary"></i> Object to certain processing activities</li>
+                            </ul>
+
+                            <h2 class="h4 text-primary mt-4">Contact Us</h2>
+                            <p class="text-muted">If you have questions about our privacy practices, please contact:</p>
+                            <div class="alert alert-info">
+                                <h6 class="mb-2">Data Protection Officer</h6>
+                                <p class="mb-1"><i class="fas fa-envelope"></i> dpo@unimaid.edu.ng</p>
+                                <p class="mb-0"><i class="fas fa-phone"></i> +234 (0) 803 123 4567</p>
+                            </div>
                         </div>
-
-                        <div class="policy-content">
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">1. Information We Collect</h3>
-                                <p>We collect information you provide directly to us, such as when you:</p>
-                                <ul>
-                                    <li>Create an account or use our services</li>
-                                    <li>Contact us for support or assistance</li>
-                                    <li>Register for events or borrow materials</li>
-                                    <li>Participate in surveys or feedback forms</li>
-                                </ul>
-                                <p>This may include personal information such as your name, email address, phone number, and academic information.</p>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">2. How We Use Your Information</h3>
-                                <p>We use the information we collect to:</p>
-                                <ul>
-                                    <li>Provide library services and resources</li>
-                                    <li>Process borrowing transactions and manage accounts</li>
-                                    <li>Communicate with you about your account and services</li>
-                                    <li>Improve our services and develop new features</li>
-                                    <li>Ensure compliance with library policies and regulations</li>
-                                </ul>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">3. Information Sharing</h3>
-                                <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except in the following circumstances:</p>
-                                <ul>
-                                    <li>With your explicit consent</li>
-                                    <li>To comply with legal obligations</li>
-                                    <li>To protect our rights and safety</li>
-                                    <li>With trusted service providers who assist our operations</li>
-                                </ul>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">4. Data Security</h3>
-                                <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes:</p>
-                                <ul>
-                                    <li>Secure data storage and transmission</li>
-                                    <li>Regular security assessments</li>
-                                    <li>Access controls and authentication</li>
-                                    <li>Staff training on data protection</li>
-                                </ul>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">5. Your Rights</h3>
-                                <p>You have the right to:</p>
-                                <ul>
-                                    <li>Access your personal information</li>
-                                    <li>Correct inaccurate information</li>
-                                    <li>Request deletion of your information</li>
-                                    <li>Object to processing in certain circumstances</li>
-                                    <li>Data portability</li>
-                                </ul>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">6. Cookies and Tracking</h3>
-                                <p>Our website uses cookies to enhance your browsing experience and provide personalized services. You can control cookie settings through your browser preferences.</p>
-                            </section>
-
-                            <section class="mb-5">
-                                <h3 class="fw-bold mb-3">7. Contact Us</h3>
-                                <p>If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-                                <div class="contact-info mt-3">
-                                    <p><strong>Email:</strong> ramatlibrary@unimaid.edu.ng</p>
-                                    <p><strong>Phone:</strong> +234 80166 253 232</p>
-                                    <p><strong>Address:</strong> University of Maiduguri, Borno State, Nigeria</p>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
                                 </div>
-                            </section>
-
-                            <section>
-                                <h3 class="fw-bold mb-3">8. Changes to This Policy</h3>
-                                <p>We may update this Privacy Policy from time to time. We will notify users of any material changes through our website or email communications.</p>
-                            </section>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:terms_of_use' %}" class="text-decoration-none">
+                                                <i class="fas fa-file-contract text-primary"></i> Terms of Use
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:security_settings' %}" class="text-decoration-none">
+                                                <i class="fas fa-shield-alt text-primary"></i> Security Settings
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:account_activity' %}" class="text-decoration-none">
+                                                <i class="fas fa-history text-primary"></i> Account Activity
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:profile' %}" class="text-decoration-none">
+                                                <i class="fas fa-user text-primary"></i> My Profile
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -124,17 +107,23 @@
 </div>
 {% endblock %}
 
-<style>
-    .policy-content section h3 {
-        color: var(--primary-blue);
-        border-bottom: 2px solid var(--accent-blue);
-        padding-bottom: 0.5rem;
-    }
-    .policy-content ul {
-        padding-left: 1.5rem;
-    }
-    .policy-content li {
-        margin-bottom: 0.5rem;
-    }
-</style>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling for internal links
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

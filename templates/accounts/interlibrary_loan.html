@@ -1,104 +1,390 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-globe fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">Access materials from libraries worldwide through our interlibrary loan service</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Interlibrary Loan - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="interlibrary-loan-page">
-    <div class="container-fluid">
-        <!-- Services Overview -->
-        <div class="row g-4 mb-5">
-            {% for service in services %}
-            <div class="col-lg-4">
-                <div class="card h-100 border-0 shadow-hover">
-                    <div class="card-body p-4 text-center">
-                        <div class="service-icon mb-4">
-                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <i class="bi {{ service.icon }} fs-2 text-white"></i>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Interlibrary Loan Services</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted">Access materials from libraries around the world through our interlibrary loan service. We can help you obtain books, articles, and other resources not available in our collection.</p>
+
+                            <h2 class="h4 text-primary mt-4">What is Interlibrary Loan?</h2>
+                            <p class="text-muted">Interlibrary Loan (ILL) is a service that allows you to borrow materials from other libraries when they are not available in our collection. This service helps expand your access to research materials and academic resources worldwide.</p>
+
+                            <div class="alert alert-primary mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-globe"></i> Global Network Access</h6>
+                                <p class="mb-0">Through our partnerships with libraries worldwide, you can access millions of additional resources beyond our local collection.</p>
+                            </div>
+
+                            <h2 class="h4 text-primary mt-5">Types of Materials Available</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book text-primary"></i> Books & Monographs
+                                            </h6>
+                                            <p class="card-text">Full-length books and monographs from partner libraries.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-clock text-primary"></i> Loan periods vary by lending library</li>
+                                                <li><i class="fas fa-shipping-fast text-primary"></i> Delivery typically 3-7 business days</li>
+                                                <li><i class="fas fa-box text-primary"></i> Physical books shipped to our library</li>
+                                                <li><i class="fas fa-copy text-primary"></i> Photocopy options available</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-newspaper text-primary"></i> Journal Articles
+                                            </h6>
+                                            <p class="card-text">Individual articles from academic journals and periodicals.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-download text-primary"></i> Electronic delivery preferred</li>
+                                                <li><i class="fas fa-clock text-primary"></i> Usually available within 1-3 days</li>
+                                                <li><i class="fas fa-file-alt text-primary"></i> PDF format for easy access</li>
+                                                <li><i class="fas fa-copyright text-primary"></i> Copyright compliance maintained</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-graduation-cap text-primary"></i> Theses & Dissertations
+                                            </h6>
+                                            <p class="card-text">Academic theses and dissertations from other institutions.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-university text-primary"></i> Access to research from universities worldwide</li>
+                                                <li><i class="fas fa-file-pdf text-primary"></i> Digital copies typically provided</li>
+                                                <li><i class="fas fa-search text-primary"></i> Comprehensive search assistance available</li>
+                                                <li><i class="fas fa-graduation-cap text-primary"></i> Graduate-level research support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-microscope text-primary"></i> Special Materials
+                                            </h6>
+                                            <p class="card-text">Conference proceedings, technical reports, and other specialized materials.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-chart-bar text-primary"></i> Statistical reports and data</li>
+                                                <li><i class="fas fa-film text-primary"></i> Audiovisual materials (limited availability)</li>
+                                                <li><i class="fas fa-map text-primary"></i> Maps and government documents</li>
+                                                <li><i class="fas fa-archive text-primary"></i> Archival materials (case by case)</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-primary mt-5">How to Request Materials</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-search text-primary"></i> Step 1: Check Our Collection
+                                            </h6>
+                                            <p class="card-text">Before requesting, verify the item is not available in our library.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-laptop text-primary"></i> Search our online catalog</li>
+                                                <li><i class="fas fa-database text-primary"></i> Check electronic databases</li>
+                                                <li><i class="fas fa-book text-primary"></i> Ask a librarian for assistance</li>
+                                                <li><i class="fas fa-question-circle text-primary"></i> Verify complete citation information</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-file-alt text-primary"></i> Step 2: Submit Request
+                                            </h6>
+                                            <p class="card-text">Complete the interlibrary loan request form with all required information.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-user text-primary"></i> Your library account information</li>
+                                                <li><i class="fas fa-book text-primary"></i> Complete bibliographic details</li>
+                                                <li><i class="fas fa-calendar text-primary"></i> Desired delivery date (if applicable)</li>
+                                                <li><i class="fas fa-envelope text-primary"></i> Contact information</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-clock text-primary"></i> Step 3: Wait for Processing
+                                            </h6>
+                                            <p class="card-text">Our staff will process your request and contact partner libraries.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-globe text-primary"></i> We search our network of partner libraries</li>
+                                                <li><i class="fas fa-envelope text-primary"></i> We contact multiple libraries if needed</li>
+                                                <li><i class="fas fa-phone text-primary"></i> We follow up to ensure timely delivery</li>
+                                                <li><i class="fas fa-bell text-primary"></i> You'll be notified when materials arrive</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-download text-primary"></i> Step 4: Receive & Use Materials
+                                            </h6>
+                                            <p class="card-text">Pick up physical materials or access electronic copies.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-map-marker-alt text-primary"></i> Physical items picked up at service desk</li>
+                                                <li><i class="fas fa-laptop text-primary"></i> Electronic items accessed via email link</li>
+                                                <li><i class="fas fa-clock text-primary"></i> Observe loan periods and return dates</li>
+                                                <li><i class="fas fa-book text-primary"></i> Follow all lending library requirements</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-primary mt-5">Request Form</h2>
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="materialType" class="form-label">Material Type</label>
+                                                    <select class="form-select" id="materialType">
+                                                        <option>Book</option>
+                                                        <option>Journal Article</option>
+                                                        <option>Thesis/Dissertation</option>
+                                                        <option>Conference Proceeding</option>
+                                                        <option>Other</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="title" class="form-label">Title</label>
+                                                    <input type="text" class="form-control" id="title" placeholder="Enter title">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="author" class="form-label">Author</label>
+                                                    <input type="text" class="form-control" id="author" placeholder="Enter author name">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="publicationYear" class="form-label">Publication Year</label>
+                                                    <input type="number" class="form-control" id="publicationYear" placeholder="Enter year">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="isbn" class="form-label">ISBN/ISSN</label>
+                                                    <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN or ISSN">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="journalTitle" class="form-label">Journal Title (if article)</label>
+                                                    <input type="text" class="form-control" id="journalTitle" placeholder="Enter journal title">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="volume" class="form-label">Volume/Issue (if article)</label>
+                                                    <input type="text" class="form-control" id="volume" placeholder="Enter volume and issue">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="pages" class="form-label">Pages (if article)</label>
+                                                    <input type="text" class="form-control" id="pages" placeholder="Enter page numbers">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="notes" class="form-label">Additional Notes</label>
+                                            <textarea class="form-control" id="notes" rows="3" placeholder="Any additional information"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-primary mt-5">Important Information</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-clock text-primary"></i> Processing Times
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-calendar text-primary"></i> Articles: 1-3 business days</li>
+                                                <li><i class="fas fa-book text-primary"></i> Books: 3-7 business days</li>
+                                                <li><i class="fas fa-globe text-primary"></i> International requests: 2-4 weeks</li>
+                                                <li><i class="fas fa-exclamation-triangle text-primary"></i> Some materials may not be available</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-dollar-sign text-primary"></i> Costs & Fees
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-tags text-primary"></i> Most requests are free for students</li>
+                                                <li><i class="fas fa-file-pdf text-primary"></i> Article copies: Usually free</li>
+                                                <li><i class="fas fa-book text-primary"></i> Book loans: Usually free</li>
+                                                <li><i class="fas fa-exclamation-triangle text-primary"></i> Some specialized materials may have fees</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-gavel text-primary"></i> Copyright & Usage
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-copyright text-primary"></i> All requests must comply with copyright law</li>
+                                                <li><i class="fas fa-file-alt text-primary"></i> Articles for personal research use only</li>
+                                                <li><i class="fas fa-book text-primary"></i> Books subject to lending library policies</li>
+                                                <li><i class="fas fa-user-check text-primary"></i> Proper attribution required</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-undo text-primary"></i> Returns & Renewals
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-calendar-check text-primary"></i> Return dates set by lending library</li>
+                                                <li><i class="fas fa-exchange-alt text-primary"></i> Renewals subject to lender approval</li>
+                                                <li><i class="fas fa-times-circle text-primary"></i> Late returns may affect future requests</li>
+                                                <li><i class="fas fa-map-marker-alt text-primary"></i> Return materials to service desk</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-primary mt-5">Contact Information</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">ILL Department</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-map-marker-alt text-primary"></i> Main Library, 3rd Floor</li>
+                                                <li><i class="fas fa-clock text-primary"></i> Mon-Fri: 9 AM - 5 PM</li>
+                                                <li><i class="fas fa-phone text-primary"></i> +234 (0) 803 123 4567</li>
+                                                <li><i class="fas fa-envelope text-primary"></i> ill@unimaid.edu.ng</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">Online Requests</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-laptop text-primary"></i> 24/7 online request submission</li>
+                                                <li><i class="fas fa-envelope text-primary"></i> Email confirmation within 24 hours</li>
+                                                <li><i class="fas fa-bell text-primary"></i> Status updates via email</li>
+                                                <li><i class="fas fa-question-circle text-primary"></i> Help and support available</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">Frequently Asked Questions</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-question-circle text-primary"></i> What can I request?</li>
+                                                <li><i class="fas fa-question-circle text-primary"></i> How long does it take?</li>
+                                                <li><i class="fas fa-question-circle text-primary"></i> Are there any costs?</li>
+                                                <li><i class="fas fa-question-circle text-primary"></i> Can I renew materials?</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-primary btn-sm mt-2">View FAQ</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <h5 class="fw-bold mb-3">{{ service.title }}</h5>
-                        <p class="text-muted mb-4">{{ service.description }}</p>
-                        <button class="btn btn-outline-primary" onclick="scrollToContact()">
-                            <i class="bi bi-plus-circle me-2"></i>Request Service
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Service Information -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-info-circle me-2"></i>How It Works
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="process-step d-flex mb-4">
-                                    <div class="step-number me-3">
-                                        <div class="badge bg-primary fs-5">1</div>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold">Submit Request</h6>
-                                        <p class="text-muted small">Fill out our online request form with the details of the material you need.</p>
-                                    </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
                                 </div>
-                                <div class="process-step d-flex mb-4">
-                                    <div class="step-number me-3">
-                                        <div class="badge bg-primary fs-5">2</div>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold">Review & Approval</h6>
-                                        <p class="text-muted small">Our staff reviews your request and checks availability through our network.</p>
-                                    </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:research_assistance' %}" class="text-decoration-none">
+                                                <i class="fas fa-search text-primary"></i> Research Assistance
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:digital_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-laptop text-primary"></i> Digital Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:library_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-book text-primary"></i> Library Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:study_room_booking' %}" class="text-decoration-none">
+                                                <i class="fas fa-chalkboard-teacher text-primary"></i> Study Rooms
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="process-step d-flex mb-4">
-                                    <div class="step-number me-3">
-                                        <div class="badge bg-primary fs-5">3</div>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold">Delivery</h6>
-                                        <p class="text-muted small">Materials are delivered electronically or physically depending on the type.</p>
-                                    </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">ILL Statistics</h6>
                                 </div>
-                                <div class="process-step d-flex">
-                                    <div class="step-number me-3">
-                                        <div class="badge bg-primary fs-5">4</div>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold">Return</h6>
-                                        <p class="text-muted small">Return physical items by the due date or manage digital access.</p>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <h4 class="text-primary">95%</h4>
+                                        <p class="small text-muted">Success Rate</p>
+                                        <hr>
+                                        <h4 class="text-primary">3-7</h4>
+                                        <p class="small text-muted">Business Days Average</p>
+                                        <hr>
+                                        <h4 class="text-primary">500+</h4>
+                                        <p class="small text-muted">Partner Libraries</p>
                                     </div>
                                 </div>
                             </div>
@@ -107,94 +393,26 @@
                 </div>
             </div>
         </div>
-
-        <!-- Request Form -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-send me-2"></i>Request Interlibrary Loan
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <form method="post" action="{% url 'accounts:contact' %}" id="loanForm">
-                            {% csrf_token %}
-                            <input type="hidden" name="subject" value="interlibrary_loan">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label fw-bold">Full Name *</label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="email" class="form-label fw-bold">Email Address *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="request_type" class="form-label fw-bold">Request Type</label>
-                                    <select class="form-select" id="request_type" name="request_type">
-                                        <option value="book">Book</option>
-                                        <option value="article">Journal Article</option>
-                                        <option value="document">Document</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="urgency" class="form-label fw-bold">Urgency Level</label>
-                                    <select class="form-select" id="urgency" name="urgency">
-                                        <option value="normal">Normal (2-4 weeks)</option>
-                                        <option value="urgent">Urgent (1-2 weeks)</option>
-                                        <option value="rush">Rush (within 1 week)</option>
-                                    </select>
-                                </div>
-                                <div class="col-12">
-                                    <label for="title" class="form-label fw-bold">Title *</label>
-                                    <input type="text" class="form-control" id="title" name="title" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="author" class="form-label fw-bold">Author (if known)</label>
-                                    <input type="text" class="form-control" id="author" name="author">
-                                </div>
-                                <div class="col-12">
-                                    <label for="message" class="form-label fw-bold">Additional Details *</label>
-                                    <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Please provide any additional information that might help locate the material"></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary px-5">
-                                        <i class="bi bi-send me-2"></i>Submit Request
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    </row>
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ block.super }}
+{% block extra_js %}
 <script>
-    function scrollToContact() {
-        document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    // Add interactive features to resource cards
+    const resourceCards = document.querySelectorAll('.card.border-primary');
+    
+    resourceCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
 </script>
-<style>
-    .service-icon div {
-        transition: transform 0.3s ease;
-    }
-    .card:hover .service-icon div {
-        transform: scale(1.1) rotate(5deg);
-    }
-    .process-step {
-        padding: 1rem;
-        border-radius: 8px;
-        transition: background-color 0.3s ease;
-    }
-    .process-step:hover {
-        background-color: rgba(10, 36, 114, 0.05);
-    }
-</style>
 {% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rare Books Collection - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Rare Books Collection</h1>
+            <p class="lead text-center text-muted mb-5">Explore our珍贵 collection of rare and historical books</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Search and Filter Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="century" class="form-label">Century</label>
+                            <select name="century" id="century" class="form-select">
+                                <option value="">All Centuries</option>
+                                {% for century in centuries %}
+                                <option value="{{ century }}" {% if request.GET.century == century|stringformat:"s" %}selected{% endif %}>{{ century }}th Century</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <select name="subject" id="subject" class="form-select">
+                                <option value="">All Subjects</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="condition" class="form-label">Condition</label>
+                            <select name="condition" id="condition" class="form-select">
+                                <option value="">All Conditions</option>
+                                {% for condition in conditions %}
+                                <option value="{{ condition }}" {% if request.GET.condition == condition %}selected{% endif %}>{{ condition|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by title or author..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a href="{% url 'accounts:rare_books' %}" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Rare Books Grid -->
+            <div class="row">
+                {% for book in rare_books %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm rare-book-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="bi bi-book text-warning" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title">{{ book.title|truncatewords:8 }}</h5>
+                                    <p class="card-text text-muted small">{{ book.author }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">{{ book.century }}th Century</span>
+                                <span class="badge bg-secondary">{{ book.subject.name }}</span>
+                            </div>
+                            
+                            <p class="card-text text-muted small">{{ book.description|truncatewords:20 }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">Condition: {{ book.condition|title }}</span>
+                                <span class="text-muted small">Acquired: {{ book.acquisition_date|date:"Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bookModal{{ book.id }}">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </button>
+                            <span class="text-muted small ms-2">Reference Only</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not rare_books %}
+            <div class="text-center py-5">
+                <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                <p class="text-muted mt-3">No rare books found matching your criteria.</p>
+                        <a href="{% url 'accounts:rare_books' %}" class="btn btn-primary">View All Rare Books</a>
+            </div>
+            {% endif %}
+
+            <!-- Access Information -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Rare Books Collection Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Access Requirements</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Prior appointment required</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Valid university ID needed</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Supervised access only</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> No food or drinks allowed</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Collection Highlights</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar-check text-primary me-2"></i> 15th-19th century publications</li>
+                                <li><i class="bi bi-globe text-info me-2"></i> International rare editions</li>
+                                <li><i class="bi bi-book text-warning me-2"></i> First editions and manuscripts</li>
+                                <li><i class="bi bi-shield-check text-danger me-2"></i> Climate-controlled storage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Book Modal -->
+{% for book in rare_books %}
+<div class="modal fade" id="bookModal{{ book.id }}" tabindex="-1" aria-labelledby="bookModalLabel{{ book.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookModalLabel{{ book.id }}">{{ book.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Author:</strong> {{ book.author }}</p>
+                        <p><strong>Publication Date:</strong> {{ book.publication_date }}</p>
+                        <p><strong>Century:</strong> {{ book.century }}th Century</p>
+                        <p><strong>Subject:</strong> {{ book.subject.name }}</p>
+                        <p><strong>Condition:</strong> {{ book.condition|title }}</p>
+                        <p><strong>Acquisition Date:</strong> {{ book.acquisition_date }}</p>
+                        <p><strong>Provenance:</strong> {{ book.provenance }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Description:</strong></p>
+                        <p class="text-muted">{{ book.description }}</p>
+                        <p><strong>Special Features:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for feature in book.special_features.all %}
+                            <li><i class="bi bi-star text-warning me-2"></i>{{ feature.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="requestAccess('{{ book.id }}')">
+                    <i class="bi bi-calendar-plus me-2"></i>Request Access
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function requestAccess(bookId) {
+    // This would typically make an AJAX request to request access to the rare book
+    alert('Access request for book ' + bookId + ' has been submitted. Please contact the rare books librarian.');
+}
+</script>
+{% endblock %}

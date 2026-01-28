@@ -2,216 +2,361 @@
 {% load static %}
 {% load account_filters %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-database fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">Access premium academic databases and research tools</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Digital Resources - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="digital-resources-page">
-    <div class="container-fluid">
-        <!-- Library Resources Overview Notice -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-info border-0 shadow-sm">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-info-circle-fill fs-4 me-3 text-info"></i>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1">Multiple Library Resources Available</h6>
-                            <p class="mb-2">This page shows external academic databases. For our institutional digital library with theses and documents, visit our <a href="/repository/" class="alert-link">Digital Library</a>.</p>
-                            <a href="/accounts/library-resources/" class="btn btn-sm btn-info">
-                                <i class="bi bi-collection me-1"></i>Compare All Resources
-                            </a>
-                        </div>
-                    </div>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h1 class="h3 mb-0">Digital Resources</h1>
                 </div>
-            </div>
-        </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted">Access our extensive collection of digital resources including e-books, academic journals, databases, and multimedia content.</p>
 
-        <!-- Resource Categories -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-6">
-                <div class="category-card card h-100 border-0 shadow-hover">
-                    <div class="card-body p-4 text-center">
-                        <div class="category-icon mb-3">
-                            <i class="bi bi-search fs-1 text-primary"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Academic Databases</h5>
-                        <p class="text-muted">Peer-reviewed journals, conference proceedings, and research papers from leading publishers.</p>
-                        <div class="mt-3">
-                            <span class="badge bg-primary">Premium Access</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="category-card card h-100 border-0 shadow-hover">
-                    <div class="card-body p-4 text-center">
-                        <div class="category-icon mb-3">
-                            <i class="bi bi-globe fs-1 text-success"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Open Access Resources</h5>
-                        <p class="text-muted">Free scholarly resources including Google Scholar, PubMed, and other open repositories.</p>
-                        <div class="mt-3">
-                            <span class="badge bg-success">Free Access</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Institutional Repository Highlight -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
-                    <div class="card-body p-5 text-white text-center">
-                        <i class="bi bi-file-earmark-text fs-1 mb-3"></i>
-                        <h3 class="fw-bold mb-3">Also Explore Our Digital Library</h3>
-                        <p class="lead mb-4 opacity-90">
-                            Access our institutional repository with theses, dissertations, research papers,
-                            and university publications - all available online 24/7.
-                        </p>
-                        <div class="row g-3 justify-content-center">
-                            <div class="col-md-4">
-                                <div class="bg-white bg-opacity-20 rounded p-3">
-                                    <h4 class="fw-bold mb-1">10,000+</h4>
-                                    <p class="mb-0 small">Digital Documents</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="bg-white bg-opacity-20 rounded p-3">
-                                    <h4 class="fw-bold mb-1">24/7</h4>
-                                    <p class="mb-0 small">Online Access</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="bg-white bg-opacity-20 rounded p-3">
-                                    <h4 class="fw-bold mb-1">Free</h4>
-                                    <p class="mb-0 small">No Login Required</p>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="/repository/" class="btn btn-light btn-lg mt-4">
-                            <i class="bi bi-arrow-right me-2"></i>Visit Digital Library
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Available Resources -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-grid me-2"></i>Available Resources
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            {% for resource in resources %}
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-{{ resource.type|lower|replace:' ,-' }} fs-4 text-primary"></i>
+                            <!-- Resource Categories -->
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="category-card card h-100 border-0 shadow-hover">
+                                        <div class="card-body p-4 text-center">
+                                            <div class="category-icon mb-3">
+                                                <i class="bi bi-search fs-1 text-primary"></i>
                                             </div>
-                                            <div>
-                                                <h6 class="fw-bold mb-1">{{ resource.name }}</h6>
-                                                <small class="text-muted">{{ resource.type }}</small>
+                                            <h5 class="fw-bold mb-3">Academic Databases</h5>
+                                            <p class="text-muted">Peer-reviewed journals, conference proceedings, and research papers from leading publishers.</p>
+                                            <div class="mt-3">
+                                                <span class="badge bg-primary">Premium Access</span>
                                             </div>
                                         </div>
-                                        <p class="text-muted small mb-3">{{ resource.description }}</p>
-                                        <div class="access-info">
-                                            <span class="badge bg-{{ resource.access|lower|replace:' ,-'|replace:'on-campus&vpn,warning'|replace:'freeaccess,success' }}">
-                                                {{ resource.access }}
-                                            </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="category-card card h-100 border-0 shadow-hover">
+                                        <div class="card-body p-4 text-center">
+                                            <div class="category-icon mb-3">
+                                                <i class="bi bi-globe fs-1 text-success"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-3">Open Access Resources</h5>
+                                            <p class="text-muted">Free scholarly resources including Google Scholar, PubMed, and other open repositories.</p>
+                                            <div class="mt-3">
+                                                <span class="badge bg-success">Free Access</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Access Instructions -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-light py-3">
-                        <h4 class="mb-0">
-                            <i class="bi bi-key me-2"></i>How to Access
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-2"><i class="bi bi-building me-2 text-primary"></i>On-Campus Access</h6>
-                                <p class="text-muted small">All premium databases are accessible from computers within the library building or connected to the university network.</p>
+                            <!-- Institutional Repository Highlight -->
+                            <div class="row mb-5">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-lg bg-gradient" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));">
+                                        <div class="card-body p-5 text-white text-center">
+                                            <i class="bi bi-file-earmark-text fs-1 mb-3"></i>
+                                            <h3 class="fw-bold mb-3">Also Explore Our Digital Library</h3>
+                                            <p class="lead mb-4 opacity-90">
+                                                Access our institutional repository with theses, dissertations, research papers,
+                                                and university publications - all available online 24/7.
+                                            </p>
+                                            <div class="row g-3 justify-content-center">
+                                                <div class="col-md-4">
+                                                    <div class="bg-white bg-opacity-20 rounded p-3">
+                                                        <h4 class="fw-bold mb-1">10,000+</h4>
+                                                        <p class="mb-0 small">Digital Documents</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="bg-white bg-opacity-20 rounded p-3">
+                                                        <h4 class="fw-bold mb-1">24/7</h4>
+                                                        <p class="mb-0 small">Online Access</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="bg-white bg-opacity-20 rounded p-3">
+                                                        <h4 class="fw-bold mb-1">Free</h4>
+                                                        <p class="mb-0 small">No Login Required</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <a href="/repository/" class="btn btn-light btn-lg mt-4">
+                                                <i class="bi bi-arrow-right me-2"></i>Visit Digital Library
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-2"><i class="bi bi-wifi me-2 text-primary"></i>VPN Access</h6>
-                                <p class="text-muted small">Off-campus access requires connecting to the university VPN. Contact IT support for VPN setup assistance.</p>
-                            </div>
-                        </div>
-                        <hr class="my-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-2"><i class="bi bi-person-badge me-2 text-primary"></i>Library Account</h6>
-                                <p class="text-muted small">Some resources may require additional authentication. Use your library account credentials when prompted.</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-2"><i class="bi bi-question-circle me-2 text-primary"></i>Need Help?</h6>
-                                <p class="text-muted small">Contact our research assistance team if you encounter any access issues or need guidance.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Contact for Support -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-headset me-2"></i>Need Help Accessing Resources?
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <p class="text-center text-muted mb-4">
-                            Our digital resources team is here to help you navigate and access all available databases and research tools.
-                        </p>
-                        <div class="text-center">
-                            <a href="{% url 'accounts:contact' %}" class="btn btn-primary px-5">
-                                <i class="bi bi-envelope me-2"></i>Contact Digital Resources Support
-                            </a>
+                            <!-- Available Resources -->
+                            <div class="row mb-5">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-lg">
+                                        <div class="card-header bg-gradient text-white py-4">
+                                            <h3 class="mb-0 text-center">
+                                                <i class="bi bi-grid me-2"></i>Available Resources
+                                            </h3>
+                                        </div>
+                                        <div class="card-body p-5">
+                                            <div class="row g-4">
+                                                {% for resource in resources %}
+                                                <div class="col-lg-6 col-xl-4">
+                                                    <div class="resource-card card h-100 border">
+                                                        <div class="card-body p-4">
+                                                            <div class="d-flex align-items-center mb-3">
+                                                                <div class="resource-icon me-3">
+                                                                    <i class="bi bi-{{ resource.type|lower|replace:' ,-' }} fs-4 text-primary"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="fw-bold mb-1">{{ resource.name }}</h6>
+                                                                    <small class="text-muted">{{ resource.type }}</small>
+                                                                </div>
+                                                            </div>
+                                                            <p class="text-muted small mb-3">{{ resource.description }}</p>
+                                                            <div class="access-info">
+                                                                <span class="badge bg-{{ resource.access|lower|replace:' ,-'|replace:'on-campus&vpn,warning'|replace:'freeaccess,success' }}">
+                                                                    {{ resource.access }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-dark mt-4">E-Books Collection</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-dark">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book-reader text-dark"></i> Academic E-Books
+                                            </h6>
+                                            <p class="card-text">Over 50,000 academic e-books across all disciplines.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-download text-dark"></i> Download for offline reading</li>
+                                                <li><i class="fas fa-search text-dark"></i> Full-text search capabilities</li>
+                                                <li><i class="fas fa-highlighter text-dark"></i> Highlight and annotate features</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-dark btn-sm">Browse E-Books</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-dark">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-newspaper text-dark"></i> Textbooks
+                                            </h6>
+                                            <p class="card-text">Current edition textbooks for all courses.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-book-open text-dark"></i> Interactive textbook features</li>
+                                                <li><i class="fas fa-question-circle text-dark"></i> Integrated study guides</li>
+                                                <li><i class="fas fa-chart-line text-dark"></i> Progress tracking</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-dark btn-sm">Access Textbooks</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-dark mt-5">Academic Journals</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-journal-whills fa-2x text-dark mb-3"></i>
+                                            <h6>Science & Technology</h6>
+                                            <p class="small text-muted">2,500+ journals</p>
+                                            <a href="#" class="btn btn-outline-dark btn-sm">Explore</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-globe fa-2x text-dark mb-3"></i>
+                                            <h6>Humanities & Social Sciences</h6>
+                                            <p class="small text-muted">1,800+ journals</p>
+                                            <a href="#" class="btn btn-outline-dark btn-sm">Explore</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-stethoscope fa-2x text-dark mb-3"></i>
+                                            <h6>Medical & Health Sciences</h6>
+                                            <p class="small text-muted">1,200+ journals</p>
+                                            <a href="#" class="btn btn-outline-dark btn-sm">Explore</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-dark mt-5">Research Databases</h2>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-hover">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <th>Database</th>
+                                            <th>Content</th>
+                                            <th>Access</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>JSTOR</strong></td>
+                                            <td>Academic journals, books, and primary sources</td>
+                                            <td><span class="badge bg-success">Full Access</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>ScienceDirect</strong></td>
+                                            <td>Scientific, technical, and medical research</td>
+                                            <td><span class="badge bg-success">Full Access</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>IEEE Xplore</strong></td>
+                                            <td>Engineering and technology publications</td>
+                                            <td><span class="badge bg-success">Full Access</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>PubMed</strong></td>
+                                            <td>Biomedical literature</td>
+                                            <td><span class="badge bg-success">Full Access</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>EBSCOhost</strong></td>
+                                            <td>Multidisciplinary databases</td>
+                                            <td><span class="badge bg-success">Full Access</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h2 class="h4 text-dark mt-5">Multimedia Resources</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-dark">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-video text-dark"></i> Educational Videos
+                                            </h6>
+                                            <p class="card-text">Documentaries, lectures, and educational content.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-play text-dark"></i> On-demand streaming</li>
+                                                <li><i class="fas fa-closed-captioning text-dark"></i> Subtitles available</li>
+                                                <li><i class="fas fa-clock text-dark"></i> Flexible viewing times</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-dark btn-sm">Watch Videos</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-dark">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-music text-dark"></i> Audio Resources
+                                            </h6>
+                                            <p class="card-text">Audiobooks, podcasts, and academic recordings.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-headphones text-dark"></i> High-quality audio</li>
+                                                <li><i class="fas fa-mobile-alt text-dark"></i> Mobile-friendly format</li>
+                                                <li><i class="fas fa-download text-dark"></i> Download for offline listening</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-dark btn-sm">Listen Now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-dark mt-5">How to Access</h2>
+                            <div class="alert alert-dark mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-key"></i> Authentication Required</h6>
+                                <p class="mb-2">To access our digital resources, you need to be logged into your library account.</p>
+                                <p class="mb-0">If you're accessing from off-campus, you may need to use our VPN service or proxy server.</p>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-dark text-white">
+                                            <h6 class="mb-0">For Students</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-user-graduate text-dark"></i> Use your student ID and password</li>
+                                                <li><i class="fas fa-laptop text-dark"></i> Access from any device</li>
+                                                <li><i class="fas fa-clock text-dark"></i> 24/7 availability</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-dark text-white">
+                                            <h6 class="mb-0">For Staff</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-chalkboard-teacher text-dark"></i> Extended database access</li>
+                                                <li><i class="fas fa-chart-bar text-dark"></i> Research analytics tools</li>
+                                                <li><i class="fas fa-users text-dark"></i> Group access features</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:open_access' %}" class="text-decoration-none">
+                                                <i class="fas fa-unlock-alt text-dark"></i> Open Access Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:open_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-globe text-dark"></i> Open Educational Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:research_assistance' %}" class="text-decoration-none">
+                                                <i class="fas fa-search text-dark"></i> Research Assistance
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:library_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-book text-dark"></i> Library Resources
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header bg-dark text-white">
+                                    <h6 class="mb-0">Technical Support</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Need help accessing digital resources?</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-phone text-dark"></i> +234 (0) 803 123 4567</li>
+                                        <li><i class="fas fa-envelope text-dark"></i> support@unimaid.edu.ng</li>
+                                        <li><i class="fas fa-comments text-dark"></i> Live chat available</li>
+                                    </ul>
+                                    <a href="#" class="btn btn-dark btn-sm mt-2">Get Help</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -221,26 +366,22 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ block.super }}
-<style>
-    .category-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-    }
-    .resource-card {
-        transition: all 0.3s ease;
-    }
-    .resource-card:hover {
-        border-color: var(--accent-blue) !important;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    .category-icon {
-        transition: transform 0.3s ease;
-    }
-    .category-card:hover .category-icon {
-        transform: scale(1.1);
-    }
-</style>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to resource cards
+    const resourceCards = document.querySelectorAll('.card.border-dark');
+    
+    resourceCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
 {% endblock %}

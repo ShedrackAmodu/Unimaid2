@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Workshops & Training - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Workshops & Training</h1>
+            <p class="lead text-center text-muted mb-5">Enhance your skills with our comprehensive workshop programs</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Search and Filter Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select name="category" id="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="difficulty" class="form-label">Difficulty Level</label>
+                            <select name="difficulty" id="difficulty" class="form-select">
+                                <option value="">All Levels</option>
+                                {% for level in difficulty_levels %}
+                                <option value="{{ level }}" {% if request.GET.difficulty == level %}selected{% endif %}>{{ level|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="format" class="form-label">Format</label>
+                            <select name="format" id="format" class="form-select">
+                                <option value="">All Formats</option>
+                                {% for format in formats %}
+                                <option value="{{ format }}" {% if request.GET.format == format %}selected{% endif %}>{{ format|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by title or description..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a href="{% url 'accounts:workshops' %}" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Upcoming Workshops -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Upcoming Workshops
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% if workshops %}
+                    {% for workshop in workshops %}
+                    <div class="row mb-4 border-bottom pb-4">
+                        <div class="col-md-8">
+                            <h5 class="text-primary">{{ workshop.title }}</h5>
+                            <p class="text-muted mb-2">{{ workshop.description|truncatewords:30 }}</p>
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-calendar me-2"></i>
+                                        <strong>Date:</strong> {{ workshop.date|date:"F j, Y" }}
+                                    </p>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-clock me-2"></i>
+                                        <strong>Time:</strong> {{ workshop.start_time|time:"g:i A" }} - {{ workshop.end_time|time:"g:i A" }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-geo-alt me-2"></i>
+                                        <strong>Venue:</strong> {{ workshop.venue }}
+                                    </p>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-person me-2"></i>
+                                        <strong>Instructor:</strong> {{ workshop.instructor }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-primary me-2">{{ workshop.category.name }}</span>
+                                <span class="badge bg-info me-2">{{ workshop.difficulty_level|title }}</span>
+                                <span class="badge bg-success">{{ workshop.format|title }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="btn-group-vertical" role="group">
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#workshopModal{{ workshop.id }}">
+                                    <i class="bi bi-eye me-2"></i>Details
+                                </button>
+                                {% if workshop.is_registration_open %}
+                                <a href="{% url 'register_workshop' workshop.id %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-plus-circle me-2"></i>Register
+                                </a>
+                                {% else %}
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="bi bi-x-circle me-2"></i>Registration Closed
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                        <p class="text-muted mt-3">No workshops found matching your criteria.</p>
+                        <a href="{% url 'accounts:workshops' %}" class="btn btn-primary">View All Workshops</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Workshop Categories -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-tags me-2"></i>
+                        Workshop Categories
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for category in workshop_categories %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-{{ category.icon }} text-info" style="font-size: 3rem;"></i>
+                                    <h6 class="mt-3">{{ category.name }}</h6>
+                                    <p class="text-muted small">{{ category.description|truncatewords:15 }}</p>
+                                    <a href="{% url 'accounts:workshops' %}?category={{ category.id }}" class="btn btn-outline-info btn-sm">View Workshops</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Benefits of Our Workshops
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Professional Development</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Enhance your research skills</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Learn new technologies</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Improve academic writing</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Develop presentation skills</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Academic Support</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-primary me-2"></i> Citation management training</li>
+                                <li><i class="bi bi-check-circle text-primary me-2"></i> Database navigation skills</li>
+                                <li><i class="bi bi-check-circle text-primary me-2"></i> Literature review techniques</li>
+                                <li><i class="bi bi-check-circle text-primary me-2"></i> Data analysis workshops</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workshop Modal -->
+{% for workshop in workshops %}
+<div class="modal fade" id="workshopModal{{ workshop.id }}" tabindex="-1" aria-labelledby="workshopModalLabel{{ workshop.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="workshopModalLabel{{ workshop.id }}">{{ workshop.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p><strong>Description:</strong></p>
+                        <p class="text-muted">{{ workshop.description }}</p>
+                        
+                        <p><strong>Learning Objectives:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for objective in workshop.learning_objectives.all %}
+                            <li><i class="bi bi-check-circle text-success me-2"></i>{{ objective.description }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong>Date:</strong> {{ workshop.date|date:"F j, Y" }}</p>
+                                <p><strong>Time:</strong> {{ workshop.start_time|time:"g:i A" }} - {{ workshop.end_time|time:"g:i A" }}</p>
+                                <p><strong>Venue:</strong> {{ workshop.venue }}</p>
+                                <p><strong>Instructor:</strong> {{ workshop.instructor }}</p>
+                                <p><strong>Duration:</strong> {{ workshop.duration }} hours</p>
+                                <p><strong>Capacity:</strong> {{ workshop.max_participants }} participants</p>
+                                <p><strong>Registered:</strong> {{ workshop.participants.count }} participants</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if workshop.is_registration_open %}
+                <a href="{% url 'register_workshop' workshop.id %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Register for Workshop
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

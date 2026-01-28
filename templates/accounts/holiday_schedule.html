@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Holiday Schedule - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Holiday Schedule</h1>
+            <p class="lead text-center text-muted mb-5">Library operating hours during holidays and special occasions</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Current Year Schedule -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-calendar me-2"></i>
+                        {{ current_year }} Holiday Schedule
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Holiday</th>
+                                    <th>Date</th>
+                                    <th>Library Status</th>
+                                    <th>Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for holiday in holidays %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ holiday.name }}</strong>
+                                        {% if holiday.is_observed %}
+                                        <span class="badge bg-warning text-dark ms-2">Observed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ holiday.date|date:"F j, Y" }} ({{ holiday.date|date:"l" }})</td>
+                                    <td>
+                                        {% if holiday.is_closed %}
+                                        <span class="badge bg-danger">Closed</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Open</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if holiday.is_closed %}
+                                        <span class="text-muted">Library Closed</span>
+                                        {% else %}
+                                        <span class="text-success">{{ holiday.special_hours }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Hours Notice -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Special Hours Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Reduced Hours During Holiday Periods</h6>
+                        <p class="mb-2">The library operates with reduced hours during the following periods:</p>
+                        <ul class="mb-0">
+                            <li><strong>Christmas Break:</strong> December 24 - January 2 (Closed December 25 & January 1)</li>
+                            <li><strong>Easter Break:</strong> Good Friday through Easter Monday (Reduced hours)</li>
+                            <li><strong>University Breaks:</strong> Reduced hours during semester breaks</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Holidays -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        Upcoming Holidays
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_holidays %}
+                    <div class="row">
+                        {% for holiday in upcoming_holidays %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 {% if holiday.is_closed %}border-danger{% else %}border-success{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">{{ holiday.name }}</h6>
+                                        <span class="badge {% if holiday.is_closed %}bg-danger{% else %}bg-success{% endif %}">
+                                            {% if holiday.is_closed %}Closed{% else %}Open{% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="bi bi-calendar me-2"></i>
+                                        {{ holiday.date|date:"F j, Y" }} ({{ holiday.date|date:"l" }})
+                                    </p>
+                                    {% if not holiday.is_closed %}
+                                    <p class="card-text text-success small">
+                                        <i class="bi bi-clock me-2"></i>
+                                        <strong>Hours:</strong> {{ holiday.special_hours }}
+                                    </p>
+                                    {% endif %}
+                                    {% if holiday.is_observed %}
+                                    <span class="badge bg-warning text-dark">Observed Holiday</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-calendar-check text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">No upcoming holidays in the next 30 days.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-telephone me-2"></i>
+                        Contact Us
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>General Inquiries</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-telephone text-primary me-2"></i> +234 (0) 123 4567</li>
+                                <li><i class="bi bi-envelope text-info me-2"></i> library@university.edu</li>
+                                <li><i class="bi bi-chat-dots text-success me-2"></i> Live Chat Available</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Holiday Information</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar-check text-warning me-2"></i> Holiday hours posted 2 weeks in advance</li>
+                                <li><i class="bi bi-bell text-danger me-2"></i> Emergency closures announced via email</li>
+                                <li><i class="bi bi-info-circle text-info me-2"></i> Check website for latest updates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

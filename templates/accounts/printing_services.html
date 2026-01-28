@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Printing Services - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Printing Services</h1>
+            <p class="lead text-center text-muted mb-5">Professional printing and copying services for all your academic needs</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Service Overview -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-printer me-2"></i>
+                        Available Services
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text text-primary" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Document Printing</h5>
+                                    <p class="card-text">Black & white and color printing for documents, reports, and assignments.</p>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <strong class="text-success">B&W: ₦5/page</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong class="text-info">Color: ₦15/page</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-copy text-info" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Photocopying</h5>
+                                    <p class="card-text">High-quality photocopying services for books, articles, and other materials.</p>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <strong class="text-success">B&W: ₦3/page</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong class="text-info">Color: ₦10/page</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-scissors text-warning" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Binding Services</h5>
+                                    <p class="card-text">Professional binding options for reports, theses, and presentations.</p>
+                                    <div class="row text-center">
+                                        <div class="col-12">
+                                            <strong class="text-warning">From ₦200/document</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-laptop text-success" style="font-size: 3rem;"></i>
+                                    <h5 class="card-title mt-3">Digital Services</h5>
+                                    <p class="card-text">Scanning, USB printing, and digital file management services.</p>
+                                    <div class="row text-center">
+                                        <div class="col-12">
+                                            <strong class="text-success">Scanning: ₦2/page</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Table -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-currency-naira me-2"></i>
+                        Detailed Pricing
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Size</th>
+                                    <th>Black & White</th>
+                                    <th>Color</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Standard Printing</td>
+                                    <td>A4</td>
+                                    <td>₦5</td>
+                                    <td>₦15</td>
+                                    <td>Per page</td>
+                                </tr>
+                                <tr>
+                                    <td>Standard Printing</td>
+                                    <td>A3</td>
+                                    <td>₦10</td>
+                                    <td>₦30</td>
+                                    <td>Per page</td>
+                                </tr>
+                                <tr>
+                                    <td>Photocopying</td>
+                                    <td>A4</td>
+                                    <td>₦3</td>
+                                    <td>₦10</td>
+                                    <td>Per page</td>
+                                </tr>
+                                <tr>
+                                    <td>Photocopying</td>
+                                    <td>A3</td>
+                                    <td>₦6</td>
+                                    <td>₦20</td>
+                                    <td>Per page</td>
+                                </tr>
+                                <tr>
+                                    <td>Scanning</td>
+                                    <td>A4</td>
+                                    <td>₦2</td>
+                                    <td>-</td>
+                                    <td>To USB/Email</td>
+                                </tr>
+                                <tr>
+                                    <td>Binding</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>From ₦200</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-cart-plus me-2"></i>
+                        Place an Order
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="printing-order-form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="service-type" class="form-label">Service Type</label>
+                                <select class="form-select" id="service-type" required>
+                                    <option value="">Select Service</option>
+                                    <option value="printing">Document Printing</option>
+                                    <option value="copying">Photocopying</option>
+                                    <option value="scanning">Scanning</option>
+                                    <option value="binding">Binding</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="paper-size" class="form-label">Paper Size</label>
+                                <select class="form-select" id="paper-size" required>
+                                    <option value="">Select Size</option>
+                                    <option value="A4">A4</option>
+                                    <option value="A3">A3</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="color-type" class="form-label">Color Type</label>
+                                <select class="form-select" id="color-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="black-white">Black & White</option>
+                                    <option value="color">Color</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="quantity" min="1" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="file-upload" class="form-label">Upload File (PDF, DOC, JPG)</label>
+                                <input type="file" class="form-control" id="file-upload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="special-instructions" class="form-label">Special Instructions (Optional)</label>
+                                <textarea class="form-control" id="special-instructions" rows="3" placeholder="Any special requirements..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">Submit Order</button>
+                                <button type="reset" class="btn btn-outline-secondary ms-2">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Service Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Operating Hours</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-clock text-primary me-2"></i> Monday - Friday: 8:00 AM - 8:00 PM</li>
+                                <li><i class="bi bi-clock text-primary me-2"></i> Saturday: 9:00 AM - 4:00 PM</li>
+                                <li><i class="bi bi-clock text-primary me-2"></i> Sunday: Closed</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Important Notes</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Payment required before service</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Maximum file size: 50MB</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Turnaround time: 15 minutes - 2 hours</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Bulk order discounts available</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('printing-order-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const serviceType = document.getElementById('service-type').value;
+    const paperSize = document.getElementById('paper-size').value;
+    const colorType = document.getElementById('color-type').value;
+    const quantity = document.getElementById('quantity').value;
+    
+    // Calculate cost
+    let costPerUnit = 0;
+    if (serviceType === 'printing') {
+        costPerUnit = (colorType === 'color') ? (paperSize === 'A4' ? 15 : 30) : (paperSize === 'A4' ? 5 : 10);
+    } else if (serviceType === 'copying') {
+        costPerUnit = (colorType === 'color') ? (paperSize === 'A4' ? 10 : 20) : (paperSize === 'A4' ? 3 : 6);
+    } else if (serviceType === 'scanning') {
+        costPerUnit = 2;
+    }
+    
+    const totalCost = costPerUnit * parseInt(quantity);
+    
+    alert(`Order Summary:\nService: ${serviceType}\nSize: ${paperSize}\nColor: ${colorType}\nQuantity: ${quantity}\nTotal Cost: ₦${totalCost}\n\nPlease proceed to the service desk to complete your order.`);
+});
+</script>
+{% endblock %}

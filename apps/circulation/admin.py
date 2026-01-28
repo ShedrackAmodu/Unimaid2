@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils import timezone
 from .models import Loan, Reservation, Fine, LoanRequest, Attendance
+from config.bulk_actions import (
+    bulk_update_loan_status, bulk_extend_loans, bulk_calculate_fines,
+    bulk_process_reservations, bulk_checkout_visitors
+)
 
 
 @admin.register(Loan)
@@ -8,7 +12,7 @@ class LoanAdmin(admin.ModelAdmin):
     list_display = ['user', 'book_copy', 'loan_date', 'due_date', 'status']
     list_filter = ['status', 'loan_date', 'due_date']
     search_fields = ['user__username', 'book_copy__book__title']
-    actions = ['process_return']
+    actions = ['process_return', bulk_update_loan_status, bulk_extend_loans, bulk_calculate_fines]
 
     def process_return(self, request, queryset):
         updated = 0
@@ -28,6 +32,7 @@ class ReservationAdmin(admin.ModelAdmin):
     list_display = ['user', 'book', 'reservation_date', 'status']
     list_filter = ['status', 'reservation_date']
     search_fields = ['user__username', 'book__title']
+    actions = [bulk_process_reservations]
 
 
 @admin.register(Fine)
@@ -69,7 +74,7 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_display = ['user', 'full_name', 'check_in', 'check_out', 'status']
     list_filter = ['status', 'check_in', 'check_out']
     search_fields = ['user__username', 'full_name', 'registration_number']
-    actions = ['check_out_visitors']
+    actions = ['check_out_visitors', bulk_checkout_visitors]
 
     def check_out_visitors(self, request, queryset):
         updated = 0

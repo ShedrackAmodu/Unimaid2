@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Local History Collection - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Local History Collection</h1>
+            <p class="lead text-center text-muted mb-5">Discover the rich history and heritage of our region</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Search and Filter Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="time_period" class="form-label">Time Period</label>
+                            <select name="time_period" id="time_period" class="form-select">
+                                <option value="">All Periods</option>
+                                {% for period in time_periods %}
+                                <option value="{{ period.id }}" {% if request.GET.time_period == period.id|stringformat:"s" %}selected{% endif %}>{{ period.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select name="category" id="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="format" class="form-label">Format</label>
+                            <select name="format" id="format" class="form-select">
+                                <option value="">All Formats</option>
+                                {% for format in formats %}
+                                <option value="{{ format }}" {% if request.GET.format == format %}selected{% endif %}>{{ format|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by title or description..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a href="{% url 'accounts:local_history' %}" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Historical Documents Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Historical Documents
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for document in historical_documents %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ document.title }}</h6>
+                                    <p class="card-text text-muted">{{ document.description|truncatewords:25 }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">{{ document.time_period.name }}</span>
+                                        <span class="text-muted small">{{ document.date_created|date:"F Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="#" class="btn btn-outline-primary btn-sm">View Document</a>
+                                    <span class="text-muted small ms-2">{{ document.format|title }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photographs Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-camera me-2"></i>
+                        Historical Photographs
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for photo in photographs %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-image text-info" style="font-size: 3rem;"></i>
+                                    <h6 class="mt-3">{{ photo.title }}</h6>
+                                    <p class="text-muted small">{{ photo.description|truncatewords:15 }}</p>
+                                    <span class="badge bg-info">{{ photo.time_period.name }}</span>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="#" class="btn btn-outline-info btn-sm">View Photo</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maps Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-map me-2"></i>
+                        Historical Maps
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for map_item in historical_maps %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ map_item.title }}</h6>
+                                    <p class="card-text text-muted">{{ map_item.description }}</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1"><strong>Date:</strong> {{ map_item.date_created|date:"Y" }}</p>
+                                            <p class="text-muted mb-1"><strong>Scale:</strong> {{ map_item.scale }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted mb-1"><strong>Area:</strong> {{ map_item.area_covered }}</p>
+                                            <p class="text-muted mb-1"><strong>Condition:</strong> {{ map_item.condition }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="#" class="btn btn-outline-success btn-sm">View Map</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oral Histories Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-mic me-2"></i>
+                        Oral Histories
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for oral_history in oral_histories %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ oral_history.title }}</h6>
+                                    <p class="card-text text-muted">{{ oral_history.description|truncatewords:25 }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-warning text-dark">{{ oral_history.interviewee }}</span>
+                                        <span class="text-muted small">{{ oral_history.date_recorded|date:"F Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <a href="#" class="btn btn-outline-warning btn-sm">Listen</a>
+                                    <span class="text-muted small ms-2">{{ oral_history.duration }} minutes</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Local History Collection Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Research Assistance</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Genealogical research support</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Historical document interpretation</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Local history expert consultation</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Research appointment scheduling</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Collection Highlights</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar-check text-primary me-2"></i> 19th century local records</li>
+                                <li><i class="bi bi-camera text-info me-2"></i> Historical photograph archives</li>
+                                <li><i class="bi bi-map text-warning me-2"></i> Original historical maps</li>
+                                <li><i class="bi bi-mic text-danger me-2"></i> Oral history recordings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

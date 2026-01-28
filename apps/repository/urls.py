@@ -5,6 +5,8 @@ app_name = 'repository'
 
 urlpatterns = [
     path('', views.EBookListView.as_view(), name='ebook_list'),
+    path('home/', views.EBookListView.as_view(), name='home'),
+    path('list/', views.EBookListView.as_view(), name='repository_list'),
     path('ebook/<int:pk>/', views.EBookDetailView.as_view(), name='ebook_detail'),
     path('download/<int:pk>/', views.download_ebook, name='download_ebook'),
     path('upload/', views.upload_ebook, name='upload_ebook'),

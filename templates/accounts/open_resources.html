@@ -1,192 +1,354 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="/">Home</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-book fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">Free e-books, textbooks, and open educational resources from around the world</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Open Educational Resources - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="open-resources-page">
-    <div class="container-fluid">
-        <!-- Introduction -->
-        <div class="row mb-5">
-            <div class="col-lg-10 mx-auto text-center">
-                <h2 class="fw-bold mb-4">Free Books & Educational Materials</h2>
-                <p class="lead text-muted">
-                    Access thousands of free e-books, textbooks, and educational resources from reputable publishers
-                    and institutions worldwide. These open resources cover academic subjects, research materials,
-                    and classic literature available for download and online reading.
-                </p>
-            </div>
-        </div>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h1 class="h3 mb-0">Open Educational Resources (OER)</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted">Discover high-quality, freely accessible educational materials that can be used, adapted, and shared to enhance teaching and learning experiences.</p>
 
-        <!-- E-book Sites Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-bookshelf me-2"></i>Free E-book Collections
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            {% for resource in ebook_sites %}
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-book fs-4 text-primary"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">{{ resource.name }}</h6>
-                                                <p class="text-muted small mb-3">{{ resource.description }}</p>
-                                                <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Visit Collection
-                                                </a>
-                                            </div>
+                            <h2 class="h4 text-info mt-4">What are Open Educational Resources?</h2>
+                            <p class="text-muted">Open Educational Resources (OER) are teaching, learning, and research materials that are either in the public domain or have been released under an open license that permits free use, adaptation, and distribution.</p>
+
+                            <div class="alert alert-info mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-graduation-cap"></i> 5R Permissions</h6>
+                                <p class="mb-0">OER materials allow you to: <strong>Retain</strong> - make and keep copies, <strong>Reuse</strong> - use in various ways, <strong>Revise</strong> - adapt and modify, <strong>Remix</strong> - combine with other materials, <strong>Redistribute</strong> - share with others.</p>
+                            </div>
+
+                            <h2 class="h4 text-info mt-5">Textbooks & Course Materials</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book-open text-info"></i> Open Textbook Libraries
+                                            </h6>
+                                            <p class="card-text">Comprehensive collections of peer-reviewed open textbooks.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-globe text-info"></i> <strong>OpenStax:</strong> Rice University textbooks</li>
+                                                <li><i class="fas fa-book text-info"></i> <strong>BCcampus:</strong> Canadian open textbooks</li>
+                                                <li><i class="fas fa-university text-info"></i> <strong>MERLOT:</strong> Multimedia educational resources</li>
+                                                <li><i class="fas fa-search text-info"></i> <strong>OER Commons:</strong> Extensive resource discovery</li>
+                                            </ul>
+                                            <a href="https://openstax.org" target="_blank" class="btn btn-info btn-sm">Visit OpenStax</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-laptop text-info"></i> Interactive Learning Materials
+                                            </h6>
+                                            <p class="card-text">Dynamic and engaging educational content.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-chart-line text-info"></i> Interactive simulations</li>
+                                                <li><i class="fas fa-video text-info"></i> Educational videos and animations</li>
+                                                <li><i class="fas fa-gamepad text-info"></i> Learning games and quizzes</li>
+                                                <li><i class="fas fa-comments text-info"></i> Discussion forums and activities</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-info btn-sm">Explore Materials</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Categories Overview -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-light py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-grid me-2"></i>Resource Categories
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-md-6 col-lg-3">
-                                <div class="category-card text-center p-4 bg-light rounded">
-                                    <i class="bi bi-calculator fs-2 text-primary mb-3"></i>
-                                    <h6 class="fw-bold">Mathematics</h6>
-                                    <p class="text-muted small">Textbooks and resources for math education</p>
+                            <h2 class="h4 text-info mt-5">Subject-Specific Resources</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-microscope fa-2x text-info mb-3"></i>
+                                            <h6>Science & Technology</h6>
+                                            <p class="small text-muted">Lab manuals, simulations, and research materials</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Science</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-globe fa-2x text-info mb-3"></i>
+                                            <h6>Humanities</h6>
+                                            <p class="small text-muted">Literature, history, philosophy resources</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Humanities</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chart-bar fa-2x text-info mb-3"></i>
+                                            <h6>Social Sciences</h6>
+                                            <p class="small text-muted">Economics, psychology, sociology materials</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Social Sciences</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="category-card text-center p-4 bg-light rounded">
-                                    <i class="bi bi-heart-pulse fs-2 text-danger mb-3"></i>
-                                    <h6 class="fw-bold">Medical</h6>
-                                    <p class="text-muted small">Healthcare and medical textbooks</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="category-card text-center p-4 bg-light rounded">
-                                    <i class="bi bi-code-slash fs-2 text-success mb-3"></i>
-                                    <h6 class="fw-bold">Technology</h6>
-                                    <p class="text-muted small">Programming and tech resources</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="category-card text-center p-4 bg-light rounded">
-                                    <i class="bi bi-tree fs-2 text-info mb-3"></i>
-                                    <h6 class="fw-bold">Science</h6>
-                                    <p class="text-muted small">Biology, physics, and research materials</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Usage Guidelines -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-info-circle me-2"></i>Usage Guidelines
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="alert alert-success border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-check-circle-fill me-2"></i>Free Access</h6>
-                                    <p class="mb-0 small">All resources listed are completely free to access and download.</p>
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-stethoscope fa-2x text-info mb-3"></i>
+                                            <h6>Health Sciences</h6>
+                                            <p class="small text-muted">Medical, nursing, and health education</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Health</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-paint-brush fa-2x text-info mb-3"></i>
+                                            <h6>Arts & Design</h6>
+                                            <p class="small text-muted">Creative arts and design resources</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Arts</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-calculator fa-2x text-info mb-3"></i>
+                                            <h6>Mathematics</h6>
+                                            <p class="small text-muted">Math tutorials, exercises, and tools</p>
+                                            <a href="#" class="btn btn-outline-info btn-sm">Browse Math</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-info border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-download me-2"></i>Download Options</h6>
-                                    <p class="mb-0 small">Most sites offer PDF downloads, online reading, or both options.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <hr class="my-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="alert alert-warning border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Availability</h6>
-                                    <p class="mb-0 small">Some resources may have limited availability or require registration.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-primary border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb me-2"></i>Educational Use</h6>
-                                    <p class="mb-0 small">These materials are intended for educational and research purposes.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Help Section -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-body p-5 text-center">
-                        <h3 class="fw-bold mb-4">Need Help Finding Resources?</h3>
-                        <p class="text-muted mb-4">
-                            Our librarians can help you find specific textbooks or educational materials for your studies.
-                        </p>
-                        <div class="row g-3 justify-content-center">
-                            <div class="col-md-6">
-                                <a href="{% url 'accounts:research_assistance' %}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-search me-2"></i>Research Assistance
-                                </a>
+                            <h2 class="h4 text-info mt-5">Finding OER Materials</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-search text-info"></i> Search Strategies
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-hashtag text-info"></i> Use subject-specific keywords</li>
+                                                <li><i class="fas fa-filter text-info"></i> Filter by license type</li>
+                                                <li><i class="fas fa-star text-info"></i> Look for peer-reviewed content</li>
+                                                <li><i class="fas fa-download text-info"></i> Check file formats and compatibility</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-shield-alt text-info"></i> License Verification
+                                            </h6>
+                                            <p class="card-text">Always check the license terms:</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check-circle text-info"></i> <strong>CC BY:</strong> Attribution required</li>
+                                                <li><i class="fas fa-check-circle text-info"></i> <strong>CC BY-SA:</strong> Share alike required</li>
+                                                <li><i class="fas fa-check-circle text-info"></i> <strong>CC BY-NC:</strong> Non-commercial use</li>
+                                                <li><i class="fas fa-check-circle text-info"></i> <strong>Public Domain:</strong> No restrictions</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <a href="{% url 'accounts:contact' %}" class="btn btn-primary w-100">
-                                    <i class="bi bi-envelope me-2"></i>Contact Librarian
-                                </a>
+
+                            <h2 class="h4 text-info mt-5">Adapting OER Materials</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-edit text-info"></i> Customization Options
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-text-height text-info"></i> Modify text and content</li>
+                                                <li><i class="fas fa-image text-info"></i> Update images and graphics</li>
+                                                <li><i class="fas fa-list-ol text-info"></i> Rearrange chapters or sections</li>
+                                                <li><i class="fas fa-plus text-info"></i> Add supplementary materials</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-tools text-info"></i> Adaptation Tools
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-file-alt text-info"></i> LibreOffice for document editing</li>
+                                                <li><i class="fas fa-image text-info"></i> GIMP for image editing</li>
+                                                <li><i class="fas fa-film text-info"></i> OpenShot for video editing</li>
+                                                <li><i class="fas fa-music text-info"></i> Audacity for audio editing</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-info mt-5">Benefits of OER</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-dollar-sign fa-2x text-info mb-3"></i>
+                                            <h6>Cost Savings</h6>
+                                            <p class="small text-muted">Eliminates expensive textbook costs for students</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-lightbulb fa-2x text-info mb-3"></i>
+                                            <h6>Customization</h6>
+                                            <p class="small text-muted">Tailor materials to specific course needs</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-globe fa-2x text-info mb-3"></i>
+                                            <h6>Accessibility</h6>
+                                            <p class="small text-muted">Available to anyone with internet access</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-users fa-2x text-info mb-3"></i>
+                                            <h6>Collaboration</h6>
+                                            <p class="small text-muted">Share and improve materials with colleagues</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chart-line fa-2x text-info mb-3"></i>
+                                            <h6>Updated Content</h6>
+                                            <p class="small text-muted">Keep materials current and relevant</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-graduation-cap fa-2x text-info mb-3"></i>
+                                            <h6>Student Engagement</h6>
+                                            <p class="small text-muted">Interactive and adaptable learning materials</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-info mt-5">Support & Training</h2>
+                            <div class="alert alert-info mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-hands-helping"></i> Need Help with OER?</h6>
+                                <p class="mb-2">Our library offers support for finding, adapting, and implementing OER materials:</p>
+                                <ul class="mb-0">
+                                    <li>Workshops on OER discovery and evaluation</li>
+                                    <li>Consultations for material adaptation</li>
+                                    <li>Technical support for OER platforms</li>
+                                    <li>Grant opportunities for OER development</li>
+                                </ul>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">For Instructors</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-search text-info"></i> Find suitable OER for your courses</li>
+                                                <li><i class="fas fa-edit text-info"></i> Adapt materials to fit your curriculum</li>
+                                                <li><i class="fas fa-upload text-info"></i> Share your adapted materials</li>
+                                                <li><i class="fas fa-chart-bar text-info"></i> Track student engagement and outcomes</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">For Students</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-book text-info"></i> Access free course materials</li>
+                                                <li><i class="fas fa-download text-info"></i> Download materials for offline use</li>
+                                                <li><i class="fas fa-comment-dots text-info"></i> Participate in material improvement</li>
+                                                <li><i class="fas fa-globe text-info"></i> Access materials from anywhere</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:open_access' %}" class="text-decoration-none">
+                                                <i class="fas fa-unlock-alt text-info"></i> Open Access Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:digital_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-laptop text-info"></i> Digital Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:research_assistance' %}" class="text-decoration-none">
+                                                <i class="fas fa-search text-info"></i> Research Assistance
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:library_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-book text-info"></i> Library Resources
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">OER Workshops</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Join our regular workshops to learn about OER discovery and implementation.</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-calendar text-info"></i> Monthly workshops</li>
+                                        <li><i class="fas fa-chalkboard-teacher text-info"></i> Hands-on training</li>
+                                        <li><i class="fas fa-laptop text-info"></i> Online and in-person options</li>
+                                        <li><i class="fas fa-certificate text-info"></i> Certificate of completion</li>
+                                    </ul>
+                                    <a href="#" class="btn btn-info btn-sm mt-2">View Schedule</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -197,34 +359,22 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ block.super }}
-<style>
-    .resource-card {
-        transition: all 0.3s ease;
-    }
-
-    .resource-card:hover {
-        border-color: var(--accent-blue) !important;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .resource-icon {
-        transition: transform 0.3s ease;
-    }
-
-    .resource-card:hover .resource-icon {
-        transform: scale(1.1);
-    }
-
-    .category-card {
-        transition: all 0.3s ease;
-    }
-
-    .category-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-</style>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add interactive features to resource cards
+    const resourceCards = document.querySelectorAll('.card.border-info');
+    
+    resourceCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
 {% endblock %}

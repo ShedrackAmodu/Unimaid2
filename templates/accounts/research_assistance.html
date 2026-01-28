@@ -1,180 +1,340 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'accounts:contact' %}">Contact</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-search fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">Get expert help with your research needs and academic projects</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Research Assistance - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="research-assistance-page">
-    <div class="container-fluid">
-        <!-- Services Overview -->
-        <div class="row g-4 mb-5">
-            {% for service in services %}
-            <div class="col-lg-6 col-xl-3">
-                <div class="card h-100 border-0 shadow-hover">
-                    <div class="card-body p-4 text-center">
-                        <div class="service-icon mb-4">
-                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0a2472, #3a86ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                                <i class="bi {{ service.icon }} fs-2 text-white"></i>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h1 class="h3 mb-0">Research Assistance</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted">Get expert help with your research projects from our knowledgeable librarians and research specialists. We're here to support you at every stage of the research process.</p>
+
+                            <h2 class="h4 text-warning mt-4">How We Can Help</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-search text-warning"></i> Research Strategy
+                                            </h6>
+                                            <p class="card-text">Develop effective research plans and identify the best resources for your topic.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-brain text-warning"></i> Topic refinement and focus</li>
+                                                <li><i class="fas fa-map-marked-alt text-warning"></i> Research roadmap development</li>
+                                                <li><i class="fas fa-lightbulb text-warning"></i> Search strategy consultation</li>
+                                                <li><i class="fas fa-compass text-warning"></i> Database selection guidance</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-database text-warning"></i> Database Navigation
+                                            </h6>
+                                            <p class="card-text">Master advanced search techniques and discover specialized databases.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-laptop text-warning"></i> Database training sessions</li>
+                                                <li><i class="fas fa-cog text-warning"></i> Advanced search techniques</li>
+                                                <li><i class="fas fa-filter text-warning"></i> Refining search results</li>
+                                                <li><i class="fas fa-download text-warning"></i> Exporting and managing citations</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-citation text-warning"></i> Citation Management
+                                            </h6>
+                                            <p class="card-text">Learn to organize your sources and create properly formatted citations.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-bookmark text-warning"></i> Reference management software</li>
+                                                <li><i class="fas fa-file-alt text-warning"></i> Citation style guidance</li>
+                                                <li><i class="fas fa-copy text-warning"></i> Plagiarism prevention</li>
+                                                <li><i class="fas fa-graduation-cap text-warning"></i> Academic writing support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-chart-bar text-warning"></i> Data Analysis
+                                            </h6>
+                                            <p class="card-text">Get help with statistical analysis and data visualization.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-chart-pie text-warning"></i> Statistical software guidance</li>
+                                                <li><i class="fas fa-chart-line text-warning"></i> Data visualization tools</li>
+                                                <li><i class="fas fa-calculator text-warning"></i> Quantitative analysis support</li>
+                                                <li><i class="fas fa-comments text-warning"></i> Qualitative analysis methods</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-warning mt-5">Schedule a Consultation</h2>
+                            <div class="alert alert-warning mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-calendar-check"></i> Book Your Research Session</h6>
+                                <p class="mb-2">Meet one-on-one with a research librarian for personalized assistance:</p>
+                                <ul class="mb-0">
+                                    <li><strong>Duration:</strong> 30-60 minutes per session</li>
+                                    <li><strong>Format:</strong> In-person or virtual consultations available</li>
+                                    <li><strong>Preparation:</strong> Come with your research question or topic</li>
+                                    <li><strong>Follow-up:</strong> Additional sessions can be scheduled as needed</li>
+                                </ul>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-user-tie fa-2x text-warning mb-3"></i>
+                                            <h6>Individual Consultations</h6>
+                                            <p class="small text-muted">One-on-one sessions with subject specialists</p>
+                                            <a href="#" class="btn btn-warning btn-sm">Book Now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-users fa-2x text-warning mb-3"></i>
+                                            <h6>Group Sessions</h6>
+                                            <p class="small text-muted">Workshops for classes and research groups</p>
+                                            <a href="#" class="btn btn-warning btn-sm">Request Session</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-comments fa-2x text-warning mb-3"></i>
+                                            <h6>Quick Questions</h6>
+                                            <p class="small text-muted">Drop-in help for immediate research needs</p>
+                                            <a href="#" class="btn btn-warning btn-sm">Get Help</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-warning mt-5">Research Tools & Resources</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-laptop text-warning"></i> Research Software
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-file-alt text-warning"></i> <strong>Zotero:</strong> Reference management</li>
+                                                <li><i class="fas fa-chart-bar text-warning"></i> <strong>SPSS:</strong> Statistical analysis</li>
+                                                <li><i class="fas fa-code text-warning"></i> <strong>R:</strong> Statistical computing</li>
+                                                <li><i class="fas fa-mind-share text-warning"></i> <strong>NVivo:</strong> Qualitative analysis</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-globe text-warning"></i> Subject Guides
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-microscope text-warning"></i> Science and Technology</li>
+                                                <li><i class="fas fa-globe text-warning"></i> Humanities and Social Sciences</li>
+                                                <li><i class="fas fa-stethoscope text-warning"></i> Health and Medical Sciences</li>
+                                                <li><i class="fas fa-chart-line text-warning"></i> Business and Economics</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-warning mt-5">Workshops & Training</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-search fa-2x text-warning mb-3"></i>
+                                            <h6>Advanced Searching</h6>
+                                            <p class="small text-muted">Master database search techniques</p>
+                                            <span class="badge bg-warning text-dark">Monthly</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-citation fa-2x text-warning mb-3"></i>
+                                            <h6>Citation Management</h6>
+                                            <p class="small text-muted">Learn reference management tools</p>
+                                            <span class="badge bg-warning text-dark">Bi-weekly</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chart-bar fa-2x text-warning mb-3"></i>
+                                            <h6>Data Visualization</h6>
+                                            <p class="small text-muted">Create effective data presentations</p>
+                                            <span class="badge bg-warning text-dark">Quarterly</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-warning mt-5">Online Resources</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-video text-warning"></i> Tutorial Videos
+                                            </h6>
+                                            <p class="card-text">Step-by-step guides for common research tasks.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-play text-warning"></i> Database search tutorials</li>
+                                                <li><i class="fas fa-play text-warning"></i> Citation management guides</li>
+                                                <li><i class="fas fa-play text-warning"></i> Research software demos</li>
+                                                <li><i class="fas fa-play text-warning"></i> Academic writing tips</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-warning btn-sm">Watch Videos</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book text-warning"></i> Research Guides
+                                            </h6>
+                                            <p class="card-text">Comprehensive guides for different research methods.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-graduation-cap text-warning"></i> Undergraduate research</li>
+                                                <li><i class="fas fa-user-graduate text-warning"></i> Graduate research</li>
+                                                <li><i class="fas fa-chalkboard-teacher text-warning"></i> Faculty research</li>
+                                                <li><i class="fas fa-flask text-warning"></i> Scientific research methods</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-warning btn-sm">View Guides</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-warning mt-5">Contact Us</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6 class="mb-0">Research Help Desk</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-map-marker-alt text-warning"></i> Main Library, 2nd Floor</li>
+                                                <li><i class="fas fa-clock text-warning"></i> Mon-Fri: 9 AM - 5 PM</li>
+                                                <li><i class="fas fa-phone text-warning"></i> +234 (0) 803 123 4567</li>
+                                                <li><i class="fas fa-envelope text-warning"></i> research@unimaid.edu.ng</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6 class="mb-0">Virtual Assistance</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-comments text-warning"></i> Live chat available</li>
+                                                <li><i class="fas fa-video text-warning"></i> Virtual consultations</li>
+                                                <li><i class="fas fa-envelope-open text-warning"></i> Email support</li>
+                                                <li><i class="fas fa-question-circle text-warning"></i> FAQ section</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6 class="mb-0">Subject Specialists</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-book text-warning"></i> Subject-specific librarians</li>
+                                                <li><i class="fas fa-user-tie text-warning"></i> Expert knowledge areas</li>
+                                                <li><i class="fas fa-calendar-alt text-warning"></i> Office hours by appointment</li>
+                                                <li><i class="fas fa-globe text-warning"></i> Online availability</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <h5 class="fw-bold mb-3">{{ service.title }}</h5>
-                        <p class="text-muted mb-4">{{ service.description }}</p>
-                        <button class="btn btn-outline-primary" onclick="scrollToContact()">
-                            <i class="bi bi-calendar-event me-2"></i>Request Service
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Research Resources -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-journal-bookmark me-2"></i>Research Resources & Guides
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-md-6 col-lg-4">
-                                <div class="resource-card p-4 border rounded h-100">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="resource-icon me-3">
-                                            <i class="bi bi-search fs-4 text-primary"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-0">Finding Sources</h6>
-                                    </div>
-                                    <p class="text-muted small mb-3">
-                                        Learn how to effectively search for scholarly articles, books, and other resources.
-                                    </p>
-                                    <ul class="list-unstyled small">
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Database searching techniques</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Advanced search operators</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Source evaluation criteria</li>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:interlibrary_loan' %}" class="text-decoration-none">
+                                                <i class="fas fa-exchange-alt text-warning"></i> Interlibrary Loan
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:digital_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-laptop text-warning"></i> Digital Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:library_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-book text-warning"></i> Library Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:study_room_booking' %}" class="text-decoration-none">
+                                                <i class="fas fa-chalkboard-teacher text-warning"></i> Study Rooms
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 col-lg-4">
-                                <div class="resource-card p-4 border rounded h-100">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="resource-icon me-3">
-                                            <i class="bi bi-bookmark-check fs-4 text-primary"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-0">Citation Help</h6>
-                                    </div>
-                                    <p class="text-muted small mb-3">
-                                        Master different citation styles and avoid plagiarism.
-                                    </p>
-                                    <ul class="list-unstyled small">
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>APA, MLA, Chicago styles</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Reference management tools</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Plagiarism prevention</li>
-                                    </ul>
+                            <div class="card mt-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">Research Tips</h6>
                                 </div>
-                            </div>
-
-                            <div class="col-md-6 col-lg-4">
-                                <div class="resource-card p-4 border rounded h-100">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="resource-icon me-3">
-                                            <i class="bi bi-graph-up fs-4 text-primary"></i>
-                                        </div>
-                                        <h6 class="fw-bold mb-0">Data Analysis</h6>
+                                <div class="card-body">
+                                    <div class="alert alert-light">
+                                        <h6 class="alert-heading"><i class="fas fa-lightbulb"></i> Pro Tips</h6>
+                                        <ul class="mb-0">
+                                            <li>Start with broad searches, then narrow down</li>
+                                            <li>Use synonyms and related terms</li>
+                                            <li>Check reference lists for additional sources</li>
+                                            <li>Keep track of your search strategy</li>
+                                        </ul>
                                     </div>
-                                    <p class="text-muted small mb-3">
-                                        Support for quantitative and qualitative data analysis.
-                                    </p>
-                                    <ul class="list-unstyled small">
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Statistical software</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Data visualization</li>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i>Research methodology</li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Form for Research Assistance -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-send me-2"></i>Request Research Assistance
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <form method="post" action="{% url 'accounts:contact' %}" id="researchForm">
-                            {% csrf_token %}
-                            <input type="hidden" name="subject" value="research_assistance">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label fw-bold">Full Name *</label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="email" class="form-label fw-bold">Email Address *</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="department" class="form-label fw-bold">Department/Program</label>
-                                    <input type="text" class="form-control" id="department" name="department">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="service_type" class="form-label fw-bold">Type of Assistance Needed</label>
-                                    <select class="form-select" id="service_type" name="service_type">
-                                        <option value="reference">Reference Services</option>
-                                        <option value="citation">Citation Help</option>
-                                        <option value="consultation">Research Consultation</option>
-                                        <option value="database">Database Training</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="col-12">
-                                    <label for="research_topic" class="form-label fw-bold">Research Topic/Project Title</label>
-                                    <input type="text" class="form-control" id="research_topic" name="research_topic">
-                                </div>
-                                <div class="col-12">
-                                    <label for="message" class="form-label fw-bold">Specific Needs/Questions *</label>
-                                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary px-5">
-                                        <i class="bi bi-send me-2"></i>Submit Request
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -183,27 +343,22 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ block.super }}
+{% block extra_js %}
 <script>
-    function scrollToContact() {
-        document.getElementById('researchForm').scrollIntoView({ behavior: 'smooth' });
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    // Add interactive features to resource cards
+    const resourceCards = document.querySelectorAll('.card.border-warning');
+    
+    resourceCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
 </script>
-<style>
-    .service-icon div {
-        transition: transform 0.3s ease;
-    }
-    .card:hover .service-icon div {
-        transform: scale(1.1) rotate(5deg);
-    }
-    .resource-card {
-        transition: all 0.3s ease;
-    }
-    .resource-card:hover {
-        border-color: var(--accent-blue) !important;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-</style>
 {% endblock %}

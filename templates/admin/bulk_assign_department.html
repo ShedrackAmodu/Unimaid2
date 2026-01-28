@@ -1,0 +1,13 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_department">{% trans "Department" %}:</label>
+    <select name="department" id="id_department" required>
+        <option value="">{% trans "---------" %}</option>
+        {% for department in departments %}
+        <option value="{{ department.id }}">{{ department.name }} ({{ department.faculty.name }})</option>
+        {% endfor %}
+    </select>
+    <p class="help">{% trans "Select the department to assign to all selected users." %}</p>
+{% endblock %}

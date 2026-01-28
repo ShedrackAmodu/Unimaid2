@@ -102,7 +102,9 @@ class EBookPermissionRequest(BaseModel):
         EBook,
         on_delete=models.CASCADE,
         related_name='permission_requests',
-        help_text="The eBook access is being requested for"
+        help_text="The eBook access is being requested for",
+        null=True,
+        blank=True
     )
     user = models.ForeignKey(
         LibraryUser,
@@ -189,7 +191,9 @@ class EBookPermission(BaseModel):
         EBook,
         on_delete=models.CASCADE,
         related_name='permissions',
-        help_text="The eBook being granted access to"
+        help_text="The eBook being granted access to",
+        null=True,
+        blank=True
     )
     user = models.ForeignKey(
         LibraryUser,

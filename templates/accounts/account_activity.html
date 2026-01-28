@@ -1,0 +1,930 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Activity - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}" class="text-decoration-none">
+    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+</a></li>
+<li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}" class="text-decoration-none">
+    <i class="bi bi-person me-1"></i>Profile
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Account Activity</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-clock fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Account Activity</h1>
+                <p class="lead text-muted">View your recent account activity and security events</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Account Activity Page Content -->
+<div class="account-activity-page">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Activity Summary -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h4 class="fw-bold mb-1">Activity Summary</h4>
+                                <p class="text-muted mb-0">Overview of your recent account activity</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-filter me-2"></i>Filter Activity
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="filterActivity('all')">All Activity</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterActivity('security')">Security</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterActivity('library')">Library</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterActivity('profile')">Profile</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="activity-summary-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-primary me-3">
+                                            <i class="bi bi-clock text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Last Activity</h6>
+                                            <small class="text-muted">
+                                                {% if last_activity %}
+                                                    {{ last_activity|date:"M d, Y H:i" }}
+                                                {% else %}
+                                                    Never
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-summary-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-success me-3">
+                                            <i class="bi bi-check-circle text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Successful Logins</h6>
+                                            <small class="text-muted">Recent successful sign-ins</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-summary-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-warning me-3">
+                                            <i class="bi bi-exclamation-triangle text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Failed Attempts</h6>
+                                            <small class="text-muted">{{ failed_attempts }} attempts</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-summary-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-info me-3">
+                                            <i class="bi bi-shield-check text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Security Events</h6>
+                                            <small class="text-muted">Account security changes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activity Timeline -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-1">Recent Activity</h5>
+                                <p class="text-muted mb-0">Your recent account and library activities</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="refreshActivity()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-timeline">
+                            <!-- Security Activities -->
+                            <div class="activity-category" data-category="security">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-shield-check me-2"></i>Security Activity
+                                </h6>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-success me-3">
+                                            <i class="bi bi-check-circle text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Password Changed</h6>
+                                                    <p class="text-muted mb-2">
+                                                        {% if last_password_change %}
+                                                            Password was successfully updated on {{ last_password_change|date:"M d, Y H:i" }}
+                                                        {% else %}
+                                                            Password has never been changed
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-success">Security</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {% if last_password_change %}
+                                                        {{ last_password_change|timesince }} ago
+                                                    {% else %}
+                                                        Never
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-info me-3">
+                                            <i class="bi bi-shield-check text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Two-Factor Authentication</h6>
+                                                    <p class="text-muted mb-2">
+                                                        {% if user.two_factor_enabled %}
+                                                            Two-factor authentication is currently enabled on your account
+                                                        {% else %}
+                                                            Two-factor authentication is not enabled. Consider enabling it for better security.
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-info">Security</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {% if user.two_factor_enabled %}
+                                                        Enabled
+                                                    {% else %}
+                                                        Not enabled
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if failed_attempts > 0 %}
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-warning me-3">
+                                            <i class="bi bi-exclamation-triangle text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Failed Login Attempts</h6>
+                                                    <p class="text-muted mb-2">
+                                                        {{ failed_attempts }} failed login attempt{{ failed_attempts|pluralize }} detected. 
+                                                        {% if locked_until %}
+                                                            Account is locked until {{ locked_until|date:"M d, Y H:i" }}.
+                                                        {% else %}
+                                                            Account is not currently locked.
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-warning">Security</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {% if locked_until %}
+                                                        Locked until {{ locked_until|date:"M d, Y H:i" }}
+                                                    {% else %}
+                                                        No current lockout
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Library Activities -->
+                            <div class="activity-category" data-category="library">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-book me-2"></i>Library Activity
+                                </h6>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-primary me-3">
+                                            <i class="bi bi-arrow-left-right text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Recent Loans</h6>
+                                                    <p class="text-muted mb-2">
+                                                        View your recent book loans and their status
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-primary">Library</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Check your dashboard for recent loans
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-info me-3">
+                                            <i class="bi bi-bookmark text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Reservations</h6>
+                                                    <p class="text-muted mb-2">
+                                                        View your book reservations and their status
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-info">Library</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Check your dashboard for active reservations
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-success me-3">
+                                            <i class="bi bi-cash text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Fines and Payments</h6>
+                                                    <p class="text-muted mb-2">
+                                                        View any outstanding fines or recent payments
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-success">Library</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Check your dashboard for fine status
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Profile Activities -->
+                            <div class="activity-category" data-category="profile">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-person me-2"></i>Profile Activity
+                                </h6>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-secondary me-3">
+                                            <i class="bi bi-person-circle text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Profile Updated</h6>
+                                                    <p class="text-muted mb-2">
+                                                        Your profile information was last updated
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-secondary">Profile</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Last updated recently
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon bg-info me-3">
+                                            <i class="bi bi-envelope text-white"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Email Verification</h6>
+                                                    <p class="text-muted mb-2">
+                                                        {% if user.email_verified %}
+                                                            Your email address has been verified
+                                                        {% else %}
+                                                            Your email address is not verified. Please check your email for verification instructions.
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <span class="badge bg-info">Profile</span>
+                                            </div>
+                                            <div class="activity-meta">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {% if user.email_verified %}
+                                                        Verified
+                                                    {% else %}
+                                                        Not verified
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Recommendations -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Security Recommendations</h5>
+                        
+                        <div class="security-recommendations">
+                            {% if not user.two_factor_enabled %}
+                            <div class="recommendation-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="icon-circle bg-warning me-3">
+                                        <i class="bi bi-shield-exclamation text-white"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold">Enable Two-Factor Authentication</h6>
+                                        <p class="text-muted mb-2">
+                                            Add an extra layer of security to protect your account from unauthorized access.
+                                        </p>
+                                        <a href="{% url 'accounts:security_settings' %}" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-shield-check me-2"></i>Enable 2FA
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if failed_attempts > 0 %}
+                            <div class="recommendation-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="icon-circle bg-danger me-3">
+                                        <i class="bi bi-exclamation-triangle text-white"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold">Review Failed Login Attempts</h6>
+                                        <p class="text-muted mb-2">
+                                            You have {{ failed_attempts }} failed login attempt{{ failed_attempts|pluralize }}. If this wasn't you, please secure your account.
+                                        </p>
+                                        <button class="btn btn-danger btn-sm" onclick="resetFailedAttempts()">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Reset Attempts
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="recommendation-item">
+                                <div class="d-flex align-items-start">
+                                    <div class="icon-circle bg-info me-3">
+                                        <i class="bi bi-key text-white"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold">Update Your Password</h6>
+                                        <p class="text-muted mb-2">
+                                            Use a strong, unique password that you don't use elsewhere.
+                                        </p>
+                                        <a href="{% url 'accounts:change_password' %}" class="btn btn-info btn-sm">
+                                            <i class="bi bi-key me-2"></i>Change Password
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activity Export -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-1">Export Activity</h5>
+                                <p class="text-muted mb-0">Download your activity history for record keeping</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportActivity('csv')">
+                                    <i class="bi bi-download me-2"></i>Export CSV
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="exportActivity('pdf')">
+                                    <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle me-3 fs-4"></i>
+                                <div>
+                                    <strong>Activity Data:</strong>
+                                    <p class="mt-2 mb-0">
+                                        Your activity data is stored securely and is only accessible by you. 
+                                        We recommend regularly reviewing your activity for any suspicious behavior.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Filter Modal -->
+<div class="modal fade" id="activityFilterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Filter Activity</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filterSecurity" checked>
+                            <label class="form-check-label" for="filterSecurity">
+                                <i class="bi bi-shield-check me-2"></i>Security Activity
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filterLibrary" checked>
+                            <label class="form-check-label" for="filterLibrary">
+                                <i class="bi bi-book me-2"></i>Library Activity
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filterProfile" checked>
+                            <label class="form-check-label" for="filterProfile">
+                                <i class="bi bi-person me-2"></i>Profile Activity
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filterAll" checked>
+                            <label class="form-check-label" for="filterAll">
+                                <i class="bi bi-list me-2"></i>Show All Activity
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Account Activity Specific Styles */
+    .account-activity-page {
+        padding-bottom: 4rem;
+    }
+    
+    /* Activity Summary Items */
+    .activity-summary-item {
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-summary-item:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    /* Activity Timeline */
+    .activity-timeline {
+        position: relative;
+    }
+    
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #e9ecef;
+        z-index: 0;
+    }
+    
+    .activity-category {
+        margin-bottom: 30px;
+    }
+    
+    .activity-category h6 {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .activity-category h6::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 2px;
+        background-color: #0d6efd;
+    }
+    
+    .activity-item {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: 18px;
+        top: 10px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #0d6efd;
+        z-index: 1;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .activity-meta {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    /* Recommendation Items */
+    .recommendation-item {
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-item:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate__fadeInUp {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Hover Effects */
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .account-activity-page {
+            padding-bottom: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .activity-timeline::before {
+            left: 20px;
+        }
+        
+        .activity-item {
+            padding-left: 35px;
+        }
+        
+        .activity-item::before {
+            left: 13px;
+        }
+        
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter activity function
+        window.filterActivity = function(category) {
+            const categories = document.querySelectorAll('.activity-category');
+            
+            categories.forEach(cat => {
+                if (category === 'all' || cat.dataset.category === category) {
+                    cat.style.display = 'block';
+                    cat.style.animation = 'fadeInUp 0.3s ease-out';
+                } else {
+                    cat.style.display = 'none';
+                }
+            });
+            
+            // Update button text
+            const filterBtn = document.querySelector('.dropdown-toggle');
+            if (filterBtn) {
+                if (category === 'all') {
+                    filterBtn.innerHTML = '<i class="bi bi-filter me-2"></i>All Activity';
+                } else {
+                    filterBtn.innerHTML = `<i class="bi bi-filter me-2"></i>${category.charAt(0).toUpperCase() + category.slice(1)} Activity`;
+                }
+            }
+        };
+        
+        // Refresh activity function
+        window.refreshActivity = function() {
+            const refreshBtn = event.target;
+            const originalText = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Refreshing...';
+            refreshBtn.disabled = true;
+            
+            // Simulate refresh (in real app, this would fetch new data)
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                showToast('success', 'Activity refreshed successfully');
+            }, 1000);
+        };
+        
+        // Reset failed attempts function
+        window.resetFailedAttempts = function() {
+            if (confirm('Are you sure you want to reset failed login attempts? This will unlock your account if it was locked.')) {
+                fetch('{% url "accounts:security_settings" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                    body: new URLSearchParams({
+                        'action': 'reset_failed_attempts'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('success', data.message);
+                        // Update the failed attempts display
+                        updateFailedAttemptsDisplay(data.failed_attempts, data.locked_until);
+                        
+                        // Hide the failed attempts recommendation
+                        const failedAttemptsItem = document.querySelector('.recommendation-item:has-text("Review Failed Login Attempts")');
+                        if (failedAttemptsItem) {
+                            failedAttemptsItem.style.display = 'none';
+                        }
+                    } else {
+                        showToast('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('error', 'An error occurred while resetting failed attempts');
+                });
+            }
+        };
+        
+        // Export activity function
+        window.exportActivity = function(format) {
+            showToast('info', `Exporting activity as ${format.toUpperCase()}...`);
+            
+            // Simulate export (in real app, this would generate and download a file)
+            setTimeout(() => {
+                showToast('success', `Activity exported as ${format.toUpperCase()} successfully`);
+            }, 2000);
+        };
+        
+        // Apply filters function
+        window.applyFilters = function() {
+            const securityChecked = document.getElementById('filterSecurity').checked;
+            const libraryChecked = document.getElementById('filterLibrary').checked;
+            const profileChecked = document.getElementById('filterProfile').checked;
+            const allChecked = document.getElementById('filterAll').checked;
+            
+            const securityCategory = document.querySelector('.activity-category[data-category="security"]');
+            const libraryCategory = document.querySelector('.activity-category[data-category="library"]');
+            const profileCategory = document.querySelector('.activity-category[data-category="profile"]');
+            
+            if (allChecked) {
+                securityCategory.style.display = 'block';
+                libraryCategory.style.display = 'block';
+                profileCategory.style.display = 'block';
+            } else {
+                securityCategory.style.display = securityChecked ? 'block' : 'none';
+                libraryCategory.style.display = libraryChecked ? 'block' : 'none';
+                profileCategory.style.display = profileChecked ? 'block' : 'none';
+            }
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('activityFilterModal'));
+            modal.hide();
+            
+            showToast('success', 'Filters applied successfully');
+        };
+        
+        // Update failed attempts display
+        function updateFailedAttemptsDisplay(attempts, lockedUntil) {
+            const failedAttemptsElement = document.querySelector('.activity-summary-item:nth-child(3) small.text-muted');
+            if (failedAttemptsElement) {
+                let text = `${attempts} attempts`;
+                if (lockedUntil) {
+                    text += ` (Locked until ${lockedUntil})`;
+                }
+                failedAttemptsElement.textContent = text;
+            }
+        }
+        
+        // Toast notification function
+        function showToast(type, message) {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.custom-toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = `custom-toast alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}-fill fs-4 me-3"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Add confetti effect for security enabled
+        if ({% if user.two_factor_enabled %}true{% else %}false{% endif %}) {
+            createConfetti();
+        }
+        
+        // Confetti effect
+        function createConfetti() {
+            const colors = ['#198754', '#20c997', '#0d6efd', '#ffc107', '#dc3545'];
+            const container = document.body;
+            
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.width = '6px';
+                confetti.style.height = '6px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                confetti.style.animation = 'fall ' + (Math.random() * 3 + 2) + 's linear forwards';
+                
+                container.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Add CSS for confetti animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add smooth scrolling for activity items
+        const activityItems = document.querySelectorAll('.activity-item');
+        activityItems.forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.transform = 'translateX(10px)';
+                setTimeout(() => {
+                    this.style.transform = 'translateX(0)';
+                }, 200);
+            });
+        });
+    });
+</script>
+{% endblock %}

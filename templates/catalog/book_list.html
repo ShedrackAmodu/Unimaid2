@@ -15,7 +15,7 @@
             <div>
                 <h1 class="display-4 fw-bold mb-2">Book Collection</h1>
                 <p class="lead text-muted mb-0">
-                    Browse our extensive book collection
+                    Browse our collection of {{ books.paginator.count }} books
                 </p>
             </div>
             <div class="mt-3 mt-md-0">
@@ -552,19 +552,19 @@
             <div class="card-body p-4">
                 <div class="row text-center">
                     <div class="col-md-3">
-                        <h3 class="fw-bold text-primary">{{ total_books|default:"0" }}</h3>
+                        <h3 class="fw-bold text-primary">{{ total_books }}</h3>
                         <p class="text-muted mb-0">Total Books</p>
                     </div>
                     <div class="col-md-3">
-                        <h3 class="fw-bold text-success">{{ available_books|default:"0" }}</h3>
+                        <h3 class="fw-bold text-success">{{ available_books }}</h3>
                         <p class="text-muted mb-0">Available Now</p>
                     </div>
                     <div class="col-md-3">
-                        <h3 class="fw-bold text-warning">{{ genres_count|default:"0" }}</h3>
+                        <h3 class="fw-bold text-warning">{{ genres_count }}</h3>
                         <p class="text-muted mb-0">Genres</p>
                     </div>
                     <div class="col-md-3">
-                        <h3 class="fw-bold text-info">{{ authors_count|default:"0" }}</h3>
+                        <h3 class="fw-bold text-info">{{ authors_count }}</h3>
                         <p class="text-muted mb-0">Authors</p>
                     </div>
                 </div>

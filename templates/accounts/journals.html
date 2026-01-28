@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Journals & Periodicals - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Journals & Periodicals</h1>
+            <p class="lead text-center text-muted mb-5">Access our extensive collection of academic journals and periodicals</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Academic Journals Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-journal-text me-2"></i>
+                        Academic Journals
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% for journal in journals %}
+                    <div class="row mb-3 border-bottom pb-3">
+                        <div class="col-md-8">
+                            <h5 class="text-primary">{{ journal.title }}</h5>
+                            <p class="text-muted mb-1">
+                                <strong>Publisher:</strong> {{ journal.publisher }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Frequency:</strong> {{ journal.frequency }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Subjects:</strong> {{ journal.subjects|join:", " }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-success">{{ journal.access }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Periodicals Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-newspaper me-2"></i>
+                        Periodicals
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% for periodical in periodicals %}
+                    <div class="row mb-3 border-bottom pb-3">
+                        <div class="col-md-8">
+                            <h5 class="text-info">{{ periodical.title }}</h5>
+                            <p class="text-muted mb-1">
+                                <strong>Publisher:</strong> {{ periodical.publisher }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Frequency:</strong> {{ periodical.frequency }}
+                            </p>
+                            <p class="text-muted">{{ periodical.description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-info">Available in Reading Room</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Access Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Access Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Reading Room Access</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Current issues available</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Back issues archive</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Reference assistance available</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Subscription Details</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar-check text-primary me-2"></i> Regular updates</li>
+                                <li><i class="bi bi-globe text-info me-2"></i> International publications</li>
+                                <li><i class="bi bi-book text-warning me-2"></i> Academic focus</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

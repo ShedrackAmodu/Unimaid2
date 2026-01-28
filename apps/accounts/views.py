@@ -187,6 +187,12 @@ def student_register_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.membership_type = 'student'
+            
+            # Explicitly set staff-specific fields to None to prevent validation issues
+            user.office_hours = None
+            user.position = None
+            user.specialization = None
+            
             user.save()
 
             # Students are active immediately
@@ -501,14 +507,27 @@ def admin_dashboard(request):
         actions = []
         if hasattr(admin_class, 'actions'):
             for action in admin_class.actions:
-                if action != 'delete_selected':  # Skip default delete action
+                # Skip default delete action
+                if action == 'delete_selected':
+                    continue
+                
+                # Handle both function references and string names
+                if callable(action):
+                    # action is already a function
+                    action_method = action
+                    action_name = getattr(action, '__name__', str(action))
+                else:
+                    # action is a string, get the method
                     action_method = getattr(admin_class, action, None)
-                    if action_method and hasattr(action_method, 'short_description'):
-                        actions.append({
-                            'name': action,
-                            'description': action_method.short_description,
-                            'method': action_method
-                        })
+                    action_name = action
+                
+                # Check if the action method has short_description
+                if action_method and hasattr(action_method, 'short_description'):
+                    actions.append({
+                        'name': action_name,
+                        'description': action_method.short_description,
+                        'method': action_method
+                    })
         return actions
 
     # Accounts app
@@ -1051,21 +1070,200 @@ def profile_view(request):
     if request.method == 'POST':
         form = LibraryUserChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-
-            # Check if this is an AJAX request
+            # Handle profile picture cleanup if a new one is uploaded
+            old_profile_picture = request.user.profile_picture
+            user = form.save()
+            
+            # If a new profile picture was uploaded, delete the old one
+            if old_profile_picture and user.profile_picture != old_profile_picture:
+                try:
+                    old_profile_picture.delete(save=False)
+                except Exception as e:
+                    # Log error but don't fail the update
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Failed to delete old profile picture for user {user.username}: {e}")
+            
+            # Check if this is an AJAX request (profile picture upload)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Profile updated successfully!',
+                    'profile_picture_url': user.profile_picture.url if user.profile_picture else None,
+                    'user_data': {
+                        'full_name': user.get_full_name(),
+                        'username': user.username,
+                        'email': user.email,
+                        'department': user.department or '',
+                        'student_id': user.student_id or '',
+                        'faculty_id': user.faculty_id or '',
+                    }
+                })
             else:
+                messages.success(request, 'Profile updated successfully!')
                 return redirect('accounts:profile')
         else:
             # Handle AJAX request with errors
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': 'Please correct the errors and try again.'})
+                errors = {}
+                for field, error_list in form.errors.items():
+                    errors[field] = [str(error) for error in error_list]
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Please correct the errors and try again.',
+                    'errors': errors
+                })
+            else:
+                messages.error(request, 'Please correct the errors below.')
     else:
         form = LibraryUserChangeForm(instance=request.user)
     return render(request, 'accounts/profile.html', {'form': form})
+
+
+@login_required
+def change_password_view(request):
+    """Enhanced password change view with security features."""
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate current password
+        if not request.user.check_password(current_password):
+            return JsonResponse({
+                'success': False,
+                'message': 'Current password is incorrect.'
+            })
+        
+        # Validate new password
+        if new_password != confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'New passwords do not match.'
+            })
+        
+        if len(new_password) < 8:
+            return JsonResponse({
+                'success': False,
+                'message': 'Password must be at least 8 characters long.'
+            })
+        
+        # Check password history (simple check - ensure it's different from current)
+        if request.user.check_password(new_password):
+            return JsonResponse({
+                'success': False,
+                'message': 'New password must be different from current password.'
+            })
+        
+        # Update password
+        request.user.set_password(new_password)
+        request.user.last_password_change = timezone.now()
+        request.user.save()
+        
+        # Update session to prevent logout
+        from django.contrib.auth import update_session_auth_hash
+        update_session_auth_hash(request, request.user)
+        
+        # Log password change
+        messages.success(request, 'Password changed successfully!')
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Password changed successfully!'
+        })
+    
+    return render(request, 'accounts/change_password.html')
+
+
+@login_required
+def security_settings_view(request):
+    """Security settings page with two-factor authentication."""
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'toggle_2fa':
+            # Toggle two-factor authentication
+            request.user.two_factor_enabled = not request.user.two_factor_enabled
+            request.user.save()
+            
+            status = 'enabled' if request.user.two_factor_enabled else 'disabled'
+            messages.success(request, f'Two-factor authentication has been {status}.')
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Two-factor authentication {status} successfully.',
+                'two_factor_enabled': request.user.two_factor_enabled
+            })
+        
+        elif action == 'reset_failed_attempts':
+            # Reset failed login attempts
+            request.user.failed_login_attempts = 0
+            request.user.locked_until = None
+            request.user.save()
+            
+            messages.success(request, 'Failed login attempts have been reset.')
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Failed login attempts reset successfully.',
+                'failed_attempts': 0,
+                'locked_until': None
+            })
+    
+    # Get security information
+    security_info = {
+        'two_factor_enabled': request.user.two_factor_enabled,
+        'last_password_change': request.user.last_password_change,
+        'failed_attempts': request.user.failed_login_attempts,
+        'locked_until': request.user.locked_until,
+        'last_activity': request.user.last_activity,
+    }
+    
+    return render(request, 'accounts/security_settings.html', {'security_info': security_info})
+
+
+@login_required
+def account_activity_view(request):
+    """View account activity and active sessions."""
+    # Get recent activity (simplified - would need actual session tracking)
+    from django.contrib.sessions.models import Session
+    from django.utils import timezone
+    
+    # Get active sessions (simplified - in real app, you'd track sessions better)
+    sessions = Session.objects.filter(expire_date__gt=timezone.now())
+    
+    context = {
+        'sessions': sessions[:10],  # Last 10 sessions
+        'last_activity': request.user.last_activity,
+        'failed_attempts': request.user.failed_login_attempts,
+        'locked_until': request.user.locked_until,
+    }
+    
+    return render(request, 'accounts/account_activity.html', context)
+
+
+@login_required
+def delete_account_view(request):
+    """Request account deletion."""
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        
+        # Verify password
+        if not request.user.check_password(password):
+            messages.error(request, 'Incorrect password. Account deletion cancelled.')
+            return redirect('accounts:delete_account')
+        
+        # Mark account for deletion (soft delete)
+        request.user.is_active = False
+        request.user.save()
+        
+        # Logout user
+        logout(request)
+        
+        messages.success(request, 'Your account has been deactivated. Please contact support for complete deletion.')
+        return redirect('home')
+    
+    return render(request, 'accounts/delete_account.html')
 
 
 class StaffDirectoryView(ListView):
@@ -1583,6 +1781,111 @@ def virtual_tour_view(request):
     return render(request, 'accounts/virtual_tour.html', context)
 
 
+def staff_directory_view(request):
+    """Staff directory page showing library staff and faculty."""
+    # Get all staff and faculty members
+    staff_members = LibraryUser.objects.filter(
+        membership_type__in=['faculty', 'staff']
+    ).order_by('last_name', 'first_name')
+
+    # Get department counts for filtering
+    department_counts = LibraryUser.objects.filter(
+        membership_type__in=['faculty', 'staff']
+    ).exclude(department__isnull=True).exclude(department='').values('department').annotate(
+        count=Count('department')
+    ).order_by('department')
+
+    context = {
+        'staff_members': staff_members,
+        'department_counts': department_counts,
+        'total_staff': staff_members.count(),
+    }
+    return render(request, 'accounts/staff_directory.html', context)
+
+
+def email_confirmed_view(request):
+    """Email confirmation success page."""
+    return render(request, 'accounts/email_confirmed.html')
+
+
+def open_access_view(request):
+    """Open access resources and academic databases page."""
+    context = {
+        'page_title': 'Open Access Resources',
+        'academic_databases': [
+            {'name': 'Google Scholar', 'url': 'https://scholar.google.com/', 'description': 'Search across scholarly literature'},
+            {'name': 'National Academies', 'url': 'https://www.nationalacademies.org/', 'description': 'Research and publications'},
+            {'name': 'Scientific Research Publishing', 'url': 'https://www.scirp.org/', 'description': 'Open access journals'},
+            {'name': 'SpringerOpen', 'url': 'https://www.springernature.com/gp/open-science/journals-books/journals', 'description': 'Open access journals'},
+            {'name': 'ScienceDirect', 'url': 'https://www.sciencedirect.com/', 'description': 'Scientific database'},
+            {'name': 'Jstor', 'url': 'https://www.jstor.org/action/showLogin', 'description': 'Digital library'},
+            {'name': 'Omics International', 'url': 'https://www.omicsonline.org/', 'description': 'Open access publishing'},
+            {'name': 'Oxford Academics', 'url': 'https://academic.oup.com/', 'description': 'Academic publishing'},
+            {'name': 'Wiley', 'url': 'https://onlinelibrary.wiley.com/', 'description': 'Scientific publishing'},
+            {'name': 'National Virtual Library Of Nigeria', 'url': 'https://virtuall.nln.gov.ng/accounts/login', 'description': 'National library resources'},
+            {'name': 'OARE', 'url': 'https://www.unep.org/topics/environment-under-review/digital-library/online-access-research-environment-oare', 'description': 'Environmental research'},
+            {'name': 'Ebrary', 'url': 'https://ebrary.net/', 'description': 'E-book platform'},
+            {'name': 'Project Muse', 'url': 'https://muse.jhu.edu/', 'description': 'Humanities and social sciences'},
+            {'name': 'Legalpedia', 'url': 'https://legalpediaonline.com/', 'description': 'Legal research'},
+            {'name': 'Emerald Insight', 'url': 'http://library.cusat.ac.in/index.php/emerald-list-of-journals', 'description': 'Business and management'},
+        ],
+        'additional_databases': [
+            {'name': 'World Bank e-Library', 'url': 'https://elibrary.worldbank.org', 'description': 'World Bank publications'},
+            {'name': 'MathSciNet', 'url': 'https://mathscinet.ams.org', 'description': 'Mathematics research (subscription required)'},
+            {'name': 'EconBiz', 'url': 'https://www.econbiz.de', 'description': 'Economics research'},
+            {'name': 'African Journals Online (AJOL)', 'url': 'https://www.ajol.info', 'description': 'African scholarly journals'},
+            {'name': 'Annual Reviews', 'url': 'https://www.annualreviews.org', 'description': 'Review articles (some free)'},
+            {'name': 'Aluka', 'url': 'https://www.jstor.org', 'description': 'African cultural heritage'},
+            {'name': 'BioOne', 'url': 'https://bioone.org', 'description': 'Biological sciences (subscription)'},
+            {'name': 'DATAD', 'url': 'https://datad.org', 'description': 'African theses and dissertations'},
+            {'name': 'Oxford English Dictionary', 'url': 'https://www.oed.com', 'description': 'Dictionary (subscription)'},
+            {'name': 'Oxford Reference Online', 'url': 'https://www.oxfordreference.com', 'description': 'Reference works (subscription)'},
+            {'name': 'APS Journals', 'url': 'https://journals.aps.org', 'description': 'Physics journals'},
+            {'name': 'GEM Portal', 'url': 'https://www.gemconsortium.org', 'description': 'Entrepreneurship research'},
+            {'name': 'World Bank Publications', 'url': 'https://openknowledge.worldbank.org', 'description': 'Development research'},
+            {'name': 'Directory of Open Access Journals (DOAJ)', 'url': 'https://doaj.org', 'description': 'Open access journals directory'},
+            {'name': 'SAGE Journals', 'url': 'https://journals.sagepub.com', 'description': 'Social sciences (mixed access)'},
+            {'name': 'Directory of Open Access Books (DOAB)', 'url': 'https://www.doabooks.org', 'description': 'Open access books'},
+            {'name': 'Bentham Open', 'url': 'https://benthamopen.com', 'description': 'Open access publishing'},
+            {'name': 'The Journal of Research Practice', 'url': 'https://jrp.icaap.org', 'description': 'Research methodology'},
+            {'name': 'edX', 'url': 'https://www.edx.org', 'description': 'Online courses'},
+            {'name': 'The WomanStats Project', 'url': 'https://www.womanstats.org', 'description': 'Gender research'},
+            {'name': 'Strategies for Online Teaching', 'url': 'https://teachonline.ca', 'description': 'Educational resources'},
+            {'name': 'MedlinePlus', 'url': 'https://medlineplus.gov', 'description': 'Health information'},
+            {'name': 'The NTS Library', 'url': 'https://www.ntsb.gov/investigations/Pages/library.aspx', 'description': 'Transportation safety'},
+            {'name': 'World eBook Library', 'url': 'https://www.worldebooklibrary.org', 'description': 'E-book collection (subscription)'},
+            {'name': 'J-Gate Medical / PubMed', 'url': 'J-Gate: https://jgateplus.com, PubMed: https://pubmed.ncbi.nlm.nih.gov', 'description': 'Medical literature'},
+            {'name': 'Wiley Online Library', 'url': 'https://onlinelibrary.wiley.com', 'description': 'Scientific publishing (mixed access)'},
+        ]
+    }
+    return render(request, 'accounts/open_access.html', context)
+
+
+def open_resources_view(request):
+    """Open educational resources and free e-book sites."""
+    context = {
+        'page_title': 'Open Resources',
+        'ebook_sites': [
+            {'name': 'American Institute of Mathematics (AIM)', 'url': 'https://aimath.org/textbooks', 'description': 'Mathematics textbooks'},
+            {'name': 'Booksee', 'url': 'https://booksee.org', 'description': 'Book collection (availability varies)'},
+            {'name': 'Bookboon', 'url': 'https://bookboon.com', 'description': 'Free textbooks'},
+            {'name': 'Connexions (OpenStax CNX)', 'url': 'https://cnx.org', 'description': 'Open textbooks'},
+            {'name': 'FreeBooks4Doctors', 'url': 'https://www.freebooks4doctors.com', 'description': 'Medical books'},
+            {'name': 'Free Book Center', 'url': 'https://www.freebookcentre.net', 'description': 'Book collection'},
+            {'name': 'IntechOpen (INTECH)', 'url': 'https://www.intechopen.com', 'description': 'Open access books'},
+            {'name': 'IT eBooks', 'url': 'https://it-ebooks.info', 'description': 'Technology books'},
+            {'name': 'Living Books About Life', 'url': 'https://www.livingbooksaboutlife.org', 'description': 'Biology books'},
+            {'name': 'National Academies Press', 'url': 'https://nap.nationalacademies.org', 'description': 'Research publications'},
+            {'name': 'NCBI Bookshelf', 'url': 'https://www.ncbi.nlm.nih.gov/books', 'description': 'Biomedical books'},
+            {'name': 'Open Access Textbooks', 'url': 'https://openaccesstextbooks.org', 'description': 'Textbook collection'},
+            {'name': 'Open Textbook Library', 'url': 'https://open.umn.edu/opentextbooks', 'description': 'Peer-reviewed textbooks'},
+            {'name': 'Oxfam Digital Library', 'url': 'https://policy-practice.oxfam.org/resources', 'description': 'Development resources'},
+            {'name': 'Project Gutenberg', 'url': 'https://www.gutenberg.org', 'description': 'Classic literature'},
+        ]
+    }
+    return render(request, 'accounts/open_resources.html', context)
+
+
 def delete_item(request, app_label, model_name, item_id):
     """Generic delete view for all models accessible through admin dashboard.
 
@@ -1939,3 +2242,552 @@ def export_data_view(request, app_label, model_name):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+def journals_view(request):
+    """Journals and periodicals collection page."""
+    context = {
+        'page_title': 'Journals & Periodicals',
+        'journals': [
+            {
+                'title': 'Journal of Academic Research',
+                'publisher': 'Academic Press',
+                'frequency': 'Monthly',
+                'subjects': ['Research Methods', 'Academic Writing'],
+                'access': 'Available in Reading Room'
+            },
+            {
+                'title': 'Science & Technology Review',
+                'publisher': 'Tech Publications',
+                'frequency': 'Bi-monthly',
+                'subjects': ['Computer Science', 'Engineering', 'Mathematics'],
+                'access': 'Available in Reading Room'
+            },
+            {
+                'title': 'Social Sciences Quarterly',
+                'publisher': 'Social Science Institute',
+                'frequency': 'Quarterly',
+                'subjects': ['Sociology', 'Psychology', 'Education'],
+                'access': 'Available in Reading Room'
+            },
+            {
+                'title': 'Business & Management Journal',
+                'publisher': 'Business Review Press',
+                'frequency': 'Monthly',
+                'subjects': ['Business Administration', 'Economics', 'Finance'],
+                'access': 'Available in Reading Room'
+            }
+        ],
+        'periodicals': [
+            {
+                'title': 'National Geographic',
+                'publisher': 'National Geographic Society',
+                'frequency': 'Monthly',
+                'description': 'Geography, science, and history magazine'
+            },
+            {
+                'title': 'Time Magazine',
+                'publisher': 'Time Inc.',
+                'frequency': 'Weekly',
+                'description': 'Current events and news magazine'
+            },
+            {
+                'title': 'The Economist',
+                'publisher': 'The Economist Group',
+                'frequency': 'Weekly',
+                'description': 'International news and business magazine'
+            }
+        ]
+    }
+    return render(request, 'accounts/journals.html', context)
+
+
+def theses_view(request):
+    """Theses and dissertations collection page."""
+    context = {
+        'page_title': 'Theses & Dissertations',
+        'theses': [
+            {
+                'title': 'Advanced Machine Learning Algorithms for Educational Data Mining',
+                'author': 'Dr. Amina Yusuf',
+                'year': 2023,
+                'department': 'Computer Science',
+                'level': 'PhD',
+                'abstract': 'This research explores novel machine learning approaches...'
+            },
+            {
+                'title': 'Sustainable Development in Northern Nigeria: Challenges and Opportunities',
+                'author': 'Prof. Bello Mohammed',
+                'year': 2022,
+                'department': 'Environmental Studies',
+                'level': 'PhD',
+                'abstract': 'An in-depth analysis of sustainable development practices...'
+            },
+            {
+                'title': 'Digital Transformation in Nigerian Universities',
+                'author': 'Fatima Aliyu',
+                'year': 2023,
+                'department': 'Library and Information Science',
+                'level': 'MSc',
+                'abstract': 'Examining the impact of digital technologies on university operations...'
+            },
+            {
+                'title': 'Renewable Energy Solutions for Rural Communities',
+                'author': 'Ahmed Ibrahim',
+                'year': 2022,
+                'department': 'Electrical Engineering',
+                'level': 'MSc',
+                'abstract': 'Investigating renewable energy implementation in rural areas...'
+            }
+        ],
+        'dissertations': [
+            {
+                'title': 'Artificial Intelligence in Healthcare: A Nigerian Perspective',
+                'author': 'Dr. Sarah Johnson',
+                'year': 2023,
+                'faculty': 'Medicine',
+                'abstract': 'Comprehensive study on AI applications in Nigerian healthcare...'
+            },
+            {
+                'title': 'Climate Change Adaptation Strategies in Agriculture',
+                'author': 'Dr. Musa Bello',
+                'year': 2022,
+                'faculty': 'Agriculture',
+                'abstract': 'Analyzing adaptation strategies for climate-resilient agriculture...'
+            }
+        ]
+    }
+    return render(request, 'accounts/theses.html', context)
+
+
+def reference_materials_view(request):
+    """Reference materials collection page."""
+    context = {
+        'page_title': 'Reference Materials',
+        'reference_types': [
+            {
+                'category': 'Encyclopedias',
+                'items': [
+                    {
+                        'title': 'Encyclopedia Britannica',
+                        'edition': '15th Edition',
+                        'volumes': 32,
+                        'description': 'Comprehensive general knowledge encyclopedia'
+                    },
+                    {
+                        'title': 'World Book Encyclopedia',
+                        'edition': 'Latest Edition',
+                        'volumes': 22,
+                        'description': 'Student-friendly encyclopedia with illustrations'
+                    }
+                ]
+            },
+            {
+                'category': 'Dictionaries',
+                'items': [
+                    {
+                        'title': 'Oxford English Dictionary',
+                        'edition': 'Latest Edition',
+                        'volumes': 20,
+                        'description': 'Comprehensive English language dictionary'
+                    },
+                    {
+                        'title': 'Hausa-English Dictionary',
+                        'edition': 'Latest Edition',
+                        'volumes': 2,
+                        'description': 'Hausa to English translation dictionary'
+                    },
+                    {
+                        'title': 'French-English Dictionary',
+                        'edition': 'Latest Edition',
+                        'volumes': 3,
+                        'description': 'French to English translation dictionary'
+                    }
+                ]
+            },
+            {
+                'category': 'Atlases & Maps',
+                'items': [
+                    {
+                        'title': 'National Geographic Atlas of the World',
+                        'edition': '11th Edition',
+                        'description': 'Comprehensive world atlas with detailed maps'
+                    },
+                    {
+                        'title': 'Atlas of Nigeria',
+                        'edition': 'Latest Edition',
+                        'description': 'Detailed maps of Nigerian states and regions'
+                    }
+                ]
+            },
+            {
+                'category': 'Statistical Yearbooks',
+                'items': [
+                    {
+                        'title': 'Nigerian Statistical Yearbook',
+                        'year': '2023',
+                        'description': 'Official statistics on Nigerian demographics, economy, and society'
+                    },
+                    {
+                        'title': 'World Development Indicators',
+                        'year': '2023',
+                        'description': 'World Bank statistics on global development'
+                    }
+                ]
+            }
+        ]
+    }
+    return render(request, 'accounts/reference_materials.html', context)
+
+
+def rare_books_view(request):
+    """Rare books collection page."""
+    context = {
+        'page_title': 'Rare Books Collection',
+        'collections': [
+            {
+                'name': 'Historical Manuscripts',
+                'description': 'Original manuscripts and documents from the 19th and early 20th centuries',
+                'items': [
+                    {
+                        'title': 'The Sokoto Caliphate: Historical Documents',
+                        'year': '1850-1900',
+                        'description': 'Original correspondence and administrative documents'
+                    },
+                    {
+                        'title': 'Colonial Administration Records',
+                        'year': '1900-1960',
+                        'description': 'British colonial administration documents for Northern Nigeria'
+                    }
+                ]
+            },
+            {
+                'name': 'First Editions',
+                'description': 'First editions of significant literary and academic works',
+                'items': [
+                    {
+                        'title': 'Things Fall Apart',
+                        'author': 'Chinua Achebe',
+                        'year': '1958',
+                        'description': 'First edition of the seminal African novel'
+                    },
+                    {
+                        'title': 'Arrow of God',
+                        'author': 'Chinua Achebe',
+                        'year': '1964',
+                        'description': 'First edition of Achebe\'s second major novel'
+                    }
+                ]
+            },
+            {
+                'name': 'Art & Architecture',
+                'description': 'Rare books on art, architecture, and design',
+                'items': [
+                    {
+                        'title': 'Traditional Hausa Architecture',
+                        'author': 'Various',
+                        'year': '1920s-1950s',
+                        'description': 'Documentation of traditional Hausa building techniques'
+                    },
+                    {
+                        'title': 'Islamic Art and Design',
+                        'author': 'Western Scholars',
+                        'year': '1930s-1960s',
+                        'description': 'Early Western studies of Islamic artistic traditions'
+                    }
+                ]
+            },
+            {
+                'name': 'University Archives',
+                'description': 'Historical documents related to the university and academic life',
+                'items': [
+                    {
+                        'title': 'University Founding Documents',
+                        'year': '1975-1980',
+                        'description': 'Original documents from the university\'s establishment'
+                    },
+                    {
+                        'title': 'Early Academic Publications',
+                        'year': '1980s-1990s',
+                        'description': 'First publications by university faculty and researchers'
+                    }
+                ]
+            }
+        ],
+        'access_info': {
+            'hours': 'By appointment only, Monday-Friday 9:00 AM - 4:00 PM',
+            'requirements': 'Valid university ID required, handling instructions provided',
+            'contact': 'Contact Special Collections Librarian for access'
+        }
+    }
+    return render(request, 'accounts/rare_books.html', context)
+
+
+def local_history_view(request):
+    """Local history collection page."""
+    context = {
+        'page_title': 'Local History Collection',
+        'collections': [
+            {
+                'name': 'Regional History',
+                'description': 'Materials documenting the history of Borno State and Northeastern Nigeria',
+                'items': [
+                    {
+                        'title': 'History of Borno State',
+                        'author': 'Local Historians',
+                        'year': 'Various',
+                        'description': 'Comprehensive history of Borno State from ancient times to present'
+                    },
+                    {
+                        'title': 'The Kanem-Bornu Empire',
+                        'author': 'Historical Society',
+                        'year': '1980s',
+                        'description': 'Documentation of the ancient Kanem-Bornu civilization'
+                    }
+                ]
+            },
+            {
+                'name': 'Cultural Heritage',
+                'description': 'Materials on local cultures, traditions, and languages',
+                'items': [
+                    {
+                        'title': 'Hausa Culture and Traditions',
+                        'author': 'Cultural Preservation Society',
+                        'year': '1990s',
+                        'description': 'Documentation of Hausa cultural practices and traditions'
+                    },
+                    {
+                        'title': 'Kanuri Language Studies',
+                        'author': 'Linguistic Institute',
+                        'year': '1980s',
+                        'description': 'Linguistic studies and documentation of the Kanuri language'
+                    }
+                ]
+            },
+            {
+                'name': 'Photographic Archives',
+                'description': 'Historical photographs of the region and university',
+                'items': [
+                    {
+                        'title': 'Historical Photographs of Maiduguri',
+                        'year': '1950s-1980s',
+                        'description': 'Photographic documentation of Maiduguri\'s development'
+                    },
+                    {
+                        'title': 'University Campus History',
+                        'year': '1975-Present',
+                        'description': 'Photographs showing the university\'s growth and development'
+                    }
+                ]
+            },
+            {
+                'name': 'Newspaper Archives',
+                'description': 'Historical newspapers and periodicals from the region',
+                'items': [
+                    {
+                        'title': 'Daily Trust Archives',
+                        'year': '1990s-Present',
+                        'description': 'Complete archives of the Daily Trust newspaper'
+                    },
+                    {
+                        'title': 'Local Gazette',
+                        'year': '1980s-2000s',
+                        'description': 'Local newspaper covering regional news and events'
+                    }
+                ]
+            }
+        ],
+        'research_support': {
+            'assistance': 'Research assistance available from specialized librarians',
+            'digitization': 'Selected materials available in digital format',
+            'interlibrary': 'Interlibrary loan available for research purposes'
+        }
+    }
+    return render(request, 'accounts/local_history.html', context)
+
+
+def printing_services_view(request):
+    """Printing and copying services page."""
+    context = {
+        'page_title': 'Printing & Copying Services',
+        'services': [
+            {
+                'name': 'Black & White Printing',
+                'description': 'High-quality black and white document printing',
+                'rates': {
+                    'single_sided': '₦5 per page',
+                    'double_sided': '₦8 per page',
+                    'bulk_100_plus': '₦4 per page'
+                },
+                'features': ['Fast service', 'Multiple paper sizes', 'Professional quality']
+            },
+            {
+                'name': 'Color Printing',
+                'description': 'Vibrant color printing for presentations and projects',
+                'rates': {
+                    'single_sided': '₦25 per page',
+                    'double_sided': '₦40 per page',
+                    'bulk_50_plus': '₦20 per page'
+                },
+                'features': ['Professional color matching', 'Various paper types', 'Quick turnaround']
+            },
+            {
+                'name': 'Photocopying',
+                'description': 'Document copying services with various options',
+                'rates': {
+                    'black_white': '₦3 per page',
+                    'color': '₦15 per page',
+                    'bulk_200_plus': '₦2 per page'
+                },
+                'features': ['Multiple sizes', 'Collated copies available', 'Binding options']
+            },
+            {
+                'name': 'Scanning Services',
+                'description': 'Document scanning and digitization',
+                'rates': {
+                    'standard': '₦10 per page',
+                    'high_resolution': '₦20 per page',
+                    'bulk_100_plus': '₦8 per page'
+                },
+                'features': ['PDF creation', 'Multiple file formats', 'OCR available']
+            }
+        ],
+        'facilities': [
+            {
+                'name': 'Main Library Copy Center',
+                'location': 'Ground Floor, Main Library',
+                'hours': 'Monday-Friday: 8:00 AM - 8:00 PM, Saturday: 9:00 AM - 4:00 PM',
+                'equipment': ['2 high-speed printers', '3 color printers', '5 photocopiers', '2 scanners']
+            },
+            {
+                'name': 'Faculty Copy Centers',
+                'location': 'Various faculty buildings',
+                'hours': 'Monday-Friday: 9:00 AM - 5:00 PM',
+                'equipment': ['Basic printing and copying', 'Student-friendly rates']
+            }
+        ],
+        'policies': {
+            'payment': 'Cash and card payments accepted',
+            'turnaround': 'Standard service: 15 minutes, Large orders: 24 hours',
+            'quality': 'Professional quality guaranteed',
+            'support': 'Technical assistance available during operating hours'
+        }
+    }
+    return render(request, 'accounts/printing_services.html', context)
+
+
+def workshops_view(request):
+    """Workshops and training schedule page."""
+    context = {
+        'page_title': 'Workshops & Training',
+        'upcoming_workshops': [
+            {
+                'title': 'Research Database Navigation',
+                'date': 'March 15, 2024',
+                'time': '2:00 PM - 4:00 PM',
+                'location': 'Library Training Room A',
+                'instructor': 'Dr. Amina Bello',
+                'description': 'Learn to effectively search and navigate academic databases',
+                'target': 'All students and researchers',
+                'registration': 'Required - limited to 20 participants'
+            },
+            {
+                'title': 'Citation Management with Zotero',
+                'date': 'March 22, 2024',
+                'time': '10:00 AM - 12:00 PM',
+                'location': 'Library Training Room B',
+                'instructor': 'Librarian Fatima Ali',
+                'description': 'Master Zotero for managing references and citations',
+                'target': 'Postgraduate students and faculty',
+                'registration': 'Required - limited to 15 participants'
+            },
+            {
+                'title': 'Academic Writing Workshop',
+                'date': 'April 5, 2024',
+                'time': '9:00 AM - 1:00 PM',
+                'location': 'Main Auditorium',
+                'instructor': 'Prof. John Smith',
+                'description': 'Comprehensive workshop on academic writing skills',
+                'target': 'All students',
+                'registration': 'Recommended - seating limited'
+            },
+            {
+                'title': 'Data Analysis with Python',
+                'date': 'April 12, 2024',
+                'time': '3:00 PM - 5:00 PM',
+                'location': 'Computer Lab 1',
+                'instructor': 'Dr. Ahmed Ibrahim',
+                'description': 'Introduction to data analysis using Python libraries',
+                'target': 'Science and engineering students',
+                'registration': 'Required - bring your laptop'
+            },
+            {
+                'title': 'Thesis Writing Bootcamp',
+                'date': 'April 19-20, 2024',
+                'time': '9:00 AM - 4:00 PM (both days)',
+                'location': 'Library Conference Room',
+                'instructor': 'Multiple experts',
+                'description': 'Intensive workshop covering all aspects of thesis writing',
+                'target': 'Final year students and postgraduates',
+                'registration': 'Required - full attendance expected'
+            }
+        ],
+        'regular_programs': [
+            {
+                'name': 'Weekly Database Training',
+                'schedule': 'Every Tuesday, 3:00 PM - 4:00 PM',
+                'location': 'Training Room A',
+                'description': 'Rotating sessions on different academic databases'
+            },
+            {
+                'name': 'Monthly Research Skills',
+                'schedule': 'First Thursday of every month, 10:00 AM - 12:00 PM',
+                'location': 'Training Room B',
+                'description': 'Essential research skills for academic success'
+            },
+            {
+                'name': 'Software Training Sessions',
+                'schedule': 'As scheduled',
+                'location': 'Computer Lab 2',
+                'description': 'Training on various academic software and tools'
+            }
+        ],
+        'registration_info': {
+            'online': 'Register through the library website',
+            'in_person': 'Visit the reference desk to register',
+            'confirmation': 'Email confirmation sent upon registration',
+            'cancellation': 'Please notify us if you cannot attend'
+        }
+    }
+    return render(request, 'accounts/workshops.html', context)
+
+
+def holiday_schedule_view(request):
+    """Library holiday schedule page."""
+    context = {
+        'page_title': 'Library Holiday Schedule',
+        'holidays': [
+            {'name': 'New Year\'s Day', 'date': 'January 1', 'status': 'Closed'},
+            {'name': 'Good Friday', 'date': 'April 18', 'status': 'Closed'},
+            {'name': 'Easter Monday', 'date': 'April 21', 'status': 'Closed'},
+            {'name': 'Workers\' Day', 'date': 'May 1', 'status': 'Closed'},
+            {'name': 'Democracy Day', 'date': 'June 12', 'status': 'Closed'},
+            {'name': 'Eid al-Fitr', 'date': 'March 31', 'status': 'Closed'},
+            {'name': 'Eid al-Adha', 'date': 'June 17', 'status': 'Closed'},
+            {'name': 'Independence Day', 'date': 'October 1', 'status': 'Closed'},
+            {'name': 'Christmas Day', 'date': 'December 25', 'status': 'Closed'},
+            {'name': 'Boxing Day', 'date': 'December 26', 'status': 'Closed'},
+        ],
+        'special_hours': [
+            {'date': 'December 24', 'hours': '8:00 AM - 2:00 PM'},
+            {'date': 'December 31', 'hours': '8:00 AM - 2:00 PM'},
+            {'date': 'Eve of Public Holidays', 'hours': '8:00 AM - 4:00 PM'},
+        ],
+        'academic_breaks': [
+            {'period': 'Mid-Semester Break', 'dates': 'March 11-15, 2024', 'hours': '8:00 AM - 4:00 PM'},
+            {'period': 'Long Vacation', 'dates': 'July - September 2024', 'hours': '8:00 AM - 2:00 PM'},
+            {'period': 'Christmas Break', 'dates': 'December 2024 - January 2025', 'hours': 'Closed December 24 - January 2'},
+        ],
+        'notice': 'Holiday schedules are subject to change. Please check the library website for updates.'
+    }
+    return render(request, 'accounts/holiday_schedule.html', context)

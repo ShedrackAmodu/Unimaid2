@@ -9,18 +9,6 @@ django.setup()
 from apps.accounts.models import LibraryUser
 
 def main():
-    # Load backup data if exists
-    if os.path.exists('backup.json'):
-        print("Loading data from backup.json...")
-        try:
-            call_command('loaddata', 'backup')
-            print("Data loaded from backup.json successfully.")
-        except Exception as e:
-            print(f"Error loading data from backup.json: {e}")
-            return
-    else:
-        print("No backup.json found, proceeding with fresh setup.")
-
     print("Running makemigrations...")
     try:
         call_command('makemigrations')
@@ -63,13 +51,16 @@ def main():
     except Exception as e:
         print(f"Error creating superuser: {e}")
 
-    # Backup data to JSON
-    print("Backing up data to backup.json...")
+    print("Uploading catalog data...")
     try:
-        call_command('dumpdata', '--output', 'backup.json')
-        print("Data backed up to backup.json successfully.")
+        # Import and run the catalog data upload
+        from upload_catalog_data import main as upload_catalog_main
+        upload_catalog_main()
+        print("Catalog data upload completed successfully.")
     except Exception as e:
-        print(f"Error backing up data: {e}")
+        print(f"Error uploading catalog data: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == '__main__':
     main()

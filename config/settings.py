@@ -84,7 +84,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.blog.context_processors.blog_context",
-                "config.context_processors.admin_context",  # Add this line
+                "config.context_processors.library_counts",
+                "config.context_processors.admin_context",
             ],
         },
     },

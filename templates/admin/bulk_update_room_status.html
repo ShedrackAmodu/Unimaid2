@@ -1,0 +1,17 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <div class="form-row">
+        <label>{% trans "Room Status" %}:</label>
+        <div>
+            <label>
+                <input type="radio" name="is_active" value="true" checked> {% trans "Activate" %}
+            </label>
+            <label>
+                <input type="radio" name="is_active" value="false"> {% trans "Deactivate" %}
+            </label>
+        </div>
+        <p class="help">{% trans "Choose whether to activate or deactivate the selected study rooms." %}</p>
+    </div>
+{% endblock %}

@@ -21,4 +21,13 @@ urlpatterns = [
     path('attendance-list/', views.attendance_list, name='attendance_list'),
     path('checkout-attendance/<int:attendance_id>/', views.checkout_attendance, name='checkout_attendance'),
     path('export-attendance-excel/', views.export_attendance_excel, name='export_attendance_excel'),
+    
+    # Study Room Booking URLs
+    path('room-booking/', views.room_booking_view, name='room_booking'),
+    path('room-calendar/', views.room_calendar_view, name='room_calendar'),
+    path('approve-room-booking/<int:booking_id>/', views.approve_room_booking, name='approve_room_booking'),
+    path('reject-room-booking/<int:booking_id>/', views.reject_room_booking, name='reject_room_booking'),
+    path('cancel-room-booking/<int:booking_id>/', views.cancel_room_booking, name='cancel_room_booking'),
+    path('my-room-bookings/', views.my_room_bookings, name='my_room_bookings'),
+    path('cancel-my-room-booking/<int:booking_id>/', views.cancel_my_room_booking, name='cancel_my_room_booking'),
 ]

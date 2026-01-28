@@ -73,6 +73,18 @@ class BookListView(ListView):
         context['selected_department'] = self.request.GET.get('department', '')
         context['selected_genre'] = self.request.GET.get('genre', '')
         context['selected_author'] = self.request.GET.get('author', '')
+        
+        # Calculate dynamic statistics
+        total_books = Book.objects.active().count()
+        available_books = Book.objects.active().filter(copies__status='available').distinct().count()
+        genres_count = Genre.objects.filter(books__isnull=False).distinct().count()
+        authors_count = Author.objects.filter(books__isnull=False).distinct().count()
+        
+        context['total_books'] = total_books
+        context['available_books'] = available_books
+        context['genres_count'] = genres_count
+        context['authors_count'] = authors_count
+        
         return context
 
 

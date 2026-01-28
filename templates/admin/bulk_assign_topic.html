@@ -1,0 +1,13 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_topic">{% trans "Topic" %}:</label>
+    <select name="topic" id="id_topic" required>
+        <option value="">{% trans "---------" %}</option>
+        {% for topic in topics %}
+        <option value="{{ topic.id }}">{{ topic.name }} ({{ topic.code }})</option>
+        {% endfor %}
+    </select>
+    <p class="help">{% trans "Select the topic to assign to all selected books." %}</p>
+{% endblock %}

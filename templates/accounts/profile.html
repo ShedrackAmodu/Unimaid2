@@ -56,7 +56,8 @@
                                         {% endif %}
                                     </div>
                                     <button class="btn btn-primary btn-icon-sm position-absolute bottom-0 end-0 rounded-circle" 
-                                            onclick="document.getElementById('profilePictureInput').click()">
+                                            onclick="document.getElementById('profilePictureInput').click()"
+                                            title="Change Profile Picture">
                                         <i class="bi bi-camera"></i>
                                     </button>
                                     <input type="file" 
@@ -117,15 +118,15 @@
                                     </div>
                                     
                                     <div class="d-flex flex-wrap gap-2">
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
-                                        </button>
-                                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                            <i class="bi bi-key me-2"></i>Change Password
-                                        </button>
-                                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">
-                                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-                                        </a>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                                </button>
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <i class="bi bi-key me-2"></i>Change Password
+                                </button>
+                                <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                                </a>
                                     </div>
                                 </div>
                             </div>
@@ -674,6 +675,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="editProfileForm">
+                    {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="firstName" class="form-label">First Name</label>
@@ -706,7 +708,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-6">
+                            <div class="col-md-6">
                             <label for="studentId" class="form-label">Student ID</label>
                             <input type="text" class="form-control" id="studentId" value="{{ user.student_id }}">
                         </div>
@@ -746,6 +748,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="changePasswordForm">
+                    {% csrf_token %}
                     <div class="mb-3">
                         <label for="currentPassword" class="form-label">Current Password</label>
                         <input type="password" class="form-control" id="currentPassword" required>
@@ -785,6 +788,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="editContactForm">
+                    {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
@@ -798,7 +802,7 @@
                             <label for="address" class="form-label">Address</label>
                             <textarea class="form-control" id="address" rows="3">{{ user.address }}</textarea>
                         </div>
-                        <div class="col-md-6">
+                            <div class="col-md-6">
                             <label for="emergencyName" class="form-label">Emergency Contact Name</label>
                             <input type="text" class="form-control" id="emergencyName" value="{{ user.emergency_contact_name }}">
                         </div>
@@ -835,6 +839,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="uploadDocumentForm">
+                    {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="documentType" class="form-label">Document Type</label>
@@ -1126,16 +1131,35 @@
         };
         
         // Save profile picture
-        function saveProfilePicture() {
+        window.saveProfilePicture = function() {
             const input = document.getElementById('profilePictureInput');
             if (!input.files[0]) return;
 
+            // Validate file before upload
+            const file = input.files[0];
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            
+            if (!validTypes.includes(file.type)) {
+                showToast('error', 'Please select a valid image file (JPG, PNG, or GIF)');
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('error', 'Image file must be under 2MB');
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('profile_picture', input.files[0]);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            formData.append('profile_picture', file);
+            
+            // Get CSRF token from the form
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                formData.append('csrfmiddlewaretoken', csrfToken.value);
+            }
 
             // Show loading
-            const button = event.target;
+            const button = document.querySelector('.profile-picture-container .btn-primary');
             const originalText = button.innerHTML;
             button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             button.disabled = true;
@@ -1148,14 +1172,39 @@
                     'X-Requested-With': 'XMLHttpRequest',
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Network response was not ok');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     showToast('success', 'Profile picture updated successfully');
+                    // Update the profile picture URL if returned
+                    if (data.profile_picture_url) {
+                        const profileImage = document.getElementById('profileImage');
+                        const profileInitials = document.getElementById('profileInitials');
+                        
+                        if (profileImage) {
+                            profileImage.src = data.profile_picture_url;
+                            profileImage.style.display = 'block';
+                        }
+                        if (profileInitials) {
+                            profileInitials.style.display = 'none';
+                        }
+                    }
                     // Reload page to show updated picture
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToast('error', data.message || 'Failed to update profile picture');
+                    // Handle form validation errors
+                    if (data.errors && data.errors.profile_picture) {
+                        showToast('error', data.errors.profile_picture[0]);
+                    } else {
+                        showToast('error', data.message || 'Failed to update profile picture');
+                    }
                 }
                 button.innerHTML = '<i class="bi bi-camera"></i>';
                 button.disabled = false;
@@ -1163,12 +1212,12 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showToast('error', 'Failed to update profile picture');
+                showToast('error', 'Failed to update profile picture. Please try again.');
                 button.innerHTML = '<i class="bi bi-camera"></i>';
                 button.disabled = false;
                 button.onclick = function() { document.getElementById('profilePictureInput').click(); };
             });
-        }
+        };
         
         // Save profile changes
         window.saveProfileChanges = function() {

@@ -3,6 +3,11 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from .models import LibraryUser, StudyRoom, StudyRoomBooking
 from config.admin_mixins import BaseAdminMixin, ExportMixin
+from config.bulk_actions import (
+    bulk_activate_users, bulk_deactivate_users,
+    bulk_update_membership_type, bulk_assign_department,
+    bulk_update_study_room_status, bulk_update_booking_status
+)
 
 
 @admin.register(LibraryUser)
@@ -79,7 +84,7 @@ class StudyRoomAdmin(BaseAdminMixin, ExportMixin, admin.ModelAdmin):
         ('Details', {'fields': ('features', 'location')}),
     )
 
-    actions = ['activate_rooms', 'deactivate_rooms', 'export_as_csv']
+    actions = ['activate_rooms', 'deactivate_rooms', 'export_as_csv', bulk_update_study_room_status]
 
     def activate_rooms(self, request, queryset):
         """Activate selected rooms."""
@@ -108,7 +113,7 @@ class StudyRoomBookingAdmin(BaseAdminMixin, ExportMixin, admin.ModelAdmin):
 
     readonly_fields = ['duration_hours']
 
-    actions = ['confirm_bookings', 'cancel_bookings', 'export_as_csv']
+    actions = ['confirm_bookings', 'cancel_bookings', 'export_as_csv', bulk_update_booking_status]
 
     def confirm_bookings(self, request, queryset):
         """Confirm selected bookings."""

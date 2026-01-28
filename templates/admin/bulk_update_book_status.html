@@ -1,0 +1,13 @@
+{% extends "admin/bulk_action_base.html" %}
+{% load i18n %}
+
+{% block action_form %}
+    <label for="id_status">{% trans "Book Status" %}:</label>
+    <select name="status" id="id_status" required>
+        <option value="">{% trans "---------" %}</option>
+        {% for status_code, status_name in status_choices %}
+        <option value="{{ status_code }}">{{ status_name }}</option>
+        {% endfor %}
+    </select>
+    <p class="help">{% trans "Select the status to apply to all selected book copies." %}</p>
+{% endblock %}
