@@ -72,6 +72,14 @@ class LibraryUser(AbstractUser, BaseModel):
     emergency_contact_phone = models.CharField(max_length=20, blank=True, help_text="Emergency contact phone number")
     emergency_contact_email = models.EmailField(blank=True, help_text="Emergency contact email address")
     
+    # Profile picture field
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/', 
+        blank=True, 
+        null=True, 
+        help_text="User profile picture"
+    )
+    
     # QR code field
     qr_code = models.ImageField(upload_to='qr_codes/users/', blank=True, null=True, help_text="QR code image for the user")
 

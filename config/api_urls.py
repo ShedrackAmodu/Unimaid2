@@ -19,8 +19,8 @@ from apps.analytics.api import (
     SystemHealthViewSet, track_event, dashboard, update_daily_stats
 )
 from apps.repository.api import (
-    CollectionViewSet, DocumentViewSet, DocumentPermissionRequestViewSet,
-    DocumentPermissionViewSet, global_search, search_suggestions
+    CollectionViewSet, EBookViewSet, EBookPermissionRequestViewSet,
+    EBookPermissionViewSet, global_search, search_suggestions
 )
 
 # Create routers
@@ -54,9 +54,9 @@ analytics_router.register(r'system-health', SystemHealthViewSet)
 
 repository_router = routers.DefaultRouter()
 repository_router.register(r'collections', CollectionViewSet)
-repository_router.register(r'documents', DocumentViewSet)
-repository_router.register(r'document-permissions', DocumentPermissionViewSet)
-repository_router.register(r'permission-requests', DocumentPermissionRequestViewSet)
+repository_router.register(r'ebooks', EBookViewSet)
+repository_router.register(r'ebook-permissions', EBookPermissionViewSet)
+repository_router.register(r'permission-requests', EBookPermissionRequestViewSet)
 
 # URL patterns
 urlpatterns = [

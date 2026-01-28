@@ -57,6 +57,8 @@ def main():
         from upload_catalog_data import main as upload_catalog_main
         upload_catalog_main()
         print("Catalog data upload completed successfully.")
+    except ImportError:
+        print("Catalog data upload module not found. Skipping catalog data upload.")
     except Exception as e:
         print(f"Error uploading catalog data: {e}")
         import traceback

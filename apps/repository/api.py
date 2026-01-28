@@ -3,10 +3,10 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django.db.models import Q
-from .models import Collection, Document, DocumentPermissionRequest, DocumentPermission
+from .models import Collection, EBook, EBookPermissionRequest, EBookPermission
 from .serializers import (
-    CollectionSerializer, DocumentSerializer, DocumentPermissionRequestSerializer,
-    DocumentPermissionSerializer, DocumentSearchSerializer
+    CollectionSerializer, EBookSerializer, EBookPermissionRequestSerializer,
+    EBookPermissionSerializer, EBookSearchSerializer
 )
 
 
@@ -26,16 +26,16 @@ class CollectionViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class DocumentViewSet(viewsets.ModelViewSet):
-    """ViewSet for Document model."""
-    queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
+class EBookViewSet(viewsets.ModelViewSet):
+    """ViewSet for EBook model."""
+    queryset = EBook.objects.all()
+    serializer_class = EBookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        queryset = Document.objects.all()
+        queryset = EBook.objects.all()
         user = self.request.user
-        search_serializer = DocumentSearchSerializer(data=self.request.query_params)
+        search_serializer = EBookSearchSerializer(data=self.request.query_params)
         search_serializer.is_valid(raise_exception=False)
 
         if search_serializer.validated_data:
@@ -91,10 +91,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def download(self, request, pk=None):
         """Track document download."""
-        document = self.get_object()
+        ebook = self.get_object()
 
         # Check if user can access this document
-        if not document.can_user_access(request.user):
+        if not ebook.can_user_access(request.user):
             return Response(
                 {'error': 'You do not have permission to access this document'},
                 status=status.HTTP_403_FORBIDDEN
@@ -105,7 +105,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         AnalyticsEvent.objects.create(
             event_type='download',
             user=request.user,
-            document=document,
+            document=ebook,
             session_id=request.session.session_key,
             ip_address=request.META.get('REMOTE_ADDR'),
             user_agent=request.META.get('HTTP_USER_AGENT'),
@@ -116,7 +116,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         from apps.analytics.models import PopularItem
         popular_item, created = PopularItem.objects.get_or_create(
             item_type='document',
-            document=document,
+            document=ebook,
             defaults={'checkout_count': 0, 'view_count': 0, 'search_count': 0}
         )
         popular_item.checkout_count += 1
@@ -124,18 +124,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
         return Response({
             'message': 'Download recorded',
-            'download_url': document.file.url if document.file else None
+            'download_url': ebook.file.url if ebook.file else None
         })
 
 
-class DocumentPermissionRequestViewSet(viewsets.ModelViewSet):
-    """ViewSet for DocumentPermissionRequest model."""
-    queryset = DocumentPermissionRequest.objects.all()
-    serializer_class = DocumentPermissionRequestSerializer
+class EBookPermissionRequestViewSet(viewsets.ModelViewSet):
+    """ViewSet for EBookPermissionRequest model."""
+    queryset = EBookPermissionRequest.objects.all()
+    serializer_class = EBookPermissionRequestSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = DocumentPermissionRequest.objects.all()
+        queryset = EBookPermissionRequest.objects.all()
         user = self.request.user
         status_filter = self.request.query_params.get('status', None)
 
@@ -152,23 +152,23 @@ class DocumentPermissionRequestViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class DocumentPermissionViewSet(viewsets.ModelViewSet):
-    """ViewSet for DocumentPermission model."""
-    queryset = DocumentPermission.objects.all()
-    serializer_class = DocumentPermissionSerializer
+class EBookPermissionViewSet(viewsets.ModelViewSet):
+    """ViewSet for EBookPermission model."""
+    queryset = EBookPermission.objects.all()
+    serializer_class = EBookPermissionSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = DocumentPermission.objects.all()
+        queryset = EBookPermission.objects.all()
         user = self.request.user
-        document = self.request.query_params.get('document', None)
+        ebook = self.request.query_params.get('ebook', None)
 
         # Regular users can only see permissions for documents they uploaded
         if not user.is_staff:
-            queryset = queryset.filter(document__uploaded_by=user)
+            queryset = queryset.filter(ebook__uploaded_by=user)
 
-        if document:
-            queryset = queryset.filter(document_id=document)
+        if ebook:
+            queryset = queryset.filter(ebook_id=ebook)
 
         return queryset
 
@@ -215,7 +215,7 @@ def global_search(request):
     books_data = BookSerializer(books_queryset, many=True, context={'request': request}).data
 
     # Search documents (respecting access permissions)
-    documents_queryset = Document.objects.filter(
+    documents_queryset = EBook.objects.filter(
         Q(title__icontains=query) |
         Q(authors__icontains=query) |
         Q(abstract__icontains=query) |
@@ -235,7 +235,7 @@ def global_search(request):
         documents_queryset = documents_queryset.filter(access_level='open')
 
     documents_queryset = documents_queryset[:limit//2]
-    documents_data = DocumentSerializer(documents_queryset, many=True, context={'request': request}).data
+    documents_data = EBookSerializer(documents_queryset, many=True, context={'request': request}).data
 
     # Track search event
     from apps.analytics.models import AnalyticsEvent
@@ -284,7 +284,7 @@ def search_suggestions(request):
     suggestions.extend([{'type': 'author', 'value': author} for author in authors])
 
     # Document title suggestions
-    document_titles = Document.objects.filter(
+    document_titles = EBook.objects.filter(
         title__icontains=query
     ).values_list('title', flat=True).distinct()[:5]
     suggestions.extend([{'type': 'document', 'value': title} for title in document_titles])

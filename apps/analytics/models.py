@@ -44,12 +44,12 @@ class AnalyticsEvent(BaseModel):
         help_text="Book related to the event"
     )
     document = models.ForeignKey(
-        'repository.Document',
+        'repository.EBook',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='analytics_events',
-        help_text="Document related to the event"
+        help_text="EBook related to the event"
     )
 
     # Metadata
@@ -121,12 +121,12 @@ class PopularItem(BaseModel):
         help_text="Book (if item_type is book)"
     )
     document = models.ForeignKey(
-        'repository.Document',
+        'repository.EBook',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='popularity',
-        help_text="Document (if item_type is document)"
+        help_text="EBook (if item_type is document)"
     )
 
     # Popularity metrics
