@@ -1,297 +1,295 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - Ramat Library{% endblock %}
-
-{% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="/">Home</a></li>
-<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-{% endblock %}
-
-{% block page_header %}
-<div class="row mb-5 animate__animated animate__fadeInUp">
-    <div class="col">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-                <div class="icon-60 icon-60--gradient">
-                    <i class="bi bi-globe fs-3 text-white"></i>
-                </div>
-            </div>
-            <div>
-                <h1 class="display-4 fw-bold mb-2">{{ page_title }}</h1>
-                <p class="lead text-muted">Access thousands of open access academic databases, journals, and research resources</p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block title %}Open Access Resources - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="open-access-page">
-    <div class="container-fluid">
-        <!-- Introduction -->
-        <div class="row mb-5">
-            <div class="col-lg-10 mx-auto text-center">
-                <h2 class="fw-bold mb-4">Free Academic Resources Worldwide</h2>
-                <p class="lead text-muted">
-                    Explore a comprehensive collection of open access databases, journals, and research platforms.
-                    These resources provide free access to scholarly literature, research papers, and academic materials
-                    from leading institutions and publishers around the world.
-                </p>
-            </div>
-        </div>
-
-        <!-- Academic Databases Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-search me-2"></i>Academic Databases & Search Engines
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            {% for resource in academic_databases %}
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-database fs-4 text-primary"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">{{ resource.name }}</h6>
-                                                <p class="text-muted small mb-3">{{ resource.description }}</p>
-                                                <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Visit Resource
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h1 class="h3 mb-0">Open Access Resources</h1>
                 </div>
-            </div>
-        </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="text-muted">Access freely available scholarly materials and research outputs without subscription barriers. Our open access collection promotes knowledge sharing and academic collaboration.</p>
 
-        <!-- Additional Databases Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-light py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-collection me-2"></i>Additional Research Resources
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            {% for resource in additional_databases %}
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-journal-text fs-4 text-success"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">{{ resource.name }}</h6>
-                                                <p class="text-muted small mb-3">{{ resource.description }}</p>
-                                                <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-success btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Visit Resource
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            <h2 class="h4 text-success mt-4">What is Open Access?</h2>
+                            <p class="text-muted">Open Access (OA) refers to the practice of providing unrestricted access to research outputs, allowing anyone to read, download, copy, distribute, print, search, or link to the full texts of scholarly articles without financial, legal, or technical barriers.</p>
 
-        <!-- Subscribed Resources Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-warning text-dark py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-key me-2"></i>Subscribed Resources
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-database fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">Agora</h6>
-                                                <p class="text-muted small mb-3">Access to agricultural science journals and research materials.</p>
-                                                <a href="https://login.research4life.org/tacgw/login.cshtml" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Access Agora
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="alert alert-success mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-unlock-alt"></i> Free and Open</h6>
+                                <p class="mb-0">All resources in this collection are freely available to read, download, and share without requiring a subscription or payment.</p>
                             </div>
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-heart-pulse fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">Hinari</h6>
-                                                <p class="text-muted small mb-3">Health and biomedical research literature and journals.</p>
-                                                <a href="https://login.research4life.org/tacgw/login.cshtml" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Access Hinari
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-diagram-3 fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">Ardi</h6>
-                                                <p class="text-muted small mb-3">Agricultural research and development information resources.</p>
-                                                <a href="https://login.research4life.org/tacgw/login.cshtml" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Access Ardi
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-tree fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">Oare</h6>
-                                                <p class="text-muted small mb-3">Environmental science and policy research resources.</p>
-                                                <a href="https://login.research4life.org/tacgw/login.cshtml" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Access Oare
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-xl-4">
-                                <div class="resource-card card h-100 border">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-start mb-3">
-                                            <div class="resource-icon me-3">
-                                                <i class="bi bi-globe fs-4 text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="fw-bold mb-2">Goal</h6>
-                                                <p class="text-muted small mb-3">Global online access to legal information and law journals.</p>
-                                                <a href="https://login.research4life.org/tacgw/login.cshtml" target="_blank" rel="noopener noreferrer"
-                                                   class="btn btn-outline-warning btn-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i>Access Goal
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Access Information -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-gradient text-white py-4">
-                        <h3 class="mb-0 text-center">
-                            <i class="bi bi-info-circle me-2"></i>Access Information
-                        </h3>
-                    </div>
-                    <div class="card-body p-5">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="alert alert-success border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-check-circle-fill me-2"></i>Free Access</h6>
-                                    <p class="mb-0 small">Most resources listed here are completely free and accessible without registration or subscription.</p>
+                            <h2 class="h4 text-success mt-5">Open Access Journals</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-journal-whills text-success"></i> Directory of Open Access Journals (DOAJ)
+                                            </h6>
+                                            <p class="card-text">Curated collection of high-quality, peer-reviewed open access journals.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-search text-success"></i> 15,000+ journals indexed</li>
+                                                <li><i class="fas fa-globe text-success"></i> International coverage</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Quality assurance</li>
+                                                <li><i class="fas fa-download text-success"></i> Full-text access</li>
+                                            </ul>
+                                            <a href="https://doaj.org" target="_blank" class="btn btn-success btn-sm">Visit DOAJ</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-university text-success"></i> Institutional Repositories
+                                            </h6>
+                                            <p class="card-text">University and institutional repositories hosting open access research.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-graduation-cap text-success"></i> University theses and dissertations</li>
+                                                <li><i class="fas fa-chalkboard-teacher text-success"></i> Faculty research publications</li>
+                                                <li><i class="fas fa-book text-success"></i> Conference proceedings</li>
+                                                <li><i class="fas fa-file-alt text-success"></i> Working papers</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-success btn-sm">Explore Repositories</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-info border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-globe me-2"></i>Global Access</h6>
-                                    <p class="mb-0 small">These resources are available worldwide with no geographic restrictions or VPN requirements.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <hr class="my-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="alert alert-warning border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Some Resources</h6>
-                                    <p class="mb-0 small">A few databases may require institutional access or have mixed access models (free + subscription).</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-primary border-0">
-                                    <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb me-2"></i>Research Tips</h6>
-                                    <p class="mb-0 small">Start with Google Scholar or PubMed for comprehensive searches across multiple disciplines.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Help Section -->
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-body p-5 text-center">
-                        <h3 class="fw-bold mb-4">Need Help Accessing Resources?</h3>
-                        <p class="text-muted mb-4">
-                            Our research librarians can help you navigate these resources and find the best tools for your research needs.
-                        </p>
-                        <div class="row g-3 justify-content-center">
-                            <div class="col-md-6">
-                                <a href="{% url 'accounts:research_assistance' %}" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-search me-2"></i>Research Assistance
-                                </a>
+                            <h2 class="h4 text-success mt-5">Preprint Servers</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-file-alt fa-2x text-success mb-3"></i>
+                                            <h6>arXiv</h6>
+                                            <p class="small text-muted">Physics, mathematics, computer science</p>
+                                            <a href="https://arxiv.org" target="_blank" class="btn btn-outline-success btn-sm">Visit</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-dna fa-2x text-success mb-3"></i>
+                                            <h6>bioRxiv</h6>
+                                            <p class="small text-muted">Biology preprints</p>
+                                            <a href="https://biorxiv.org" target="_blank" class="btn btn-outline-success btn-sm">Visit</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-flask fa-2x text-success mb-3"></i>
+                                            <h6>ChemRxiv</h6>
+                                            <p class="small text-muted">Chemistry research</p>
+                                            <a href="https://chemrxiv.org" target="_blank" class="btn btn-outline-success btn-sm">Visit</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <a href="{% url 'accounts:contact' %}" class="btn btn-primary w-100">
-                                    <i class="bi bi-envelope me-2"></i>Contact Librarian
-                                </a>
+
+                            <h2 class="h4 text-success mt-5">Open Access Books</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book-open text-success"></i> Open Access Book Publishers
+                                            </h6>
+                                            <p class="card-text">Leading publishers offering open access book options.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-globe text-success"></i> <strong>PLOS:</strong> Public Library of Science</li>
+                                                <li><i class="fas fa-university text-success"></i> <strong>eLife:</strong> Life sciences and biomedicine</li>
+                                                <li><i class="fas fa-microscope text-success"></i> <strong>BMC:</strong> BioMed Central</li>
+                                                <li><i class="fas fa-stethoscope text-success"></i> <strong>Frontiers:</strong> Multidisciplinary research</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-success btn-sm">Browse Publishers</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-book-reader text-success"></i> Open Textbooks
+                                            </h6>
+                                            <p class="card-text">Free, openly licensed textbooks for higher education.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-download text-success"></i> Free to download and use</li>
+                                                <li><i class="fas fa-edit text-success"></i> Can be modified and adapted</li>
+                                                <li><i class="fas fa-book text-success"></i> Peer-reviewed content</li>
+                                                <li><i class="fas fa-dollar-sign text-success"></i> Save students money</li>
+                                            </ul>
+                                            <a href="#" class="btn btn-success btn-sm">Find Textbooks</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-success mt-5">Benefits of Open Access</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-eye fa-2x text-success mb-3"></i>
+                                            <h6>Increased Visibility</h6>
+                                            <p class="small text-muted">Open access articles receive more downloads and citations.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-users fa-2x text-success mb-3"></i>
+                                            <h6>Broader Impact</h6>
+                                            <p class="small text-muted">Research reaches practitioners, policymakers, and the public.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-globe fa-2x text-success mb-3"></i>
+                                            <h6>Global Access</h6>
+                                            <p class="small text-muted">Anyone with internet can access and benefit from the research.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-success mt-5">How to Find Open Access Materials</h2>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-search text-success"></i> Search Strategies
+                                            </h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-hashtag text-success"></i> Use #OpenAccess in searches</li>
+                                                <li><i class="fas fa-globe text-success"></i> Check publisher websites for OA options</li>
+                                                <li><i class="fas fa-database text-success"></i> Use OA-specific databases and repositories</li>
+                                                <li><i class="fas fa-unlock-alt text-success"></i> Look for Creative Commons licenses</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-shield-alt text-success"></i> License Information
+                                            </h6>
+                                            <p class="card-text">Understanding Creative Commons licenses:</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check-circle text-success"></i> <strong>CC BY:</strong> Attribution required</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> <strong>CC BY-SA:</strong> Share alike required</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> <strong>CC BY-NC:</strong> Non-commercial use only</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> <strong>CC0:</strong> Public domain dedication</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="h4 text-success mt-5">Publishing Open Access</h2>
+                            <div class="alert alert-info mt-3">
+                                <h6 class="alert-heading"><i class="fas fa-lightbulb"></i> Want to Publish Open Access?</h6>
+                                <p class="mb-2">Consider these options for making your research openly available:</p>
+                                <ul class="mb-0">
+                                    <li><strong>Gold OA:</strong> Publish in open access journals</li>
+                                    <li><strong>Green OA:</strong> Self-archive in repositories</li>
+                                    <li><strong>Hybrid OA:</strong> Pay to make articles open in subscription journals</li>
+                                    <li><strong>Platinum OA:</strong> No fees for authors or readers</li>
+                                </ul>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">For Authors</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-file-alt text-success"></i> Check funder OA requirements</li>
+                                                <li><i class="fas fa-search text-success"></i> Find suitable OA journals</li>
+                                                <li><i class="fas fa-money-bill-wave text-success"></i> Explore funding for APCs</li>
+                                                <li><i class="fas fa-archive text-success"></i> Deposit in institutional repository</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">For Readers</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-globe text-success"></i> Use OA search engines</li>
+                                                <li><i class="fas fa-bookmark text-success"></i> Follow OA publishers</li>
+                                                <li><i class="fas fa-hashtag text-success"></i> Monitor #OpenAccess hashtags</li>
+                                                <li><i class="fas fa-bell text-success"></i> Set up OA alerts</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Links</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:open_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-globe text-success"></i> Open Educational Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:digital_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-laptop text-success"></i> Digital Resources
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:research_assistance' %}" class="text-decoration-none">
+                                                <i class="fas fa-search text-success"></i> Research Assistance
+                                            </a>
+                                        </li>
+                                        <li class="mb-2">
+                                            <a href="{% url 'accounts:library_resources' %}" class="text-decoration-none">
+                                                <i class="fas fa-book text-success"></i> Library Resources
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">Open Access Week</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Join us during Open Access Week for workshops and events promoting open scholarship.</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-calendar text-success"></i> Annual event in October</li>
+                                        <li><i class="fas fa-users text-success"></i> Workshops and seminars</li>
+                                        <li><i class="fas fa-lightbulb text-success"></i> Expert speakers</li>
+                                        <li><i class="fas fa-handshake text-success"></i> Networking opportunities</li>
+                                    </ul>
+                                    <a href="#" class="btn btn-success btn-sm mt-2">Learn More</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -302,25 +300,22 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-{{ block.super }}
-<style>
-    .resource-card {
-        transition: all 0.3s ease;
-    }
-
-    .resource-card:hover {
-        border-color: var(--accent-blue) !important;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .resource-icon {
-        transition: transform 0.3s ease;
-    }
-
-    .resource-card:hover .resource-icon {
-        transform: scale(1.1);
-    }
-</style>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add interactive features to resource cards
+    const resourceCards = document.querySelectorAll('.card.border-success');
+    
+    resourceCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
 {% endblock %}

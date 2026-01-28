@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test, per
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, Count
-from datetime import timedelta
+from datetime import timedelta, datetime
 from .models import Loan, Reservation, Fine, LoanRequest, Attendance
 from apps.catalog.models import Book, BookCopy
-from apps.accounts.models import LibraryUser
+from apps.accounts.models import LibraryUser, StudyRoom, StudyRoomBooking
 
 
 def is_staff_user(user):
@@ -505,3 +505,305 @@ def export_attendance_excel(request):
 
     wb.save(response)
     return response
+
+
+@login_required
+def room_booking_view(request):
+    """Study room booking view."""
+    if request.method == 'POST':
+        room_id = request.POST.get('room')
+        date_str = request.POST.get('date')
+        start_time_str = request.POST.get('start_time')
+        end_time_str = request.POST.get('end_time')
+        participants = request.POST.get('participants')
+        purpose = request.POST.get('purpose')
+        additional_info = request.POST.get('additional_info')
+
+        try:
+            room = StudyRoom.objects.get(id=room_id, is_active=True)
+            booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+            participants_count = int(participants)
+
+            # Validation
+            today = timezone.now().date()
+            if booking_date < today:
+                messages.error(request, 'Cannot book rooms for past dates.')
+                return redirect('circulation:room_booking')
+
+            if participants_count > room.capacity:
+                messages.error(request, f'This room can only accommodate {room.capacity} people.')
+                return redirect('circulation:room_booking')
+
+            # Check for time conflicts
+            conflicting_bookings = StudyRoomBooking.objects.filter(
+                room=room,
+                date=booking_date,
+                status__in=['pending', 'confirmed']
+            ).filter(
+                Q(start_time__lt=end_time, end_time__gt=start_time)
+            )
+
+            if conflicting_bookings.exists():
+                messages.error(request, 'This room is not available for the selected time slot.')
+                return redirect('circulation:room_booking')
+
+            # Create booking
+            booking = StudyRoomBooking.objects.create(
+                user=request.user,
+                room=room,
+                date=booking_date,
+                start_time=start_time,
+                end_time=end_time,
+                number_of_people=participants_count,
+                purpose=purpose,
+                additional_info=additional_info,
+                status='pending'
+            )
+
+            messages.success(request, f'Your booking request for {room.name} has been submitted and is pending approval.')
+            return redirect('circulation:room_booking')
+
+        except StudyRoom.DoesNotExist:
+            messages.error(request, 'Selected room is not available.')
+        except ValueError as e:
+            messages.error(request, f'Invalid input: {e}')
+        except Exception as e:
+            messages.error(request, f'An error occurred while processing your booking: {e}')
+
+        return redirect('circulation:room_booking')
+
+    # GET request - show available rooms
+    rooms = StudyRoom.objects.filter(is_active=True).order_by('name')
+    
+    # Calculate occupancy rate and availability
+    total_rooms = rooms.count()
+    today = timezone.now().date()
+    
+    # Count today's bookings
+    today_bookings = StudyRoomBooking.objects.filter(
+        date=today,
+        status__in=['pending', 'confirmed']
+    ).count()
+    
+    occupancy_rate = (today_bookings / total_rooms * 100) if total_rooms > 0 else 0
+
+    context = {
+        'rooms': rooms,
+        'total_rooms': total_rooms,
+        'available_rooms': rooms.exclude(
+            id__in=StudyRoomBooking.objects.filter(
+                date=today,
+                status__in=['pending', 'confirmed']
+            ).values_list('room_id', flat=True)
+        ),
+        'occupancy_rate': occupancy_rate,
+    }
+    return render(request, 'accounts/study_room_booking.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def room_calendar_view(request):
+    """Study room booking calendar view for admin."""
+    from django.db.models import Q
+    
+    # Get all bookings for the current month
+    today = timezone.now().date()
+    first_day_of_month = today.replace(day=1)
+    next_month = first_day_of_month.replace(month=first_day_of_month.month + 1) if first_day_of_month.month < 12 else first_day_of_month.replace(year=first_day_of_month.year + 1, month=1)
+    
+    bookings = StudyRoomBooking.objects.filter(
+        date__gte=first_day_of_month,
+        date__lt=next_month
+    ).select_related('user', 'room').order_by('date', 'start_time')
+    
+    rooms = StudyRoom.objects.filter(is_active=True).order_by('name')
+    
+    # Create calendar data
+    calendar_data = {}
+    current_date = first_day_of_month
+    while current_date < next_month:
+        calendar_data[current_date] = {}
+        for room in rooms:
+            calendar_data[current_date][room] = []
+        
+        current_date += timezone.timedelta(days=1)
+    
+    # Populate calendar with bookings
+    for booking in bookings:
+        if booking.date in calendar_data and booking.room in calendar_data[booking.date]:
+            calendar_data[booking.date][booking.room].append(booking)
+    
+    context = {
+        'calendar_data': calendar_data,
+        'rooms': rooms,
+        'current_month': first_day_of_month.strftime('%B %Y'),
+        'first_day_of_month': first_day_of_month,
+    }
+    return render(request, 'circulation/room_calendar.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def approve_room_booking(request, booking_id):
+    """Approve a study room booking."""
+    booking = get_object_or_404(StudyRoomBooking, id=booking_id, status='pending')
+    
+    booking.status = 'confirmed'
+    booking.confirmed_by = request.user
+    booking.confirmed_at = timezone.now()
+    booking.save()
+    
+    # Send confirmation email
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        send_mail(
+            subject=f"Study Room Booking Confirmed: {booking.room.name}",
+            message=f"Dear {booking.user.get_full_name()},\n\n"
+                   f"Your study room booking has been confirmed.\n\n"
+                   f"Room: {booking.room.name}\n"
+                   f"Date: {booking.date.strftime('%B %d, %Y')}\n"
+                   f"Time: {booking.start_time.strftime('%I:%M %p')} - {booking.end_time.strftime('%I:%M %p')}\n"
+                   f"Purpose: {booking.purpose}\n\n"
+                   f"Please arrive on time and present your university ID.\n\n"
+                   f"Best regards,\nRamat Library Administration",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[booking.user.email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        # Log error but don't fail the approval
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to send booking confirmation email to {booking.user.username}: {e}")
+    
+    messages.success(request, f'Booking for {booking.room.name} has been confirmed.')
+    return redirect('circulation:room_calendar')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def reject_room_booking(request, booking_id):
+    """Reject a study room booking."""
+    booking = get_object_or_404(StudyRoomBooking, id=booking_id, status='pending')
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Booking rejected by administrator')
+        
+        booking.status = 'rejected'
+        booking.rejected_by = request.user
+        booking.rejected_at = timezone.now()
+        booking.rejection_reason = reason
+        booking.save()
+        
+        # Send rejection email
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            send_mail(
+                subject=f"Study Room Booking Rejected: {booking.room.name}",
+                message=f"Dear {booking.user.get_full_name()},\n\n"
+                       f"Your study room booking has been rejected.\n\n"
+                       f"Room: {booking.room.name}\n"
+                       f"Date: {booking.date.strftime('%B %d, %Y')}\n"
+                       f"Time: {booking.start_time.strftime('%I:%M %p')} - {booking.end_time.strftime('%I:%M %p')}\n"
+                       f"Reason: {reason}\n\n"
+                       f"Please contact the library administration if you have questions.\n\n"
+                       f"Best regards,\nRamat Library Administration",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[booking.user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log error but don't fail the rejection
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send booking rejection email to {booking.user.username}: {e}")
+        
+        messages.success(request, f'Booking for {booking.room.name} has been rejected.')
+        return redirect('circulation:room_calendar')
+    
+    context = {
+        'booking': booking,
+    }
+    return render(request, 'circulation/reject_room_booking.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def cancel_room_booking(request, booking_id):
+    """Cancel a confirmed study room booking."""
+    booking = get_object_or_404(StudyRoomBooking, id=booking_id, status='confirmed')
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Booking cancelled by administrator')
+        
+        booking.status = 'cancelled'
+        booking.cancelled_by = request.user
+        booking.cancelled_at = timezone.now()
+        booking.cancellation_reason = reason
+        booking.save()
+        
+        # Send cancellation email
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            send_mail(
+                subject=f"Study Room Booking Cancelled: {booking.room.name}",
+                message=f"Dear {booking.user.get_full_name()},\n\n"
+                       f"Your study room booking has been cancelled.\n\n"
+                       f"Room: {booking.room.name}\n"
+                       f"Date: {booking.date.strftime('%B %d, %Y')}\n"
+                       f"Time: {booking.start_time.strftime('%I:%M %p')} - {booking.end_time.strftime('%I:%M %p')}\n"
+                       f"Reason: {reason}\n\n"
+                       f"We apologize for any inconvenience. Please contact us to reschedule.\n\n"
+                       f"Best regards,\nRamat Library Administration",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[booking.user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log error but don't fail the cancellation
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send booking cancellation email to {booking.user.username}: {e}")
+        
+        messages.success(request, f'Booking for {booking.room.name} has been cancelled.')
+        return redirect('circulation:room_calendar')
+    
+    context = {
+        'booking': booking,
+    }
+    return render(request, 'circulation/cancel_room_booking.html', context)
+
+
+@login_required
+def my_room_bookings(request):
+    """View user's own room bookings."""
+    bookings = StudyRoomBooking.objects.filter(user=request.user).order_by('-created_at')
+    
+    context = {
+        'bookings': bookings,
+    }
+    return render(request, 'circulation/my_room_bookings.html', context)
+
+
+@login_required
+def cancel_my_room_booking(request, booking_id):
+    """Allow users to cancel their own pending bookings."""
+    booking = get_object_or_404(StudyRoomBooking, id=booking_id, user=request.user, status='pending')
+    
+    booking.status = 'cancelled'
+    booking.cancelled_by = request.user
+    booking.cancelled_at = timezone.now()
+    booking.cancellation_reason = 'User cancelled'
+    booking.save()
+    
+    messages.success(request, f'Your booking for {booking.room.name} has been cancelled.')
+    return redirect('circulation:my_room_bookings')

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Theses & Dissertations - Ramat Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-4">Theses & Dissertations</h1>
+            <p class="lead text-center text-muted mb-5">Explore our collection of academic research and scholarly works</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Search and Filter Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="department" class="form-label">Department</label>
+                            <select name="department" id="department" class="form-select">
+                                <option value="">All Departments</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="year" class="form-label">Year</label>
+                            <select name="year" id="year" class="form-select">
+                                <option value="">All Years</option>
+                                {% for year in years %}
+                                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by title or author..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a href="{% url 'accounts:theses' %}" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Theses List -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-mortarboard me-2"></i>
+                        Available Theses & Dissertations
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% if theses %}
+                    {% for thesis in theses %}
+                    <div class="row mb-4 border-bottom pb-4">
+                        <div class="col-md-9">
+                            <h5 class="text-primary">{{ thesis.title }}</h5>
+                            <p class="text-muted mb-1">
+                                <strong>Author:</strong> {{ thesis.author }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Department:</strong> {{ thesis.department.name }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Year:</strong> {{ thesis.year }}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <strong>Type:</strong> {{ thesis.thesis_type }}
+                            </p>
+                            <p class="text-muted">{{ thesis.abstract|truncatewords:50 }}</p>
+                        </div>
+                        <div class="col-md-3 text-md-end">
+                            <div class="btn-group-vertical" role="group">
+                                <a href="{{ thesis.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="bi bi-download me-2"></i>Download
+                                </a>
+                                <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#thesisModal{{ thesis.id }}">
+                                    <i class="bi bi-eye me-2"></i>Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                        <p class="text-muted mt-3">No theses found matching your criteria.</p>
+                        <a href="{% url 'accounts:theses' %}" class="btn btn-primary">View All Theses</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Access Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Access Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Submission Guidelines</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Format requirements available</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Submission process assistance</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> Copyright guidance provided</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Access Policies</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar-check text-primary me-2"></i> 24/7 online access</li>
+                                <li><i class="bi bi-people text-info me-2"></i> Faculty supervision required</li>
+                                <li><i class="bi bi-shield-check text-warning me-2"></i> Copyright compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thesis Modal -->
+{% for thesis in theses %}
+<div class="modal fade" id="thesisModal{{ thesis.id }}" tabindex="-1" aria-labelledby="thesisModalLabel{{ thesis.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="thesisModalLabel{{ thesis.id }}">{{ thesis.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Author:</strong> {{ thesis.author }}</p>
+                        <p><strong>Department:</strong> {{ thesis.department.name }}</p>
+                        <p><strong>Year:</strong> {{ thesis.year }}</p>
+                        <p><strong>Type:</strong> {{ thesis.thesis_type }}</p>
+                        <p><strong>Supervisor:</strong> {{ thesis.supervisor }}</p>
+                        <p><strong>Keywords:</strong> {{ thesis.keywords|join:", " }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Abstract:</strong></p>
+                        <p class="text-muted">{{ thesis.abstract }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ thesis.file.url }}" class="btn btn-primary" target="_blank">
+                    <i class="bi bi-download me-2"></i>Download Full Text
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

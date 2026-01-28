@@ -21,15 +21,14 @@ from apps.repository.models import Collection, EBook, EBookPermission
 from apps.blog.models import BlogPost, StaticPage, FeaturedContent, News
 
 
-class BulkActionMixin:
-    """Mixin providing common bulk action functionality."""
+class BulkActionsMixin:
+    """Mixin providing bulk action functionality for admin classes."""
     
     def get_bulk_action_message(self, action_name, count, errors=None):
         """Generate a user-friendly message for bulk actions."""
         if errors:
             return f"{action_name} completed: {count} successful, {len(errors)} failed."
         return f"Successfully {action_name} {count} items."
-
 
 def bulk_activate_users(modeladmin, request, queryset):
     """Activate selected users."""

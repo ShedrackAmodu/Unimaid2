@@ -57,6 +57,21 @@ class LibraryUser(AbstractUser, BaseModel):
     office_hours = models.CharField(max_length=200, blank=True, null=True, help_text="Office hours for staff members")
     position = models.CharField(max_length=100, blank=True, null=True, help_text="Position or job title for staff members")
     specialization = models.TextField(blank=True, null=True, help_text="Area of specialization for staff members")
+    
+    # Enhanced security fields
+    two_factor_enabled = models.BooleanField(default=False, help_text="Whether two-factor authentication is enabled")
+    last_password_change = models.DateTimeField(auto_now_add=True, help_text="When the password was last changed")
+    failed_login_attempts = models.PositiveIntegerField(default=0, help_text="Number of failed login attempts")
+    locked_until = models.DateTimeField(null=True, blank=True, help_text="Account locked until this time due to failed attempts")
+    last_activity = models.DateTimeField(auto_now=True, help_text="Last time user was active")
+    
+    # Additional contact fields
+    alternate_phone = models.CharField(max_length=20, blank=True, help_text="Alternate phone number")
+    address = models.TextField(blank=True, help_text="Physical address")
+    emergency_contact_name = models.CharField(max_length=100, blank=True, help_text="Emergency contact person name")
+    emergency_contact_relation = models.CharField(max_length=50, blank=True, help_text="Relationship to emergency contact")
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, help_text="Emergency contact phone number")
+    emergency_contact_email = models.EmailField(blank=True, help_text="Emergency contact email address")
 
     objects = UserManager()
 

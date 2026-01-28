@@ -1,0 +1,710 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Account - Ramat Library{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}" class="text-decoration-none">
+    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+</a></li>
+<li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}" class="text-decoration-none">
+    <i class="bi bi-person me-1"></i>Profile
+</a></li>
+<li class="breadcrumb-item active" aria-current="page">Delete Account</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="row mb-5 animate__animated animate__fadeInUp">
+    <div class="col">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <div class="icon-60 icon-60--gradient">
+                    <i class="bi bi-trash fs-3 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="display-4 fw-bold mb-2">Delete Account</h1>
+                <p class="lead text-muted">Permanently delete your library account and all associated data</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Delete Account Page Content -->
+<div class="delete-account-page">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Warning Alert -->
+                <div class="alert alert-danger border-0 shadow-lg mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+                        <div>
+                            <h5 class="alert-heading fw-bold mb-1">Important Warning</h5>
+                            <p class="mb-0">
+                                Deleting your account is <strong>permanent and irreversible</strong>. 
+                                All your data, including loans, reservations, fines, and personal information, will be permanently deleted.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Information -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Account Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item mb-3">
+                                    <strong>Username:</strong>
+                                    <span class="text-muted">{{ user.username }}</span>
+                                </div>
+                                <div class="info-item mb-3">
+                                    <strong>Full Name:</strong>
+                                    <span class="text-muted">{{ user.get_full_name }}</span>
+                                </div>
+                                <div class="info-item mb-3">
+                                    <strong>Email:</strong>
+                                    <span class="text-muted">{{ user.email }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item mb-3">
+                                    <strong>Membership Type:</strong>
+                                    <span class="badge bg-primary">{{ user.get_membership_type_display }}</span>
+                                </div>
+                                <div class="info-item mb-3">
+                                    <strong>Account Status:</strong>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <div class="info-item mb-3">
+                                    <strong>Member Since:</strong>
+                                    <span class="text-muted">{{ user.date_joined|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data That Will Be Deleted -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Data That Will Be Deleted</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2">Library Data</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-book me-2 text-danger"></i>Book loans and borrowing history</li>
+                                    <li><i class="bi bi-bookmark me-2 text-danger"></i>Book reservations</li>
+                                    <li><i class="bi bi-cash me-2 text-danger"></i>Fines and payment history</li>
+                                    <li><i class="bi bi-calendar-check me-2 text-danger"></i>Study room bookings</li>
+                                    <li><i class="bi bi-person-check me-2 text-danger"></i>Event registrations</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2">Personal Data</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="bi bi-person me-2 text-danger"></i>Profile information</li>
+                                    <li><i class="bi bi-envelope me-2 text-danger"></i>Email address</li>
+                                    <li><i class="bi bi-telephone me-2 text-danger"></i>Phone number</li>
+                                    <li><i class="bi bi-image me-2 text-danger"></i>Profile picture</li>
+                                    <li><i class="bi bi-shield-check me-2 text-danger"></i>Security settings</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle me-3 fs-4"></i>
+                                <div>
+                                    <strong>Note:</strong> Some data may be retained for legal or administrative purposes as required by law, but will be anonymized and not associated with your identity.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alternatives -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Before You Delete</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alternative-item mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-info me-3">
+                                            <i class="bi bi-eye-slash text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Temporarily Deactivate</h6>
+                                            <p class="text-muted mb-0">Instead of deleting, you can temporarily deactivate your account.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alternative-item mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-warning me-3">
+                                            <i class="bi bi-download text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Export Your Data</h6>
+                                            <p class="text-muted mb-0">Download your borrowing history and personal information before deletion.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-question-circle me-3 fs-4"></i>
+                                <div>
+                                    <strong>Need Help?</strong> Contact our support team if you're having issues with your account or need assistance with alternatives to deletion.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Account Form -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Confirm Account Deletion</h5>
+                        
+                        <div class="alert alert-warning">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-exclamation me-3 fs-4"></i>
+                                <div>
+                                    <strong>To confirm deletion, please enter your password below.</strong>
+                                    <p class="mt-2 mb-0">
+                                        This is to ensure that only you can delete your account.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="deleteAccountForm" method="post">
+                            {% csrf_token %}
+                            
+                            <!-- Password Confirmation -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label">Confirm Your Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password"
+                                           placeholder="Enter your current password"
+                                           required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    You must enter your current password to confirm account deletion.
+                                </div>
+                            </div>
+                            
+                            <!-- Confirmation Checkbox -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                                    <label class="form-check-label" for="confirmDelete">
+                                        <strong>I understand that deleting my account is permanent and irreversible.</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            I confirm that I want to delete my account and all associated data.
+                                        </small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Messages -->
+                            <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <div id="errorText"></div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            
+                            <!-- Success Message -->
+                            <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <div id="successText"></div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3">
+                                <button type="submit" class="btn btn-danger btn-lg" id="deleteAccountBtn" disabled>
+                                    <i class="bi bi-trash me-2"></i>Delete Account Permanently
+                                </button>
+                                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancel and Return to Profile
+                                </a>
+                            </div>
+                            
+                            <!-- Final Warning -->
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-exclamation-triangle me-3 fs-4"></i>
+                                    <div>
+                                        <strong>Final Warning:</strong> Once you delete your account, there is no way to recover it. 
+                                        All your data will be permanently lost.
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Support Contact -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Need Assistance?</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="support-item">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-circle bg-primary me-3">
+                                            <i class="bi bi-headset text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Contact Support</h6>
+                                            <p class="text-muted mb-0">Get help with account issues or alternatives to deletion</p>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'accounts:contact' %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-envelope me-2"></i>Contact Support
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="support-item">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-circle bg-info me-3">
+                                            <i class="bi bi-question-circle text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Frequently Asked Questions</h6>
+                                            <p class="text-muted mb-0">Find answers to common questions about account management</p>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'accounts:privacy_policy' %}" class="btn btn-outline-info">
+                                        <i class="bi bi-file-text me-2"></i>View FAQ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="deleteSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Account Deletion Successful</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #dc3545, #6f42c1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi bi-check-lg text-white fs-1"></i>
+                    </div>
+                </div>
+                
+                <h4 class="fw-bold mb-3">Your account has been successfully deleted</h4>
+                <p class="text-muted mb-4">
+                    Your Ramat Library account and all associated data have been permanently deleted. 
+                    You will be logged out automatically in a few moments.
+                </p>
+                
+                <div class="alert alert-info">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle me-3 fs-4"></i>
+                        <div>
+                            <strong>What happens next:</strong>
+                            <ul class="mt-2 mb-0">
+                                <li>You will be automatically logged out</li>
+                                <li>You will be redirected to the home page</li>
+                                <li>If you wish to use our services again, you'll need to register a new account</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="redirectToHome()">
+                    <i class="bi bi-house me-2"></i>Go to Home Page
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+    /* Delete Account Specific Styles */
+    .delete-account-page {
+        padding-bottom: 4rem;
+    }
+    
+    /* Icon Circles */
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Info Items */
+    .info-item {
+        padding: 10px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .info-item:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    /* Alternative Items */
+    .alternative-item {
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .alternative-item:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    /* Support Items */
+    .support-item {
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .support-item:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    /* Form Styling */
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .input-group-text {
+        border-right: none;
+    }
+    
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        border-radius: 8px;
+    }
+    
+    /* Delete Button Styling */
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate__fadeInUp {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Hover Effects */
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .delete-account-page {
+            padding-bottom: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password visibility toggle
+        window.togglePassword = function(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+                button.setAttribute('title', 'Hide password');
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+                button.setAttribute('title', 'Show password');
+            }
+        };
+        
+        // Enable delete button when checkbox is checked
+        const confirmDeleteCheckbox = document.getElementById('confirmDelete');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        
+        if (confirmDeleteCheckbox && deleteAccountBtn) {
+            confirmDeleteCheckbox.addEventListener('change', function() {
+                deleteAccountBtn.disabled = !this.checked;
+            });
+        }
+        
+        // Form submission handling
+        const deleteAccountForm = document.getElementById('deleteAccountForm');
+        
+        if (deleteAccountForm) {
+            deleteAccountForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Basic validation
+                const password = document.getElementById('password').value;
+                const confirmDelete = document.getElementById('confirmDelete').checked;
+                
+                if (!password) {
+                    showErrorMessage('Please enter your password to confirm account deletion');
+                    return;
+                }
+                
+                if (!confirmDelete) {
+                    showErrorMessage('You must confirm that you understand the consequences of account deletion');
+                    return;
+                }
+                
+                // Show loading state
+                const originalText = deleteAccountBtn.innerHTML;
+                deleteAccountBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting Account...';
+                deleteAccountBtn.disabled = true;
+                
+                // Submit via AJAX
+                const formData = new FormData(deleteAccountForm);
+                
+                fetch('{% url "accounts:delete_account" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessMessage(data.message);
+                        
+                        // Show success modal
+                        const modal = new bootstrap.Modal(document.getElementById('deleteSuccessModal'));
+                        modal.show();
+                        
+                        // Redirect after 3 seconds
+                        setTimeout(() => {
+                            redirectToHome();
+                        }, 3000);
+                    } else {
+                        showErrorMessage(data.message);
+                        deleteAccountBtn.innerHTML = originalText;
+                        deleteAccountBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorMessage('An error occurred while deleting your account. Please try again.');
+                    deleteAccountBtn.innerHTML = originalText;
+                    deleteAccountBtn.disabled = false;
+                });
+            });
+        }
+        
+        // Show error message
+        function showErrorMessage(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Show success message
+        function showSuccessMessage(message) {
+            const successDiv = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            
+            successText.textContent = message;
+            successDiv.style.display = 'block';
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Redirect to home
+        window.redirectToHome = function() {
+            window.location.href = '/';
+        };
+        
+        // Add confetti effect for success
+        function createConfetti() {
+            const colors = ['#dc3545', '#6f42c1', '#fd7e14', '#e83e8c', '#20c997'];
+            const container = document.body;
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                confetti.style.animation = 'fall ' + (Math.random() * 3 + 2) + 's linear forwards';
+                
+                container.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Add CSS for confetti animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Toast notification function
+        function showToast(type, message) {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.custom-toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = `custom-toast alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}-fill fs-4 me-3"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Add shake animation for delete button on hover
+        deleteAccountBtn.addEventListener('mouseenter', function() {
+            this.style.animation = 'shake 0.5s ease-in-out';
+        });
+        
+        deleteAccountBtn.addEventListener('animationend', function() {
+            this.style.animation = '';
+        });
+        
+        // Add CSS for shake animation
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                50% { transform: translateX(5px); }
+                75% { transform: translateX(-5px); }
+                100% { transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+        
+        // Add warning animation
+        const warningAlert = document.querySelector('.alert-danger');
+        if (warningAlert) {
+            warningAlert.style.animation = 'fadeInUp 0.6s ease-out';
+        }
+    });
+</script>
+{% endblock %}

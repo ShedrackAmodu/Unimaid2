@@ -51,5 +51,16 @@ def main():
     except Exception as e:
         print(f"Error creating superuser: {e}")
 
+    print("Uploading catalog data...")
+    try:
+        # Import and run the catalog data upload
+        from upload_catalog_data import main as upload_catalog_main
+        upload_catalog_main()
+        print("Catalog data upload completed successfully.")
+    except Exception as e:
+        print(f"Error uploading catalog data: {e}")
+        import traceback
+        traceback.print_exc()
+
 if __name__ == '__main__':
     main()

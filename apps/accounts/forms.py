@@ -22,7 +22,8 @@ class LibraryUserChangeForm(UserChangeForm):
         fields = ('email', 'first_name', 'last_name', 'membership_type',
                  'department', 'student_id', 'faculty_id', 'staff_id', 'phone', 
                  'emergency_contact', 'profile_picture', 'office_hours', 'position', 
-                 'specialization')
+                 'specialization', 'alternate_phone', 'address', 'emergency_contact_name',
+                 'emergency_contact_relation', 'emergency_contact_phone', 'emergency_contact_email')
         widgets = {
             'membership_type': forms.Select(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -54,6 +55,31 @@ class LibraryUserChangeForm(UserChangeForm):
             'profile_picture': forms.FileInput(attrs={
                 'accept': 'image/*',
                 'class': 'form-control'
+            }),
+            'alternate_phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Alternate phone number'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Physical address'
+            }),
+            'emergency_contact_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Emergency contact person name'
+            }),
+            'emergency_contact_relation': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Relationship to emergency contact'
+            }),
+            'emergency_contact_phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Emergency contact phone number'
+            }),
+            'emergency_contact_email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Emergency contact email address'
             }),
         }
 

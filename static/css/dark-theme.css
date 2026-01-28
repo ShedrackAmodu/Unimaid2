@@ -1,0 +1,462 @@
+/* Enhanced Dark Theme Styles for Ramat Library
+   This file contains comprehensive dark theme overrides and improvements
+   to address CSS conflicts and provide a cohesive dark mode experience.
+*/
+
+/* Dark Theme Color Variables */
+:root {
+  /* Light theme defaults (already defined in base.html) */
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] {
+  /* Core Color Variables */
+  --primary-blue: #3a86ff;
+  --secondary-blue: #1a365d;
+  --accent-blue: #4cc9f0;
+  --light-blue: #2a4b8d;
+  --gold-accent: #ffd700;
+  --silver-accent: #c0c0c0;
+  --dark-text: #f8f9fa;
+  --light-text: #121212;
+  --gray-bg: #0f172a;
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --transition-speed: 0.4s;
+  --gradient-1: linear-gradient(135deg, #1a365d 0%, #0f172a 100%);
+  --gradient-2: linear-gradient(135deg, #1a365d 0%, #4cc9f0 100%);
+  
+  /* Additional Dark Theme Variables */
+  --bg-primary: #0f172a;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  --text-primary: #f8f9fa;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-color: #374151;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  
+  /* RGB values for transparency */
+  --primary-rgb: 26, 54, 93;
+  --accent-rgb: 76, 201, 240;
+  --danger-rgb: 239, 68, 68;
+  --success-rgb: 34, 197, 94;
+  --warning-rgb: 245, 158, 11;
+  --info-rgb: 59, 130, 246;
+}
+
+/* Enhanced Body Styling for Dark Theme */
+[data-theme="dark"] body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(58, 134, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(76, 201, 240, 0.08) 0%, transparent 50%);
+}
+
+/* Enhanced Scrollbar for Dark Theme */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 12px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+  border-radius: 6px;
+  border: 3px solid var(--bg-secondary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--accent-blue), var(--primary-blue));
+}
+
+/* Enhanced Navigation for Dark Theme */
+[data-theme="dark"] .navbar {
+  background: var(--gradient-1) !important;
+  border-bottom: 3px solid var(--gold-accent);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .navbar.scrolled {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .navbar-brand {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 0.2rem;
+}
+
+[data-theme="dark"] .navbar-nav .nav-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white !important;
+  border-color: var(--gold-accent);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .navbar-nav .nav-link.active {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Enhanced Dropdown Menu for Dark Theme */
+[data-theme="dark"] .dropdown-menu {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-blue);
+  color: white;
+}
+
+/* Enhanced Theme Toggle for Dark Theme */
+[data-theme="dark"] .theme-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--gold-accent);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 25px rgba(58, 134, 255, 0.4);
+  transform: rotate(15deg) scale(1.1);
+}
+
+[data-theme="dark"] .theme-toggle:focus {
+  outline: 3px solid rgba(58, 134, 255, 0.4);
+}
+
+/* Enhanced User Dropdown for Dark Theme */
+[data-theme="dark"] .user-dropdown .dropdown-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white !important;
+}
+
+[data-theme="dark"] .user-dropdown .dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--gold-accent);
+}
+
+/* Enhanced Cards for Dark Theme */
+[data-theme="dark"] .card {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme="dark"] .card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  border-color: var(--primary-blue);
+}
+
+[data-theme="dark"] .card-header {
+  background: var(--gradient-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .card .card-body {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Enhanced Buttons for Dark Theme */
+[data-theme="dark"] .btn-primary {
+  background: var(--gradient-2);
+  border: none;
+  box-shadow: 0 6px 20px rgba(58, 134, 255, 0.4);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(58, 134, 255, 0.6);
+  transform: translateY(-3px);
+}
+
+[data-theme="dark"] .btn-outline-primary {
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  background: transparent;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+  background: var(--gradient-2);
+  border-color: transparent;
+  color: white;
+}
+
+/* Enhanced Forms for Dark Theme */
+[data-theme="dark"] .form-control, 
+[data-theme="dark"] .form-select {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .form-control:focus, 
+[data-theme="dark"] .form-select:focus {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 4px rgba(58, 134, 255, 0.2);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Enhanced Alerts for Dark Theme */
+[data-theme="dark"] .alert {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .alert-success {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #dcfce7;
+}
+
+[data-theme="dark"] .alert-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
+[data-theme="dark"] .alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fde68a;
+}
+
+[data-theme="dark"] .alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #bfdbfe;
+}
+
+/* Enhanced Tables for Dark Theme */
+[data-theme="dark"] .table {
+  --bs-table-bg: var(--bg-secondary);
+  --bs-table-striped-bg: var(--bg-tertiary);
+  --bs-table-border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table thead th {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  border-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+  background: rgba(58, 134, 255, 0.1);
+}
+
+[data-theme="dark"] .table tbody td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Enhanced Progress Bars for Dark Theme */
+[data-theme="dark"] .progress {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .progress-bar {
+  background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
+}
+
+/* Enhanced Breadcrumbs for Dark Theme */
+[data-theme="dark"] .breadcrumb {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .breadcrumb-item.active {
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+/* Enhanced Footer for Dark Theme */
+[data-theme="dark"] .footer {
+  background: var(--gradient-1);
+  border-top: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .footer::before {
+  background: linear-gradient(90deg, var(--gold-accent), var(--silver-accent), var(--gold-accent));
+}
+
+[data-theme="dark"] .footer h5 {
+  color: var(--gold-accent);
+}
+
+[data-theme="dark"] .footer a {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .footer a:hover {
+  color: var(--gold-accent);
+}
+
+[data-theme="dark"] .social-links a {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .social-links a:hover {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+  transform: translateY(-5px) scale(1.1);
+}
+
+/* Enhanced Floating Action Button for Dark Theme */
+[data-theme="dark"] .fab {
+  background: var(--gradient-2);
+  box-shadow: 0 8px 25px rgba(58, 134, 255, 0.5);
+}
+
+[data-theme="dark"] .fab:hover {
+  box-shadow: 0 12px 40px rgba(58, 134, 255, 0.7);
+}
+
+/* Enhanced Admin Styles for Dark Theme */
+[data-theme="dark"] .module {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .module h2 {
+  background: var(--gradient-2) !important;
+}
+
+[data-theme="dark"] .form-row {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .form-row:hover {
+  background: rgba(58, 134, 255, 0.05);
+}
+
+[data-theme="dark"] #changelist table {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] #changelist table thead th {
+  background: var(--gradient-2) !important;
+}
+
+[data-theme="dark"] #changelist table tbody td {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] #changelist table tbody tr:hover {
+  background: rgba(58, 134, 255, 0.1) !important;
+}
+
+/* Enhanced Dashboard Specific Styles for Dark Theme */
+[data-theme="dark"] .stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .stat-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 15px 40px rgba(58, 134, 255, 0.3);
+}
+
+[data-theme="dark"] .timeline::before {
+  background: var(--primary-blue);
+}
+
+[data-theme="dark"] .timeline-content {
+  background: var(--bg-tertiary);
+  border-left-color: var(--primary-blue);
+}
+
+[data-theme="dark"] .membership-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+/* Enhanced Theme Transition */
+* {
+  transition: background-color var(--transition-speed) ease-in-out, 
+             color var(--transition-speed) ease-in-out,
+             border-color var(--transition-speed) ease-in-out,
+             box-shadow var(--transition-speed) ease-in-out,
+             transform var(--transition-speed) ease-in-out !important;
+}
+
+/* Smooth theme transition for body */
+body {
+  transition: background-color var(--transition-speed) ease-in-out,
+              color var(--transition-speed) ease-in-out !important;
+}
+
+/* Override any conflicting inline styles */
+[data-theme="dark"] [style*="background-color: #ffffff"],
+[data-theme="dark"] [style*="background-color: #fff"],
+[data-theme="dark"] [style*="background-color: white"] {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] [style*="color: #000000"],
+[data-theme="dark"] [style*="color: #000"],
+[data-theme="dark"] [style*="color: black"] {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] [style*="color: #6c757d"],
+[data-theme="dark"] [style*="color: #666"],
+[data-theme="dark"] [style*="color: #999"] {
+  color: var(--text-muted) !important;
+}
+
+/* Enhanced print styles for dark theme */
+@media print {
+  [data-theme="dark"] body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  [data-theme="dark"] .card {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #000 !important;
+  }
+  
+  [data-theme="dark"] .btn {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #000 !important;
+  }
+}
