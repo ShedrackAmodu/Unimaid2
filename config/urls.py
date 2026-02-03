@@ -17,10 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 from apps.accounts.views import home_view
 
 urlpatterns = [
     path("", home_view, name="home"),
+    path("offline/", TemplateView.as_view(template_name="offline.html"), name="offline"),
     path("admin/", admin.site.urls),
     path("api/", include("config.api_urls")),
     path("accounts/", include("apps.accounts.urls")),

@@ -1,0 +1,73 @@
+{
+  "name": "Ramat Library - University of Maiduguri",
+  "short_name": "Ramat Library",
+  "description": "A comprehensive library management system for the University of Maiduguri",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0a2472",
+  "icons": [
+    {
+      "src": "/static/images/librarybooks.jfif",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/librarybooks.jfif",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/librarybooks.jfif",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/librarybooks.jfif",
+      "sizes": "540x720",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/static/images/librarybooks.jfif",
+      "sizes": "1080x1440",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Books",
+      "short_name": "Books",
+      "description": "Browse library catalog",
+      "url": "/catalog/",
+      "icons": [
+        {
+          "src": "/static/images/librarybooks.jfif",
+          "sizes": "192x192",
+          "type": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "name": "My Account",
+      "short_name": "Account",
+      "description": "View your account",
+      "url": "/accounts/profile/",
+      "icons": [
+        {
+          "src": "/static/images/librarybooks.jfif",
+          "sizes": "192x192",
+          "type": "image/jpeg"
+        }
+      ]
+    }
+  ]
+}

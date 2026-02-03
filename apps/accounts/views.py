@@ -159,7 +159,19 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        # Try authenticating by username first
         user = authenticate(request, username=username, password=password)
+
+        # If that fails, and the user entered an email, try resolving email -> username
+        if user is None:
+            try:
+                from .models import LibraryUser
+                candidate = LibraryUser.objects.filter(email__iexact=(username or '')).first()
+                if candidate:
+                    user = authenticate(request, username=candidate.username, password=password)
+            except Exception:
+                user = None
+
         if user is not None:
             login(request, user)
             next_url = request.GET.get('next', reverse('accounts:dashboard'))

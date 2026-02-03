@@ -447,6 +447,16 @@
         background-color: rgba(10, 36, 114, 0.05);
     }
     
+    [data-theme="dark"] .border-dashed {
+        border-color: var(--border-color) !important;
+        background-color: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .border-dashed:hover {
+        border-color: var(--primary-blue) !important;
+        background-color: rgba(58, 134, 255, 0.1);
+    }
+    
     .file-upload-area input[type="file"] {
         position: absolute;
         top: 0;
@@ -491,6 +501,12 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+    }
+    
+    [data-theme="dark"] .file-preview .file-item {
+        background: var(--bg-tertiary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
     }
     
     /* Form Checkboxes */

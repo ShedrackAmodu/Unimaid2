@@ -96,8 +96,8 @@ class AnalyticsDashboardView(TemplateView):
         ).count()
 
         # Repository statistics
-        from apps.repository.models import Document
-        total_documents = Document.objects.count()
+        from apps.repository.models import EBook
+        total_documents = EBook.objects.count()
         document_downloads = AnalyticsEvent.objects.filter(
             event_type='download',
             created_at__date__gte=start_date,

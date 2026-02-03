@@ -5,49 +5,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="theme-color" content="#0a2472">
+    <meta name="description" content="Ramat Library - A comprehensive library management system for the University of Maiduguri">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ramat Library">
+    
     <title>{% block title %}Ramat Library - University of Maiduguri{% endblock %}</title>
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    
     <!-- Favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'images/librarybooks.jfif' %}"
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Site-wide responsive overrides -->
-    <link rel="stylesheet" href="{% static 'css/site-responsive.css' %}">
-    <!-- Enhanced dark theme styles -->
-    <link rel="stylesheet" href="{% static 'css/dark-theme.css' %}">
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Unified Navy Blue Theme -->
+    <link rel="stylesheet" href="{% static 'css/navy-blue-theme.css' %}">
+    <!-- Advanced Responsive Patterns -->
+    <link rel="stylesheet" href="{% static 'css/responsive-advanced.css' %}">
+    <!-- Site-wide responsive overrides -->
+    <link rel="stylesheet" href="{% static 'css/site-responsive.css' %}">
     
     <style>
         :root {
-            --primary-blue: #0a2472;
-            --secondary-blue: #001f3f;
-            --accent-blue: #007bff;
-            --light-blue: #e6f2ff;
-            --gold-accent: #ffd700;
-            --silver-accent: #c0c0c0;
-            --dark-text: #212529;
-            --light-text: #f8f9fa;
-            --gray-bg: #f8f9fa;
-            --card-shadow: 0 10px 30px rgba(0, 31, 63, 0.15);
-            --transition-speed: 0.4s;
+            --navy-primary: #0a2472;
+            --navy-secondary: #001f3f;
+            --navy-dark: #051a3b;
+            --navy-light: #1a4d96;
+            --accent-primary: #0066cc;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --text-dark: #212529;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+            --bg-light: #ffffff;
+            --bg-gray: #f8f9fa;
+            --bg-gray-dark: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(10, 36, 114, 0.15);
+            --transition-speed: 0.3s;
             --gradient-1: linear-gradient(135deg, #0a2472 0%, #001f3f 100%);
-            --gradient-2: linear-gradient(135deg, #0a2472 0%, #3a86ff 100%);
+            --gradient-2: linear-gradient(135deg, #0a2472 0%, #0066cc 100%);
         }
 
         [data-theme="dark"] {
-            --primary-blue: #1a365d;
-            --secondary-blue: #0f1c2d;
-            --accent-blue: #3a86ff;
-            --light-blue: #1a365d;
-            --gold-accent: #ffcc00;
-            --silver-accent: #a0a0a0;
-            --dark-text: #f8f9fa;
-            --light-text: #121212;
-            --gray-bg: #121212;
+            --navy-primary: #1a365d;
+            --navy-secondary: #0f1c2d;
+            --navy-dark: #051a3b;
+            --navy-light: #2a5f99;
+            --accent-primary: #3a86ff;
+            --gold: #ffcc00;
+            --silver: #a0a0a0;
+            --text-dark: #f8f9fa;
+            --text-light: #121212;
+            --text-muted: #d1d5db;
+            --bg-light: #111827;
+            --bg-gray: #0f172a;
+            --bg-gray-dark: #1f2937;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             --gradient-1: linear-gradient(135deg, #1a365d 0%, #0f1c2d 100%);
             --gradient-2: linear-gradient(135deg, #1a365d 0%, #3a86ff 100%);
@@ -64,8 +84,8 @@
         }
 
         body {
-            background-color: var(--gray-bg);
-            color: var(--dark-text);
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
@@ -82,8 +102,9 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(58, 134, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(10, 36, 114, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 102, 204, 0.04) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
@@ -872,8 +893,13 @@
                 </ul>
             </div>
 
-            <!-- Right Section: Theme & User -->
-            <div class="d-flex align-items-center">
+            <!-- Right Section: Theme, Install & User -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Install App Button (PWA) -->
+                <button id="install-app-btn" class="btn btn-success btn-sm me-2" style="display: none;" title="Install app on your device">
+                    <i class="bi bi-download me-1"></i><span class="d-none d-md-inline">Install</span>
+                </button>
+
                 <!-- Theme Toggle -->
                 <div class="theme-toggle-container">
                     <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme" onclick="const root=document.documentElement; const current=root.getAttribute('data-theme')||'light'; const next=current==='light'?'dark':'light'; root.setAttribute('data-theme',next); localStorage.setItem('theme',next); const icon=this.querySelector('i'); if(icon){icon.className=next==='dark'?'bi bi-sun-fill':'bi bi-moon-fill';} console.log('Theme toggled to:', next);">
@@ -1329,13 +1355,27 @@
             mainNav.addEventListener('hidden.bs.collapse', function () {
                 console.log('Menu hidden');
             });
+        </script>
 
-            console.log('Hamburger menu event listeners attached');
-        } else {
-            console.error('Hamburger menu elements not found');
-        }
+    <!-- Offline Mode Support -->
+    <!-- Offline Data Manager - Handles IndexedDB storage and sync queue -->
+    <script src="{% static 'js/offline-data-manager.js' %}"></script>
+    
+    <!-- Offline Request Interceptor - Intercepts fetch and queues offline requests -->
+    <script src="{% static 'js/offline-request-interceptor.js' %}"></script>
+    
+    <!-- Offline UI Manager - Shows offline status and sync controls -->
+    <script src="{% static 'js/offline-ui-manager.js' %}"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script src="{% static 'js/pwa-register.js' %}"></script>
+    
+    <!-- Professional Utilities Library -->
+    <script src="{% static 'js/utilities.js' %}"></script>
+    
+    <!-- Enhanced Theme Manager -->
+    <script src="{% static 'js/theme-manager.js' %}"></script>
     
     {% block scripts %}{% endblock %}
-
 </body>
 </html>

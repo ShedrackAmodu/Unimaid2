@@ -1,0 +1,752 @@
+/* ============================================================================
+   ADVANCED RESPONSIVE PATTERNS - Ramat Library
+   ============================================================================
+   Advanced media queries and responsive utilities for professional
+   layouts across all device types and screen sizes.
+*/
+
+/* ============================================================================
+   1. CONTAINER QUERIES & MODERN RESPONSIVE
+   ============================================================================ */
+
+/* Container Query Support for Card-based Layouts */
+@supports (container-type: inline-size) {
+  .card-container {
+    container-type: inline-size;
+  }
+
+  @container (max-width: 400px) {
+    .card {
+      padding: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+    }
+  }
+
+  @container (min-width: 400px) and (max-width: 700px) {
+    .card {
+      padding: 1rem;
+    }
+  }
+
+  @container (min-width: 700px) {
+    .card {
+      padding: 1.5rem;
+    }
+  }
+}
+
+/* ============================================================================
+   2. MOBILE-FIRST STRATEGY (Extra Small - 320px)
+   ============================================================================ */
+
+/* Base responsive container */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Extra small up */
+@media (min-width: 320px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    max-width: 100%;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ============================================================================
+   3. SMALL DEVICES (576px)
+   ============================================================================ */
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* Adjust typography */
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.3rem; }
+
+  /* Navbar adjustments */
+  .navbar-brand {
+    font-size: 1.35rem;
+  }
+
+  /* Card adjustments */
+  .card {
+    border-radius: 0.75rem;
+  }
+
+  .card img, .card .card-img-top {
+    height: 180px;
+  }
+}
+
+/* ============================================================================
+   4. MEDIUM DEVICES (768px - Tablets)
+   ============================================================================ */
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  /* Navigation tablet adjustments */
+  .navbar {
+    padding: 1rem 0;
+  }
+
+  .navbar .navbar-nav {
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.6rem 1rem !important;
+  }
+
+  /* Forms become wider */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  /* Button layout */
+  .button-group {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .button-group .btn {
+    flex: 1;
+  }
+
+  /* Footer adjustments */
+  .footer {
+    padding: 3rem 0 1.5rem;
+  }
+
+  /* Typography */
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  h3 { font-size: 1.5rem; }
+
+  p { font-size: 1.05rem; }
+}
+
+/* ============================================================================
+   5. LARGE DEVICES (992px - Desktops)
+   ============================================================================ */
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+
+  /* Navigation */
+  .navbar {
+    padding: 1.2rem 0;
+  }
+
+  .navbar-collapse {
+    justify-content: center;
+  }
+
+  .navbar .navbar-nav {
+    flex-direction: row;
+    gap: 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.8rem 1.2rem !important;
+    font-size: 0.95rem;
+  }
+
+  /* Forms in desktop layout */
+  .form-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Main content area */
+  main {
+    padding: 3rem 0;
+  }
+
+  /* Sidebar layouts */
+  .sidebar-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+  }
+
+  /* Card images */
+  .card img, .card .card-img-top {
+    height: 220px;
+  }
+
+  /* Typography */
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.75rem; }
+  h4 { font-size: 1.5rem; }
+
+  /* Footer */
+  .footer {
+    padding: 4rem 0 2rem;
+  }
+}
+
+/* ============================================================================
+   6. EXTRA LARGE DEVICES (1200px)
+   ============================================================================ */
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  /* Multi-column layouts become viable */
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 250px 250px;
+    gap: 2rem;
+  }
+
+  .sidebar-layout {
+    grid-template-columns: 1fr 350px;
+    gap: 2.5rem;
+  }
+
+  /* Advanced layout patterns */
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* ============================================================================
+   7. 2XL DEVICES (1400px+)
+   ============================================================================ */
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  /* Ultra-wide layouts */
+  .grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2rem;
+  }
+
+  .grid-6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2rem;
+  }
+
+  /* Maximum content width for readability */
+  main .container {
+    max-width: 1200px;
+  }
+
+  /* Typography scaling */
+  h1 { font-size: 3rem; }
+  h2 { font-size: 2.25rem; }
+}
+
+/* ============================================================================
+   8. ORIENTATION-BASED LAYOUTS
+   ============================================================================ */
+
+/* Portrait orientation (taller than wide) */
+@media (orientation: portrait) {
+  .navbar-brand img {
+    height: 45px;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  /* Stack sidebar on portrait */
+  .sidebar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Landscape orientation (wider than tall) */
+@media (orientation: landscape) {
+  /* Reduce vertical spacing in landscape */
+  main {
+    padding: 1.5rem 0;
+  }
+
+  .card {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Make better use of horizontal space */
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.4rem; }
+
+  /* Landscape navbar */
+  .navbar {
+    padding: 0.75rem 0;
+  }
+}
+
+/* ============================================================================
+   9. ASPECT RATIO MEDIA QUERIES
+   ============================================================================ */
+
+/* Ultrawide displays (21:9 or wider) */
+@media (min-aspect-ratio: 21/9) {
+  .card-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px 300px 300px;
+  }
+}
+
+/* Standard widescreen (16:9) */
+@media (aspect-ratio: 16/9) {
+  .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablet-like (4:3) */
+@media (aspect-ratio: 4/3) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Square display */
+@media (aspect-ratio: 1/1) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================================
+   10. DEVICE-SPECIFIC ADJUSTMENTS
+   ============================================================================ */
+
+/* iPhone & small phones */
+@media (max-width: 428px) {
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .card {
+    border-radius: 0.5rem;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  h1 { font-size: 1.5rem; }
+}
+
+/* iPad & medium tablets (600px-900px) */
+@media (min-width: 600px) and (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sidebar-layout {
+    grid-template-columns: 1fr 280px;
+  }
+
+  .navbar {
+    padding: 1rem 0;
+  }
+}
+
+/* Large tablets (900px+) */
+@media (min-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sidebar-layout {
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+  }
+}
+
+/* ============================================================================
+   11. TOUCH & HOVER DEVICE DIFFERENTIATION
+   ============================================================================ */
+
+/* Touch devices (no hover capability) */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch target sizes */
+  .btn,
+  a,
+  button,
+  .nav-link {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Simplify interactions */
+  .card {
+    border-radius: 0.75rem;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Remove hover states */
+  .nav-link::after {
+    display: none;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Touch feedback */
+  .btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Devices with hover capability */
+@media (hover: hover) and (pointer: fine) {
+  /* Enhance hover effects */
+  .card {
+    cursor: pointer;
+  }
+
+  .nav-link::after {
+    transition: width 0.3s ease;
+  }
+
+  .btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* ============================================================================
+   12. DARK MODE & COLOR SCHEME
+   ============================================================================ */
+
+/* Forced dark mode preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --light-text: #121212;
+    --dark-text: #f8f9fa;
+    --gray-bg: #0f172a;
+  }
+
+  body {
+    background-color: var(--gray-bg);
+    color: var(--dark-text);
+  }
+}
+
+/* Forced light mode preference */
+@media (prefers-color-scheme: light) {
+  :root {
+    --light-text: #ffffff;
+    --dark-text: #212529;
+    --gray-bg: #f8f9fa;
+  }
+}
+
+/* ============================================================================
+   13. REDUCED MOTION & ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .card {
+    border: 2px solid var(--dark-text);
+  }
+
+  .btn {
+    border-width: 2px;
+  }
+
+  .nav-link {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ============================================================================
+   14. HIGH DPI & RETINA DISPLAYS
+   ============================================================================ */
+
+/* Retina displays (2x DPI and above) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Adjust border and shadow sizes */
+  .card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Optimize images */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Ultra-high DPI */
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+  body {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+
+/* ============================================================================
+   15. LIGHT LEVEL DETECTION
+   ============================================================================ */
+
+/* Dim environment - increase contrast */
+@media (light-level: dim) {
+  body {
+    background-color: #000;
+    color: #fff;
+  }
+
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+  }
+}
+
+/* Normal light level */
+@media (light-level: normal) {
+  body {
+    background-color: var(--gray-bg);
+  }
+}
+
+/* Bright environment - reduce contrast slightly */
+@media (light-level: washed) {
+  .card {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  body {
+    background-color: #f0f0f0;
+  }
+}
+
+/* ============================================================================
+   16. PRINT MEDIA QUERIES
+   ============================================================================ */
+
+@media print {
+  /* Hide interactive elements */
+  .navbar,
+  .footer,
+  .fab,
+  button,
+  .no-print,
+  .dropdown,
+  [data-bs-toggle] {
+    display: none !important;
+  }
+
+  /* Optimize for printing */
+  body {
+    background: white;
+    color: black;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  .card {
+    page-break-inside: avoid;
+    border: 1px solid #000;
+    box-shadow: none;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  a::after {
+    content: " (" attr(href) ")";
+  }
+
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  th {
+    background: #f0f0f0;
+    font-weight: bold;
+  }
+}
+
+/* ============================================================================
+   17. UTILITY RESPONSIVE CLASSES
+   ============================================================================ */
+
+/* Display utilities */
+.d-none-mobile { display: none; }
+.d-none-tablet { display: block; }
+.d-none-desktop { display: block; }
+
+.d-block-mobile { display: block; }
+.d-block-tablet { display: none; }
+.d-block-desktop { display: none; }
+
+@media (min-width: 768px) {
+  .d-none-mobile { display: block; }
+  .d-none-tablet { display: none; }
+  
+  .d-block-mobile { display: none; }
+  .d-block-tablet { display: block; }
+}
+
+@media (min-width: 1200px) {
+  .d-none-desktop { display: none; }
+  .d-block-desktop { display: block; }
+}
+
+/* Width utilities */
+.w-full-mobile { width: 100%; }
+.w-full-tablet { width: auto; }
+.w-full-desktop { width: auto; }
+
+@media (min-width: 768px) {
+  .w-full-mobile { width: auto; }
+  .w-full-tablet { width: 100%; }
+}
+
+@media (min-width: 1200px) {
+  .w-full-tablet { width: auto; }
+  .w-full-desktop { width: 100%; }
+}
+
+/* Padding utilities */
+.p-mobile { padding: 0.5rem; }
+.p-tablet { padding: 1rem; }
+.p-desktop { padding: 1.5rem; }
+
+@media (min-width: 768px) {
+  .p-mobile { padding: 1rem; }
+  .p-tablet { padding: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .p-tablet { padding: 1.5rem; }
+  .p-desktop { padding: 2rem; }
+}
+
+/* Grid responsive columns */
+.cols-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 767.98px) {
+  .cols-2,
+  .cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -120,15 +120,26 @@ class LibraryUser(AbstractUser, BaseModel):
             old_user = LibraryUser.objects.get(pk=self.pk)
             old_membership = old_user.membership_type
 
-        # Set is_staff_approved for new staff users
-        if is_new and self.membership_type == 'staff':
-            self.is_staff_approved = False
-
-        # Set is_active based on approval status and email verification for staff
-        if self.membership_type == 'staff':
-            self.is_active = self.is_staff_approved and self.email_verified
-        elif not self.is_superuser:
+        # Ensure superusers remain active; other users follow membership rules
+        if self.is_superuser:
             self.is_active = True
+        else:
+            # Set is_staff_approved for new staff users
+            if is_new and self.membership_type == 'staff':
+                self.is_staff_approved = False
+                # Only auto-deactivate on creation if not already set by admin
+                if self.is_active:  # Only apply auto-deactivation if not manually set to False
+                    self.is_active = False
+            # For existing staff users, only auto-deactivate if both conditions fail AND user is not manually activated
+            elif not is_new and self.membership_type == 'staff' and not self.is_staff_approved:
+                # Don't override manual activation - respect admin's choice
+                pass
+            elif not is_new and self.membership_type == 'staff' and self.is_staff_approved:
+                # Staff approved - allow them to be active
+                pass
+            elif self.membership_type != 'staff':
+                # Non-staff users are active by default
+                self.is_active = True
 
         super().save(*args, **kwargs)
 

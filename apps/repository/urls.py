@@ -4,10 +4,13 @@ from . import views
 app_name = 'repository'
 
 urlpatterns = [
+    # Backwards-compatible names used across templates: document_list / document_detail
+    path('', views.EBookListView.as_view(), name='document_list'),
     path('', views.EBookListView.as_view(), name='ebook_list'),
     path('home/', views.EBookListView.as_view(), name='home'),
     path('list/', views.EBookListView.as_view(), name='repository_list'),
     path('ebook/<int:pk>/', views.EBookDetailView.as_view(), name='ebook_detail'),
+    path('ebook/<int:pk>/', views.EBookDetailView.as_view(), name='document_detail'),
     path('download/<int:pk>/', views.download_ebook, name='download_ebook'),
     path('upload/', views.upload_ebook, name='upload_ebook'),
     path('edit/<int:pk>/', views.edit_ebook, name='edit_ebook'),

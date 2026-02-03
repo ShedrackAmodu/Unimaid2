@@ -196,7 +196,7 @@
             <!-- Preview Section -->
             <div class="card-footer bg-light" id="previewSection" style="display: none;">
                 <h6 class="fw-bold mb-3"><i class="bi bi-eye me-2"></i>Preview</h6>
-                <div class="border rounded p-4 bg-white" id="postPreview">
+                <div class="border rounded p-4 preview-bg" id="postPreview">
                     <!-- Preview content will be inserted here -->
                 </div>
                 <div class="mt-3 text-end">
@@ -560,6 +560,16 @@
         margin: 1rem 0;
         font-style: italic;
         color: var(--dark-text);
+    }
+    
+    /* Preview Box Dark Theme Support */
+    .preview-bg {
+        background: white;
+    }
+    
+    [data-theme="dark"] .preview-bg {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
     }
 </style>
 {% endblock %}
