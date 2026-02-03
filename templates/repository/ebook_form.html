@@ -422,7 +422,7 @@
     }
     
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary-blue);
+        border-color: var(--navy-primary);
         box-shadow: 0 0 0 0.25rem rgba(10, 36, 114, 0.25);
     }
     
@@ -431,29 +431,29 @@
     }
     
     .form-control.is-valid, .form-select.is-valid {
-        border-color: #28a745;
+        border-color: #198754;
     }
     
     /* File Upload Area */
     .border-dashed {
-        border: 3px dashed #dee2e6 !important;
-        background-color: #f8f9fa;
+        border: 3px dashed var(--bg-gray-dark) !important;
+        background-color: var(--bg-gray);
         cursor: pointer;
         transition: all 0.3s ease;
     }
     
     .border-dashed:hover {
-        border-color: var(--primary-blue) !important;
+        border-color: var(--navy-primary) !important;
         background-color: rgba(10, 36, 114, 0.05);
     }
     
     [data-theme="dark"] .border-dashed {
-        border-color: var(--border-color) !important;
-        background-color: var(--bg-tertiary);
+        border-color: var(--bg-gray-dark) !important;
+        background-color: var(--bg-light);
     }
     
     [data-theme="dark"] .border-dashed:hover {
-        border-color: var(--primary-blue) !important;
+        border-color: var(--accent-primary) !important;
         background-color: rgba(58, 134, 255, 0.1);
     }
     

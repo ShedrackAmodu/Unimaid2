@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Unified Navy Blue Theme -->
     <link rel="stylesheet" href="{% static 'css/navy-blue-theme.css' %}">
+    <!-- Navy Blue Theme Utilities & Overrides -->
+    <link rel="stylesheet" href="{% static 'css/navy-theme-utilities.css' %}">
     <!-- Advanced Responsive Patterns -->
     <link rel="stylesheet" href="{% static 'css/responsive-advanced.css' %}">
     <!-- Site-wide responsive overrides -->
@@ -50,6 +52,10 @@
             --bg-gray-dark: #e9ecef;
             --card-shadow: 0 10px 30px rgba(10, 36, 114, 0.15);
             --transition-speed: 0.3s;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #0dcaf0;
             --gradient-1: linear-gradient(135deg, #0a2472 0%, #001f3f 100%);
             --gradient-2: linear-gradient(135deg, #0a2472 0%, #0066cc 100%);
         }
@@ -69,6 +75,10 @@
             --bg-gray: #0f172a;
             --bg-gray-dark: #1f2937;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
             --gradient-1: linear-gradient(135deg, #1a365d 0%, #0f1c2d 100%);
             --gradient-2: linear-gradient(135deg, #1a365d 0%, #3a86ff 100%);
         }
@@ -109,22 +119,21 @@
             z-index: -1;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 10px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--gray-bg);
+            background: var(--bg-gray);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--primary-blue);
+            background: var(--navy-primary);
             border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-blue);
+            background: var(--accent-primary);
         }
 
         /* Navigation Styles */
@@ -132,8 +141,8 @@
             padding: 1.2rem 0;
             background: var(--gradient-1) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 3px solid var(--gold-accent);
-            box-shadow: 0 5px 20px rgba(0, 31, 63, 0.2);
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 5px 20px rgba(10, 36, 114, 0.15);
             position: sticky;
             top: 0;
             z-index: 1000;

@@ -177,24 +177,24 @@
     
     .input-group .input-group-text {
         border-right: none;
-        background-color: #f8f9fa;
+        background-color: var(--bg-gray);
     }
     
     .form-control:focus {
-        border-color: #3a86ff;
-        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.25);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #3a86ff, #2563eb);
+        background: var(--gradient-2);
         border: none;
         transition: all 0.3s ease;
     }
     
     .btn-primary:hover {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        background: linear-gradient(135deg, #0052a3, #003d7a);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(10, 36, 114, 0.3);
     }
     
     .card {

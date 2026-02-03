@@ -1,6 +1,13 @@
 /**
- * Enhanced Theme Manager - Complete Theme System for Ramat Library
+ * Enhanced Theme Manager - Navy Blue Theme System for Ramat Library
+ * ============================================================================
  * Handles light/dark theme switching with smooth transitions and persistence
+ * 
+ * Navy Blue Color System:
+ * - Primary: #0a2472 (Light), #1a365d (Dark)
+ * - Accent: #0066cc (Light), #3a86ff (Dark)
+ * - Gold: #ffd700 (Light), #ffcc00 (Dark)
+ * ============================================================================
  */
 
 class ThemeManager {
